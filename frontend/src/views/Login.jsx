@@ -71,8 +71,8 @@ export default function Login({ onLogin }) {
                                 placeholder="12345678A"
                                 autoComplete="username"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                          focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
-                          transition"
+                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
+                                        transition"
                             />
                         </div>
 
@@ -88,8 +88,8 @@ export default function Login({ onLogin }) {
                                 placeholder="••••••••"
                                 autoComplete="current-password"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                          focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
-                          transition"
+                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
+                                        transition"
                             />
                         </div>
 
