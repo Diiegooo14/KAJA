@@ -46,16 +46,16 @@ export default function Login({ onLogin }) {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-kaja-blue px-4">
+        <div className="min-h-screen flex items-center justify-center bg-kaja-light px-4">
             <div className="w-full max-w-sm">
 
                 <div className="text-center mb-1">
-                    <img src="/img/Kaja-blanco.png" alt="Logo KAJA" />
+                    <img src="/img/kaja-transparente.png" alt="Logo KAJA" />
                     <p className="text-kaja-light text-sm mt-3">Sistema de Punto de Venta</p>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-2xl p-8">
-                    <h2 className="text-xl font-semibold text-kaja-blue mb-6">Iniciar sesión</h2>
+                    <h2 className="text-xl font-semibold text-kaja-blueText mb-6">Iniciar sesión</h2>
 
                     <form onSubmit={handleSubmit} noValidate>
 
@@ -71,7 +71,7 @@ export default function Login({ onLogin }) {
                                 placeholder="12345678A"
                                 autoComplete="username"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
+                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blueText
                                         transition"
                             />
                         </div>
@@ -88,7 +88,7 @@ export default function Login({ onLogin }) {
                                 placeholder="••••••••"
                                 autoComplete="current-password"
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue
+                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blueText
                                         transition"
                             />
                         </div>
@@ -103,7 +103,7 @@ export default function Login({ onLogin }) {
                             type="submit"
                             disabled={loading}
                             className="w-full py-2.5 bg-kaja-orange text-white font-semibold rounded-lg
-                        hover:bg-[#b8660a] active:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        hover:opacity-90 active:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             {loading ? 'Accediendo...' : 'Entrar'}
                         </button>

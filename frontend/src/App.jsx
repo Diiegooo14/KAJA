@@ -16,9 +16,9 @@ export default function App() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-kaja-blue">
+        <div className="min-h-screen flex items-center justify-center bg-kaja-light">
             <div className="bg-white rounded-2xl p-10 text-center shadow-2xl">
-                <h1 className="text-2xl font-bold text-kaja-blue mb-2">Bienvenido, {usuario.nombre}</h1>
+                <h1 className="text-2xl font-bold text-kaja-blueText mb-2">Bienvenido, {usuario.nombre}</h1>
                 <p className="text-gray-500 mb-6">Rol: <span className="font-medium text-kaja-orange">{usuario.rol}</span></p>
                 <button
                     onClick={() => {
@@ -26,7 +26,7 @@ export default function App() {
                         localStorage.removeItem('kaja_user')
                         setUsuario(null)
                     }}
-                    className="px-6 py-2 bg-kaja-orange text-white rounded-lg hover:bg-[#b8660a] transition"
+                    className="px-6 py-2 bg-kaja-orange text-white rounded-lg hover:opacity-90 transition"
                 >
                     Cerrar sesión
                 </button>
