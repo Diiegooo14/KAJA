@@ -7,9 +7,10 @@ export default {
     theme: {
         extend: {
             colors: {
-                'kaja-blue': '#2C3E50',
-                'kaja-orange': '#D4770B',
-                'kaja-light': '#B4D4FB'
+                'kaja-blue': '#B8D4F8',
+                'kaja-amber': '#D4770B',
+                'kaja-navy': '#2C3E50',
+                'kaja-light': '#F0F6FF',
             }
         },
     },
