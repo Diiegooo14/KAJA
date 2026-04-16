@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil } from 'lucide-react'
+import { Pencil, Plus, Search, Loader2, Check, X } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -22,6 +22,14 @@ export default function Inventario() {
     const [pagina, setPagina] = useState(1)
     const [totalPaginas, setTotalPaginas] = useState(1)
     const [total, setTotal] = useState(0)
+
+    // Toast
+    const [notificacion, setToast] = useState('')
+
+    function mostrarNotificacion(mensaje) {
+        setToast(mensaje)
+        setTimeout(() => setToast(''), 3000)
+    }
 
     // Modal
     const [modalAbierto, setModalAbierto] = useState(false)
@@ -155,7 +163,8 @@ export default function Inventario() {
 
             setModalAbierto(false)
             setProductoEditando(null)
-            cargarProductos(busqueda, pagina)
+            mostrarNotificacion(productoEditando ? 'Producto actualizado correctamente' : 'Producto creado correctamente')
+            cargarProductos(busqueda, productoEditando ? pagina : 1)
         } catch (e) {
             setFormError(e.message)
         } finally {
@@ -190,9 +199,7 @@ export default function Inventario() {
                         className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
                                     rounded-lg hover:brightness-90 active:scale-95 transition"
                     >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
+                        <Plus className="w-4 h-4" />
                         Añadir producto
                     </button>
                 </div>
@@ -201,11 +208,7 @@ export default function Inventario() {
             {/* Buscador */}
             <div className="mb-5">
                 <div className="relative max-w-sm">
-                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                    </svg>
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
                         value={busqueda}
@@ -220,10 +223,7 @@ export default function Inventario() {
             {/* Estado carga / error */}
             {loading && (
                 <div className="flex items-center gap-2 text-gray-500 py-12 justify-center">
-                    <svg className="animate-spin w-5 h-5 text-kaja-orange" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                    </svg>
+                    <Loader2 className="animate-spin w-5 h-5 text-kaja-orange" />
                     <span className="text-sm">Cargando productos...</span>
                 </div>
             )}
@@ -346,6 +346,16 @@ export default function Inventario() {
                 </div>
             )}
 
+            {/* Toast de éxito */}
+            {notificacion && (
+                <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3
+                                bg-green-600 text-white text-sm font-medium rounded-xl shadow-lg
+                                animate-fade-in">
+                    <Check className="w-5 h-5 shrink-0" />
+                    {notificacion}
+                </div>
+            )}
+
             {modalAbierto && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarModal} />
@@ -356,9 +366,7 @@ export default function Inventario() {
                             </h2>
                             <button onClick={cerrarModal}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
