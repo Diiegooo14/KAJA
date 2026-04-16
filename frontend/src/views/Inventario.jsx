@@ -36,6 +36,7 @@ export default function Inventario() {
     const [productoEditando, setProductoEditando] = useState(null) // null = crear, objeto = editar
     const [categorias, setCategorias] = useState([])
     const [form, setForm] = useState(FORM_VACIO)
+    const [camposError, setCamposError] = useState({})
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
@@ -85,6 +86,7 @@ export default function Inventario() {
 
     async function abrirModal(producto = null) {
         setProductoEditando(producto)
+        setCamposError({})
         setForm(producto ? {
             nombre: producto.nombre,
             idCategoria: String(producto.idCategoria),
@@ -107,12 +109,14 @@ export default function Inventario() {
         if (guardando) return
         setModalAbierto(false)
         setFormError('')
+        setCamposError({})
         setProductoEditando(null)
     }
 
     function handleFormChange(e) {
         const { name, value } = e.target
         setForm(prev => ({ ...prev, [name]: value }))
+        setCamposError(prev => ({ ...prev, [name]: '' }))
     }
 
     async function handleGuardar(e) {
@@ -126,12 +130,18 @@ export default function Inventario() {
         const esNueva = form.idCategoria === '__nueva__'
         const nombreCat = form.nuevaCategoria.trim()
 
-        if (!nombre) return setFormError('El nombre del producto es obligatorio.')
-        if (!form.idCategoria) return setFormError('Selecciona o crea una categoría.')
-        if (esNueva && !nombreCat) return setFormError('Escribe el nombre de la nueva categoría.')
-        if (isNaN(precioCoste) || precioCoste <= 0) return setFormError('El precio de coste debe ser mayor que 0.')
-        if (isNaN(precioVenta) || precioVenta <= 0) return setFormError('El precio de venta debe ser mayor que 0.')
-        if (isNaN(stock) || stock < 0) return setFormError('El stock no puede ser negativo.')
+        const errores = {}
+        if (!nombre) errores.nombre = 'El nombre es obligatorio.'
+        if (!form.idCategoria) errores.idCategoria = 'Selecciona o crea una categoría.'
+        if (esNueva && !nombreCat) errores.nuevaCategoria = 'Escribe el nombre de la nueva categoría.'
+        if (isNaN(precioCoste) || precioCoste <= 0) errores.precioCoste = 'Debe ser mayor que 0.'
+        if (isNaN(precioVenta) || precioVenta <= 0) errores.precioVenta = 'Debe ser mayor que 0.'
+        if (isNaN(stock) || stock < 0) errores.stock = 'No puede ser negativo.'
+
+        if (Object.keys(errores).length > 0) {
+            setCamposError(errores)
+            return
+        }
 
         setGuardando(true)
         try {
@@ -180,8 +190,12 @@ export default function Inventario() {
         return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">{stock} uds</span>
     }
 
-    const inputCls = `w-full px-3 py-2 border border-gray-200 rounded-lg text-sm
-    focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition`
+    function inputCls(campo) {
+        const base = 'w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 transition'
+        return camposError[campo]
+            ? `${base} border-red-400 focus:ring-red-100 focus:border-red-400`
+            : `${base} border-gray-200 focus:ring-kaja-light focus:border-kaja-blue`
+    }
 
     return (
         <div className="p-6 max-w-5xl mx-auto w-full">
@@ -195,7 +209,7 @@ export default function Inventario() {
                 <div className="flex items-center gap-4">
                     <span className="text-sm text-gray-400">{total} productos</span>
                     <button
-                        onClick={abrirModal}
+                        onClick={() => abrirModal()}
                         className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
                                     rounded-lg hover:brightness-90 active:scale-95 transition"
                     >
@@ -379,8 +393,9 @@ export default function Inventario() {
                                     <input
                                         name="nombre" value={form.nombre} onChange={handleFormChange}
                                         placeholder="Ej: Coca-Cola 33cl"
-                                        className={inputCls}
+                                        className={inputCls('nombre')}
                                     />
+                                    {camposError.nombre && <p className="mt-1 text-xs text-red-500">{camposError.nombre}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -388,7 +403,7 @@ export default function Inventario() {
                                     </label>
                                     <select
                                         name="idCategoria" value={form.idCategoria} onChange={handleFormChange}
-                                        className={inputCls}
+                                        className={inputCls('idCategoria')}
                                     >
                                         <option value="">Selecciona una categoría...</option>
                                         {categorias.map(c => (
@@ -396,6 +411,7 @@ export default function Inventario() {
                                         ))}
                                         <option value="__nueva__">+ Crear nueva categoría</option>
                                     </select>
+                                    {camposError.idCategoria && <p className="mt-1 text-xs text-red-500">{camposError.idCategoria}</p>}
                                 </div>
 
                                 {/* Campo nueva categoría (solo si se elige crear nueva) */}
@@ -407,9 +423,10 @@ export default function Inventario() {
                                         <input
                                             name="nuevaCategoria" value={form.nuevaCategoria} onChange={handleFormChange}
                                             placeholder="Ej: Bebidas"
-                                            className={inputCls}
+                                            className={inputCls('nuevaCategoria')}
                                             autoFocus
                                         />
+                                        {camposError.nuevaCategoria && <p className="mt-1 text-xs text-red-500">{camposError.nuevaCategoria}</p>}
                                     </div>
                                 )}
                                 <div className="grid grid-cols-2 gap-3">
@@ -421,8 +438,9 @@ export default function Inventario() {
                                             name="precioCoste" type="number" min="0" step="0.01"
                                             value={form.precioCoste} onChange={handleFormChange}
                                             placeholder="0.00"
-                                            className={inputCls}
+                                            className={inputCls('precioCoste')}
                                         />
+                                        {camposError.precioCoste && <p className="mt-1 text-xs text-red-500">{camposError.precioCoste}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -432,8 +450,9 @@ export default function Inventario() {
                                             name="precioVenta" type="number" min="0" step="0.01"
                                             value={form.precioVenta} onChange={handleFormChange}
                                             placeholder="0.00"
-                                            className={inputCls}
+                                            className={inputCls('precioVenta')}
                                         />
+                                        {camposError.precioVenta && <p className="mt-1 text-xs text-red-500">{camposError.precioVenta}</p>}
                                     </div>
                                 </div>
                                 <div>
@@ -444,8 +463,9 @@ export default function Inventario() {
                                         name="stock" type="number" min="0" step="1"
                                         value={form.stock} onChange={handleFormChange}
                                         placeholder="0"
-                                        className={inputCls}
+                                        className={inputCls('stock')}
                                     />
+                                    {camposError.stock && <p className="mt-1 text-xs text-red-500">{camposError.stock}</p>}
                                 </div>
                             </div>
                             {/* Error del formulario */}

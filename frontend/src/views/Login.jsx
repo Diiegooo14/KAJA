@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL
 export default function Login({ onLogin }) {
     const [nif, setNif] = useState('')
     const [password, setPassword] = useState('')
+    const [camposError, setCamposError] = useState({})
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
@@ -12,10 +13,15 @@ export default function Login({ onLogin }) {
         e.preventDefault()
         setError('')
 
-        if (!nif.trim() || !password) {
-            setError('El NIF y la contraseña son obligatorios')
+        const errores = {}
+        if (!nif.trim()) errores.nif = 'El NIF es obligatorio.'
+        if (!password) errores.password = 'La contraseña es obligatoria.'
+
+        if (Object.keys(errores).length > 0) {
+            setCamposError(errores)
             return
         }
+        setCamposError({})
 
         setLoading(true)
 
@@ -67,13 +73,15 @@ export default function Login({ onLogin }) {
                                 id="nif"
                                 type="text"
                                 value={nif}
-                                onChange={e => setNif(e.target.value)}
+                                onChange={e => { setNif(e.target.value); setCamposError(prev => ({ ...prev, nif: '' })) }}
                                 placeholder="12345678A"
                                 autoComplete="username"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blueText
-                                        transition"
+                                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition
+                                    ${camposError.nif
+                                        ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                                        : 'border-gray-300 focus:ring-kaja-light focus:border-kaja-blueText'}`}
                             />
+                            {camposError.nif && <p className="mt-1 text-xs text-red-500">{camposError.nif}</p>}
                         </div>
 
                         <div className="mb-6">
@@ -84,13 +92,15 @@ export default function Login({ onLogin }) {
                                 id="password"
                                 type="password"
                                 value={password}
-                                onChange={e => setPassword(e.target.value)}
+                                onChange={e => { setPassword(e.target.value); setCamposError(prev => ({ ...prev, password: '' })) }}
                                 placeholder="••••••••"
                                 autoComplete="current-password"
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm
-                                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blueText
-                                        transition"
+                                className={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 transition
+                                    ${camposError.password
+                                        ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
+                                        : 'border-gray-300 focus:ring-kaja-light focus:border-kaja-blueText'}`}
                             />
+                            {camposError.password && <p className="mt-1 text-xs text-red-500">{camposError.password}</p>}
                         </div>
 
                         {error && (
