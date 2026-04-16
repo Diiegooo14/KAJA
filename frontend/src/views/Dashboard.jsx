@@ -19,22 +19,22 @@ export default function Dashboard({ usuario, onLogout }) {
     if (seccionActiva === 'dashboard') {
       return (
         <div className="flex flex-col items-center justify-center h-full py-8 px-6">
-          <h1 className="text-4xl font-bold text-kaja-blue mb-8 uppercase tracking-wide text-center">
+          <h1 className="text-4xl font-bold text-kaja-blueText mb-8 uppercase tracking-wide text-center">
             Bienvenido, {usuario.nombre}!
           </h1>
           <div className="grid grid-cols-2 gap-5 w-full max-w-2xl">
             <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-not-allowed">
-              <span className="text-2xl font-bold text-kaja-blue tracking-wide text-center px-4">
+              <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 NUEVA<br />VENTA
               </span>
             </div>
             <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-not-allowed">
-              <span className="text-2xl font-bold text-kaja-blue tracking-wide text-center px-4">
+              <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 ALERTA DE<br />STOCK BAJO
               </span>
             </div>
             <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 col-span-2 cursor-not-allowed">
-              <span className="text-2xl font-bold text-kaja-blue tracking-wide text-center px-4">
+              <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 VENTAS HOY
               </span>
             </div>
@@ -48,7 +48,7 @@ export default function Dashboard({ usuario, onLogout }) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-3xl font-bold text-kaja-blue/30 uppercase tracking-widest">{labels[seccionActiva]}</p>
+          <p className="text-3xl font-bold text-kaja-blueText/30 uppercase tracking-widest">{labels[seccionActiva]}</p>
           <p className="text-sm text-gray-400 mt-2">Próximamente disponible</p>
         </div>
       </div>
@@ -62,7 +62,7 @@ export default function Dashboard({ usuario, onLogout }) {
 
         {/* Logo */}
         <div className="flex items-center gap-2 w-64 shrink-0">
-          <img src="/img/Kaja-blanco.png" alt="KAJA" className="h-8 object-contain hidden" />
+          <img src="/img/kaja-transparente.png" alt="Logo KAJA" className="h-13 object-contain" />
         </div>
 
         <div className="flex-1 max-w-md">
@@ -76,7 +76,7 @@ export default function Dashboard({ usuario, onLogout }) {
               type="text"
               placeholder="Buscador"
               disabled
-              className="w-full pl-9 pr-4 py-2 border border-kaja-blue/20 rounded-lg text-sm
+              className="w-full pl-9 pr-4 py-2 border border-kaja-blueText/20 rounded-lg text-sm
                       bg-white/60 text-gray-400 cursor-not-allowed"
             />
           </div>
@@ -87,7 +87,7 @@ export default function Dashboard({ usuario, onLogout }) {
             {usuario.nombre.charAt(0).toUpperCase()}
           </div>
           <div className="text-right leading-tight">
-            <p className="text-base font-semibold text-kaja-blue">{usuario.nombre}</p>
+            <p className="text-base font-semibold text-kaja-blueText">{usuario.nombre}</p>
             <p className="text-sm text-gray-400 capitalize">{usuario.rol}</p>
           </div>
         </div>
@@ -107,8 +107,8 @@ export default function Dashboard({ usuario, onLogout }) {
                   onClick={() => setSeccionActiva(item.id)}
                   className={`w-full text-left px-6 py-4 rounded-lg text-base transition font-medium
                     ${activo
-                      ? 'bg-white text-kaja-blue shadow-sm'
-                      : 'text-kaja-blue hover:bg-white/60'
+                      ? 'bg-white text-kaja-blueText shadow-sm'
+                      : 'text-kaja-blueText hover:bg-white/60'
                     }`}
                 >
                   {item.label}
@@ -118,10 +118,10 @@ export default function Dashboard({ usuario, onLogout }) {
           </nav>
 
           {/* Cerrar sesión */}
-          <div className="px-2 pt-2 border-t border-kaja-blue/10 mt-2">
+          <div className="px-2 pt-2 border-t border-kaja-blueText/10 mt-2">
             <button
               onClick={onLogout}
-              className="w-full text-left px-6 py-4 rounded-lg text-base font-medium text-kaja-blue hover:bg-white/60 transition"
+              className="w-full text-left px-6 py-4 rounded-lg text-base font-medium text-kaja-blueText hover:bg-white/60 transition"
             >
               Cerrar Sesión
             </button>

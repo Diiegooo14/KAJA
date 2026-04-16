@@ -68,7 +68,7 @@ export default function Inventario() {
       {/* Cabecera */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-kaja-blue">Inventario</h1>
+          <h1 className="text-2xl font-bold text-kaja-blueText">Inventario</h1>
           <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
         </div>
         <div className="text-sm text-gray-400">{productos.length} productos</div>
@@ -90,7 +90,7 @@ export default function Inventario() {
             onChange={handleBusqueda}
             placeholder="Buscar producto..."
             className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm
-                       focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
+                       focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blueText transition"
           />
         </div>
       </div>
@@ -141,12 +141,12 @@ export default function Inventario() {
                     <td className="px-4 py-3 text-gray-400">{p.id}</td>
                     <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
                     <td className="px-4 py-3">
-                      <span className="px-2 py-0.5 rounded-full text-xs bg-kaja-light text-kaja-blue font-medium">
+                      <span className="px-2 py-0.5 rounded-full text-xs bg-kaja-light text-kaja-blueText font-medium">
                         {p.categoria}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
-                    <td className="px-4 py-3 text-right font-semibold text-kaja-blue">
+                    <td className="px-4 py-3 text-right font-semibold text-kaja-blueText">
                       {parseFloat(p.precioVenta).toFixed(2)} €
                     </td>
                     <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
