@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Pencil } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -24,6 +25,7 @@ export default function Inventario() {
 
     // Modal
     const [modalAbierto, setModalAbierto] = useState(false)
+    const [productoEditando, setProductoEditando] = useState(null) // null = crear, objeto = editar
     const [categorias, setCategorias] = useState([])
     const [form, setForm] = useState(FORM_VACIO)
     const [formError, setFormError] = useState('')
@@ -73,8 +75,16 @@ export default function Inventario() {
         cargarProductos(busqueda, pag)
     }
 
-    async function abrirModal() {
-        setForm(FORM_VACIO)
+    async function abrirModal(producto = null) {
+        setProductoEditando(producto)
+        setForm(producto ? {
+            nombre: producto.nombre,
+            idCategoria: String(producto.idCategoria),
+            nuevaCategoria: '',
+            precioCoste: producto.precioCoste,
+            precioVenta: producto.precioVenta,
+            stock: producto.stock,
+        } : FORM_VACIO)
         setFormError('')
         setModalAbierto(true)
         try {
@@ -89,6 +99,7 @@ export default function Inventario() {
         if (guardando) return
         setModalAbierto(false)
         setFormError('')
+        setProductoEditando(null)
     }
 
     function handleFormChange(e) {
@@ -128,14 +139,23 @@ export default function Inventario() {
                 idCategoria = cat.id
             }
 
-            await fetchJSON(`${API_URL}/productos`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock }),
-            })
+            if (productoEditando) {
+                await fetchJSON(`${API_URL}/productos?id=${productoEditando.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock }),
+                })
+            } else {
+                await fetchJSON(`${API_URL}/productos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock }),
+                })
+            }
 
             setModalAbierto(false)
-            cargarProductos(busqueda, 1)
+            setProductoEditando(null)
+            cargarProductos(busqueda, pagina)
         } catch (e) {
             setFormError(e.message)
         } finally {
@@ -226,6 +246,7 @@ export default function Inventario() {
                                     <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Coste</th>
                                     <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
                                     <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
+                                    <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -242,6 +263,15 @@ export default function Inventario() {
                                         <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
                                         <td className="px-4 py-3 text-right font-semibold text-kaja-blue">{parseFloat(p.precioVenta).toFixed(2)} €</td>
                                         <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
+                                        <td className="px-3 py-3 text-center">
+                                            <button
+                                                onClick={() => abrirModal(p)}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
+                                                title="Editar producto"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -321,7 +351,9 @@ export default function Inventario() {
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarModal} />
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-lg font-bold text-kaja-blue">Nuevo producto</h2>
+                            <h2 className="text-lg font-bold text-kaja-blue">
+                                {productoEditando ? 'Editar producto' : 'Nuevo producto'}
+                            </h2>
                             <button onClick={cerrarModal}
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -425,7 +457,7 @@ export default function Inventario() {
                                 <button type="submit" disabled={guardando}
                                     className="flex-1 py-2.5 bg-kaja-orange text-white rounded-lg text-sm font-semibold
                                                 hover:brightness-90 active:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed">
-                                    {guardando ? 'Guardando...' : 'Guardar producto'}
+                                    {guardando ? 'Guardando...' : productoEditando ? 'Guardar cambios' : 'Guardar producto'}
                                 </button>
                             </div>
                         </form>
