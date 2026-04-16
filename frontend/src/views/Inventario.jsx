@@ -17,6 +17,11 @@ export default function Inventario() {
     const [error, setError] = useState('')
     const [busqueda, setBusqueda] = useState('')
 
+    // Paginación
+    const [pagina, setPagina] = useState(1)
+    const [totalPaginas, setTotalPaginas] = useState(1)
+    const [total, setTotal] = useState(0)
+
     // Modal
     const [modalAbierto, setModalAbierto] = useState(false)
     const [categorias, setCategorias] = useState([])
@@ -24,7 +29,7 @@ export default function Inventario() {
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
-    useEffect(() => { cargarProductos() }, [])
+    useEffect(() => { cargarProductos('', 1) }, [])
 
     function headers() {
         return { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
@@ -39,12 +44,17 @@ export default function Inventario() {
         return data
     }
 
-    async function cargarProductos(search = '') {
+    async function cargarProductos(search = '', pag = 1) {
         setLoading(true)
         setError('')
         try {
-            const url = search ? `${API_URL}/productos?search=${encodeURIComponent(search)}` : `${API_URL}/productos`
-            setProductos(await fetchJSON(url))
+            const params = new URLSearchParams({ pagina: pag })
+            if (search) params.set('search', search)
+            const respuesta = await fetchJSON(`${API_URL}/productos?${params}`)
+            setProductos(respuesta.datos)
+            setTotal(respuesta.total)
+            setTotalPaginas(respuesta.totalPaginas)
+            setPagina(respuesta.pagina)
         } catch (e) {
             setError(e.message)
         } finally {
@@ -56,7 +66,11 @@ export default function Inventario() {
         const val = e.target.value
         setBusqueda(val)
         clearTimeout(window._busquedaTimer)
-        window._busquedaTimer = setTimeout(() => cargarProductos(val), 300)
+        window._busquedaTimer = setTimeout(() => cargarProductos(val, 1), 300)
+    }
+
+    function irAPagina(pag) {
+        cargarProductos(busqueda, pag)
     }
 
     async function abrirModal() {
@@ -121,7 +135,7 @@ export default function Inventario() {
             })
 
             setModalAbierto(false)
-            cargarProductos(busqueda)
+            cargarProductos(busqueda, 1)
         } catch (e) {
             setFormError(e.message)
         } finally {
@@ -150,7 +164,7 @@ export default function Inventario() {
                     <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
                 </div>
                 <div className="flex items-center gap-4">
-                    <span className="text-sm text-gray-400">{productos.length} productos</span>
+                    <span className="text-sm text-gray-400">{total} productos</span>
                     <button
                         onClick={abrirModal}
                         className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
@@ -233,6 +247,72 @@ export default function Inventario() {
                             </tbody>
                         </table>
                     )}
+                </div>
+            )}
+
+            {/* Paginación */}
+            {!loading && !error && totalPaginas > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                    <p className="text-sm text-gray-400">
+                        Página <span className="font-medium text-gray-600">{pagina}</span> de{' '}
+                        <span className="font-medium text-gray-600">{totalPaginas}</span>
+                    </p>
+                    <div className="flex items-center gap-1">
+                        <button
+                            onClick={() => irAPagina(1)}
+                            disabled={pagina === 1}
+                            className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            title="Primera página"
+                        >
+                            «
+                        </button>
+                        <button
+                            onClick={() => irAPagina(pagina - 1)}
+                            disabled={pagina === 1}
+                            className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                        >
+                            Anterior
+                        </button>
+
+                        {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                            .filter(p => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 2)
+                            .reduce((acc, p, idx, arr) => {
+                                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...')
+                                acc.push(p)
+                                return acc
+                            }, [])
+                            .map((item, idx) =>
+                                item === '...'
+                                    ? <span key={`sep-${idx}`} className="px-2 py-1.5 text-sm text-gray-400">…</span>
+                                    : <button
+                                        key={item}
+                                        onClick={() => irAPagina(item)}
+                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition
+                                            ${item === pagina
+                                                ? 'bg-kaja-orange text-white'
+                                                : 'text-gray-600 hover:bg-gray-100'}`}
+                                    >
+                                        {item}
+                                    </button>
+                            )
+                        }
+
+                        <button
+                            onClick={() => irAPagina(pagina + 1)}
+                            disabled={pagina === totalPaginas}
+                            className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                        >
+                            Siguiente
+                        </button>
+                        <button
+                            onClick={() => irAPagina(totalPaginas)}
+                            disabled={pagina === totalPaginas}
+                            className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            title="Última página"
+                        >
+                            »
+                        </button>
+                    </div>
                 </div>
             )}
 

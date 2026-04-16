@@ -109,14 +109,14 @@ INSERT INTO CATEGORIA (nombre, descripcion) VALUES
 ('Ropa de Trabajo', 'EPIs, botas, guantes');
 
 INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, stock) VALUES
-(1, 1, 'Taladro Percutor 500W', 35.00, 45.99, 12),       -- ID 1
-(1, 1, 'Sierra Circular Pro', 80.00, 115.50, 5),       -- ID 2
-(2, 1, 'Caja Tornillos Madera 4x40', 1.50, 3.20, 50),  -- ID 3
-(3, 1, 'Rollo Cable Cobre 1.5mm', 15.00, 24.99, 10),   -- ID 4
-(3, 1, 'Enchufe Superficie Doble', 2.50, 4.50, 30),    -- ID 5
-(3, 1, 'Bombilla LED E27 10W', 4.00, 7.50, 45),        -- ID 6
-(4, 1, 'Pantalón Multibolsillos Talla L', 12.00, 22.50, 15), -- ID 7
-(4, 1, 'Botas de Seguridad S3 Talla 42', 25.00, 45.00, 8);   -- ID 8
+(1, 1, 'Taladro Percutor 500W', 35.00, 45.99, 12),     
+(1, 1, 'Sierra Circular Pro', 80.00, 115.50, 5),       
+(2, 1, 'Caja Tornillos Madera 4x40', 1.50, 3.20, 50),  
+(3, 1, 'Rollo Cable Cobre 1.5mm', 15.00, 24.99, 10),   
+(3, 1, 'Enchufe Superficie Doble', 2.50, 4.50, 30),    
+(3, 1, 'Bombilla LED E27 10W', 4.00, 7.50, 45),        
+(4, 1, 'Pantalón Multibolsillos Talla L', 12.00, 22.50, 15), 
+(4, 1, 'Botas de Seguridad S3 Talla 42', 25.00, 45.00, 8);   
 
 INSERT INTO TIPO_GASTO (nombreTipo) VALUES ('Fijo'), ('Variable');
 
@@ -126,9 +126,9 @@ INSERT INTO GASTO (idUsuario, idEmpresa, idTipoGasto, concepto, importe, fechaRe
 (1, 1, 2, 'Campaña Publicidad Facebook', 60.00, DATE_FORMAT(NOW(), '%Y-%m-15'));
 
 INSERT INTO VENTA (idUsuario, fecha, baseImponible, totalIva, totalFinal) VALUES
-(2, DATE_SUB(NOW(), INTERVAL 2 DAY), 55.78, 11.72, 67.50), -- Venta 1 (Ropa)
-(2, DATE_SUB(NOW(), INTERVAL 1 DAY), 13.64, 2.86, 16.50),  -- Venta 2 (Electricidad)
-(2, NOW(), 133.46, 28.03, 161.49);                         -- Venta 3 (Herramientas)
+(2, DATE_SUB(NOW(), INTERVAL 2 DAY), 55.78, 11.72, 67.50), 
+(2, DATE_SUB(NOW(), INTERVAL 1 DAY), 13.64, 2.86, 16.50),  
+(2, NOW(), 133.46, 28.03, 161.49);                         
 
 INSERT INTO DETALLE_VENTA (idVenta, idProducto, cantidad, precioVentaHistorico, ivaAplicado, subtotal) VALUES
 (1, 7, 1, 22.50, 21.00, 22.50),

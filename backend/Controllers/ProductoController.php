@@ -5,13 +5,24 @@ class ProductoController
     public static function listar(): void
     {
         $carga = Jwt::requerirAutenticacion();
-        $idEmpresa = (int) $carga['idEmpresa'];
+        $idEmpresa  = (int) $carga['idEmpresa'];
 
-        $busqueda = trim($_GET['search'] ?? '');
+        $busqueda    = trim($_GET['search'] ?? '');
         $idCategoria = isset($_GET['categoria']) ? (int) $_GET['categoria'] : null;
+        $pagina      = max(1, (int) ($_GET['pagina'] ?? 1));
+        $porPagina   = 25;
 
         try {
-            echo json_encode(ProductoModel::listarTodos($idEmpresa, $busqueda, $idCategoria));
+            $total = ProductoModel::contarTodos($idEmpresa, $busqueda, $idCategoria);
+            $datos = ProductoModel::listarTodos($idEmpresa, $busqueda, $idCategoria, $pagina, $porPagina);
+
+            echo json_encode([
+                'datos'       => $datos,
+                'total'       => $total,
+                'pagina'      => $pagina,
+                'porPagina'   => $porPagina,
+                'totalPaginas' => (int) ceil($total / $porPagina),
+            ]);
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);

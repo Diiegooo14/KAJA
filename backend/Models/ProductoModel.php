@@ -16,7 +16,28 @@ class ProductoModel
         return $consulta->fetch() ?: null;
     }
 
-    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null): array
+    public static function contarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null): int
+    {
+        $pdo = Database::connect();
+        $sql = 'SELECT COUNT(*) FROM PRODUCTO p
+                WHERE p.idEmpresa = :idEmpresa';
+        $parametros = [':idEmpresa' => $idEmpresa];
+
+        if ($busqueda !== '') {
+            $sql .= ' AND p.nombre LIKE :busqueda';
+            $parametros[':busqueda'] = "%$busqueda%";
+        }
+        if ($idCategoria) {
+            $sql .= ' AND p.idCategoria = :categoria';
+            $parametros[':categoria'] = $idCategoria;
+        }
+
+        $consulta = $pdo->prepare($sql);
+        $consulta->execute($parametros);
+        return (int) $consulta->fetchColumn();
+    }
+
+    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 25): array
     {
         $pdo = Database::connect();
         $sql = 'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.stock, p.estado,
@@ -34,10 +55,17 @@ class ProductoModel
             $sql .= ' AND p.idCategoria = :categoria';
             $parametros[':categoria'] = $idCategoria;
         }
-        $sql .= ' ORDER BY c.nombre ASC, p.nombre ASC';
+
+        $offset = ($pagina - 1) * $porPagina;
+        $sql .= ' ORDER BY c.nombre ASC, p.nombre ASC LIMIT :limite OFFSET :offset';
 
         $consulta = $pdo->prepare($sql);
-        $consulta->execute($parametros);
+        $consulta->bindValue(':limite', $porPagina, PDO::PARAM_INT);
+        $consulta->bindValue(':offset', $offset,    PDO::PARAM_INT);
+        foreach ($parametros as $clave => $valor) {
+            $consulta->bindValue($clave, $valor);
+        }
+        $consulta->execute();
         return $consulta->fetchAll();
     }
 
