@@ -1,14 +1,23 @@
 <?php
+
+$_env = parse_ini_file(__DIR__ . '/../.env');
+
 class Config
 {
-    public const HOST = 'localhost';        // host de la base de datos
-    public const DATABASE = 'kaja';        // nombre de la base de datos
-    public const USERNAME = 'root';        // usuario con el que accedemos
-    public const PASSWORD = '';        // contraseña del usuario
-    public const PORT = '3306';    // puerto en el que escucha MariaDB o MySQL
-    public const CHARSET = 'utf8mb4'; // encoding de la conexión
-
-    public const JWT_Servidor = 'KAJA_JWT_SERVIDOR_SECRETO_';
-    // Duración del token en segundos (8 horas)
-    public const tiempoUtil_JWT = 28800;
+    public static string $HOST;
+    public static string $DATABASE;
+    public static string $USERNAME;
+    public static string $PASSWORD;
+    public static string $PORT;
+    public static string $CHARSET = 'utf8mb4';
+    public static string $JWT_Servidor;
+    public static int    $tiempoUtil_JWT;
 }
+
+Config::$HOST           = $_env['DB_HOST'];
+Config::$DATABASE       = $_env['DB_NAME'];
+Config::$USERNAME       = $_env['DB_USER'];
+Config::$PASSWORD       = $_env['DB_PASS'];
+Config::$PORT           = $_env['DB_PORT'];
+Config::$JWT_Servidor   = $_env['JWT_SECRET'];
+Config::$tiempoUtil_JWT = (int) $_env['JWT_TTL'];

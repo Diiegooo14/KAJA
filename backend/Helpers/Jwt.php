@@ -17,10 +17,10 @@ class Jwt
     {
         $cabecera        = self::codificarB64(json_encode(['alg' => 'HS256', 'typ' => 'JWT']));
         $carga['iat']    = time();
-        $carga['exp']    = time() + Config::tiempoUtil_JWT;
+        $carga['exp']    = time() + Config::$tiempoUtil_JWT;
         $cargaCodificada = self::codificarB64(json_encode($carga));
         $firma           = self::codificarB64(
-            hash_hmac('sha256', "$cabecera.$cargaCodificada", Config::JWT_Servidor, true)
+            hash_hmac('sha256', "$cabecera.$cargaCodificada", Config::$JWT_Servidor, true)
         );
         return "$cabecera.$cargaCodificada.$firma";
     }
@@ -33,7 +33,7 @@ class Jwt
         [$cabecera, $cargaCodificada, $firma] = $partes;
 
         $firmaEsperada = self::codificarB64(
-            hash_hmac('sha256', "$cabecera.$cargaCodificada", Config::JWT_Servidor, true)
+            hash_hmac('sha256', "$cabecera.$cargaCodificada", Config::$JWT_Servidor, true)
         );
 
         if (!hash_equals($firmaEsperada, $firma)) return null;
