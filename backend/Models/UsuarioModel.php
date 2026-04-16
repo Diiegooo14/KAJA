@@ -6,7 +6,7 @@ class UsuarioModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT u.id, u.nombre, u.password, r.nombreRol AS rol
+            'SELECT u.id, u.idEmpresa, u.nombre, u.password, r.nombreRol AS rol
                FROM USUARIO u
                JOIN ROL r ON u.idRol = r.id
               WHERE u.nif = :nif

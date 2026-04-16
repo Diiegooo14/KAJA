@@ -4,13 +4,14 @@ class ProductoController
 {
     public static function listar(): void
     {
-        Jwt::requerirAutenticacion();
+        $carga = Jwt::requerirAutenticacion();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         $busqueda = trim($_GET['search'] ?? '');
         $idCategoria = isset($_GET['categoria']) ? (int) $_GET['categoria'] : null;
 
         try {
-            echo json_encode(ProductoModel::listarTodos($busqueda, $idCategoria));
+            echo json_encode(ProductoModel::listarTodos($idEmpresa, $busqueda, $idCategoria));
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
@@ -19,10 +20,11 @@ class ProductoController
 
     public static function obtener(int $id): void
     {
-        Jwt::requerirAutenticacion();
+        $carga = Jwt::requerirAutenticacion();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         try {
-            $producto = ProductoModel::buscarPorId($id);
+            $producto = ProductoModel::buscarPorId($id, $idEmpresa);
 
             if (!$producto) {
                 http_response_code(404);
@@ -40,7 +42,8 @@ class ProductoController
 
     public static function crear(): void
     {
-        Jwt::requerirAdministrador();
+        $carga = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         $datos = json_decode(file_get_contents('php://input'), true) ?? [];
         $nombre = trim($datos['nombre'] ?? '');
@@ -61,7 +64,7 @@ class ProductoController
         }
 
         try {
-            $id = ProductoModel::crear(compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'stock'));
+            $id = ProductoModel::crear(compact('nombre', 'idCategoria', 'idEmpresa', 'precioCoste', 'precioVenta', 'stock'));
             http_response_code(201);
             echo json_encode(['id' => $id, 'mensaje' => 'Producto creado']);
         } catch (PDOException $e) {
@@ -72,7 +75,8 @@ class ProductoController
 
     public static function actualizar(int $id): void
     {
-        Jwt::requerirAdministrador();
+        $carga = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         $datos = json_decode(file_get_contents('php://input'), true) ?? [];
         $nombre = trim($datos['nombre'] ?? '');

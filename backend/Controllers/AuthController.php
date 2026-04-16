@@ -24,9 +24,10 @@ class AuthController
             }
 
             $token = Jwt::generar([
-                'id'     => $usuario['id'],
-                'nombre' => $usuario['nombre'],
-                'rol'    => $usuario['rol'],
+                'id'        => $usuario['id'],
+                'idEmpresa' => $usuario['idEmpresa'],
+                'nombre'    => $usuario['nombre'],
+                'rol'       => $usuario['rol'],
             ]);
 
             echo json_encode([
