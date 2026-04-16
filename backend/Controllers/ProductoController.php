@@ -10,7 +10,7 @@ class ProductoController
         $busqueda    = trim($_GET['search'] ?? '');
         $idCategoria = isset($_GET['categoria']) ? (int) $_GET['categoria'] : null;
         $pagina      = max(1, (int) ($_GET['pagina'] ?? 1));
-        $porPagina   = 25;
+        $porPagina   = 15;
 
         try {
             $total = ProductoModel::contarTodos($idEmpresa, $busqueda, $idCategoria);

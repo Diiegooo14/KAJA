@@ -37,7 +37,7 @@ class ProductoModel
         return (int) $consulta->fetchColumn();
     }
 
-    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 25): array
+    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 15): array
     {
         $pdo = Database::connect();
         $sql = 'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.stock, p.estado,
