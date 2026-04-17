@@ -4,8 +4,8 @@ class AuthController
 {
     public static function login(): void
     {
-        $datos    = json_decode(file_get_contents('php://input'), true) ?? [];
-        $nif      = trim($datos['nif'] ?? '');
+        $datos = json_decode(file_get_contents('php://input'), true) ?? [];
+        $nif = trim($datos['nif'] ?? '');
         $password = $datos['password'] ?? '';
 
         if ($nif === '' || $password === '') {
@@ -24,16 +24,16 @@ class AuthController
             }
 
             $token = Jwt::generar([
-                'id'        => $usuario['id'],
+                'id' => $usuario['id'],
                 'idEmpresa' => $usuario['idEmpresa'],
-                'nombre'    => $usuario['nombre'],
-                'rol'       => $usuario['rol'],
+                'nombre' => $usuario['nombre'],
+                'rol' => $usuario['rol'],
             ]);
 
             echo json_encode([
-                'token'  => $token,
+                'token' => $token,
                 'nombre' => $usuario['nombre'],
-                'rol'    => $usuario['rol'],
+                'rol' => $usuario['rol'],
             ]);
 
         } catch (PDOException $e) {

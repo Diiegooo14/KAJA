@@ -1,12 +1,7 @@
 <?php
 
 $envFile = __DIR__ . '/../.env';
-$_env = file_exists($envFile) ? parse_ini_file($envFile) : [];
-
-function _env(string $key, string $default = ''): string {
-    global $_env;
-    return $_env[$key] ?? getenv($key) ?: $default;
-}
+$_env = file_exists($envFile) ? (parse_ini_file($envFile) ?: []) : [];
 
 class Config
 {
@@ -20,10 +15,10 @@ class Config
     public static int    $tiempoUtil_JWT;
 }
 
-Config::$HOST           = _env('DB_HOST');
-Config::$DATABASE       = _env('DB_NAME');
-Config::$USERNAME       = _env('DB_USER');
-Config::$PASSWORD       = _env('DB_PASS');
-Config::$PORT           = _env('DB_PORT', '3306');
-Config::$JWT_Servidor   = _env('JWT_SECRET');
-Config::$tiempoUtil_JWT = (int) _env('JWT_TTL', '28800');
+Config::$HOST           = (string)($_env['DB_HOST'] ?? getenv('DB_HOST') ?: '');
+Config::$DATABASE       = (string)($_env['DB_NAME'] ?? getenv('DB_NAME') ?: '');
+Config::$USERNAME       = (string)($_env['DB_USER'] ?? getenv('DB_USER') ?: '');
+Config::$PASSWORD       = (string)($_env['DB_PASS'] ?? getenv('DB_PASS') ?: '');
+Config::$PORT           = (string)($_env['DB_PORT'] ?? getenv('DB_PORT') ?: '3306');
+Config::$JWT_Servidor   = (string)($_env['JWT_SECRET'] ?? getenv('JWT_SECRET') ?: '');
+Config::$tiempoUtil_JWT = (int)($_env['JWT_TTL'] ?? getenv('JWT_TTL') ?: 28800);

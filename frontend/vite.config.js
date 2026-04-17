@@ -7,4 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost',
+        rewrite: (path) => path.replace(/^\/api/, '/kaja/backend/Api'),
+        changeOrigin: true,
+      },
+    },
+  },
 })

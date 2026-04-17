@@ -1,9 +1,9 @@
 Options +MultiViews
 
-Header always set Content-Type "application/json; charset=utf-8"
 Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+Header always set Content-Type "application/json; charset=utf-8"
 
 RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
