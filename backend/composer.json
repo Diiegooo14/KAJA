@@ -1,0 +1,19 @@
+{
+    "name": "diiegooo14/kaja-backend",
+    "description": "KAJA PHP REST API backend — inventory and user management",
+    "type": "project",
+    "require": {
+        "php": ">=8.0"
+    },
+    "autoload": {
+        "classmap": [
+            "Config/",
+            "Helpers/",
+            "Controllers/",
+            "Models/"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}
