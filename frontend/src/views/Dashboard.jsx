@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Menu, X } from 'lucide-react'
 import Inventario from './Inventario'
 
 const NAV_ITEMS = [
@@ -13,6 +13,12 @@ const NAV_ITEMS = [
 
 export default function Dashboard({ usuario, onLogout }) {
   const [seccionActiva, setSeccionActiva] = useState('dashboard')
+  const [sidebarAbierto, setSidebarAbierto] = useState(false)
+
+  function navegarA(id) {
+    setSeccionActiva(id)
+    setSidebarAbierto(false)
+  }
 
   function renderContenido() {
     if (seccionActiva === 'inventario') return <Inventario />
@@ -59,10 +65,18 @@ export default function Dashboard({ usuario, onLogout }) {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
 
-      <header className="flex items-center bg-kaja-light px-8 h-24 shrink-0 gap-6">
+      <header className="flex items-center bg-kaja-light px-4 md:px-8 h-24 shrink-0 gap-4 md:gap-6">
+
+        {/* Hamburguesa (solo móvil) */}
+        <button
+          className="md:hidden text-kaja-blueText p-2"
+          onClick={() => setSidebarAbierto(true)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
 
         {/* Logo */}
-        <div className="flex items-center gap-2 w-64 shrink-0">
+        <div className="flex items-center gap-2 md:w-64 shrink-0">
           <img src="/img/kaja-transparente.png" alt="Logo KAJA" className="h-13 object-contain" />
         </div>
 
@@ -93,15 +107,36 @@ export default function Dashboard({ usuario, onLogout }) {
 
       <div className="flex flex-1 overflow-hidden">
 
+        {/* Overlay móvil */}
+        {sidebarAbierto && (
+          <div
+            className="fixed inset-0 bg-black/40 z-20 md:hidden"
+            onClick={() => setSidebarAbierto(false)}
+          />
+        )}
+
         {/* Sidebar */}
-        <aside className="w-64 shrink-0 bg-kaja-light flex flex-col py-4">
+        <aside className={`
+          fixed md:static inset-y-0 left-0 z-30
+          w-64 shrink-0 bg-kaja-light flex flex-col py-4
+          transition-transform duration-300
+          ${sidebarAbierto ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}>
+          {/* Botón cerrar (solo móvil) */}
+          <button
+            className="md:hidden self-end px-4 pb-2 text-kaja-blueText"
+            onClick={() => setSidebarAbierto(false)}
+          >
+            <X className="w-6 h-6" />
+          </button>
+
           <nav className="flex-1 flex flex-col gap-1 px-2">
             {NAV_ITEMS.map((item) => {
               const activo = seccionActiva === item.id
               return (
                 <button
                   key={item.id}
-                  onClick={() => setSeccionActiva(item.id)}
+                  onClick={() => navegarA(item.id)}
                   className={`w-full text-left px-6 py-4 rounded-lg text-base transition font-medium
                     ${activo
                       ? 'bg-white text-kaja-blueText shadow-sm'
