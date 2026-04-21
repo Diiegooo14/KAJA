@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onRegistro }) {
     const [nif, setNif] = useState('')
     const [password, setPassword] = useState('')
     const [camposError, setCamposError] = useState({})
@@ -119,6 +119,17 @@ export default function Login({ onLogin }) {
                         </button>
 
                     </form>
+
+                    <div className="mt-6 pt-5 border-t border-gray-100 text-center">
+                        <p className="text-sm text-gray-500 mb-1">¿Aún no tienes cuenta?</p>
+                        <button
+                            type="button"
+                            onClick={onRegistro}
+                            className="text-sm font-semibold text-kaja-orange hover:underline"
+                        >
+                            Darse de alta en el sistema KAJA
+                        </button>
+                    </div>
                 </div>
 
                 <p className="text-center text-xs text-kaja-light mt-6 opacity-60">
