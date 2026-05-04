@@ -30,7 +30,10 @@ export default function Dashboard({ usuario, onLogout }) {
             Bienvenido, {usuario.nombre}!
           </h1>
           <div className="grid grid-cols-2 gap-5 w-full max-w-2xl">
-            <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-not-allowed">
+            <div
+              onClick={() => navegarA('tpv')}
+              className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-pointer hover:brightness-95 active:scale-95 transition select-none"
+            >
               <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 NUEVA<br />VENTA
               </span>
