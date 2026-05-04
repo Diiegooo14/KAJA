@@ -7,8 +7,8 @@ const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'tpv', label: 'TPV' },
   { id: 'inventario', label: 'Inventario' },
-  { id: 'gastos', label: 'Gastos' },
-  { id: 'usuarios', label: 'Gestión Usuarios' },
+  { id: 'gastos', label: 'Gastos', soloAdmin: true },
+  { id: 'usuarios', label: 'Gestión Usuarios', soloAdmin: true },
   { id: 'config', label: 'Configuración' },
 ]
 
@@ -29,7 +29,10 @@ export default function Dashboard({ usuario, onLogout }) {
     setSidebarAbierto(false)
   }
 
+  const esAdmin = usuario.rol === 'Administrador'
+
   function renderContenido() {
+    if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos') && !esAdmin) navegarA('dashboard')
     if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
     if (seccionActiva === 'ventashoy') return <VentasHoy />
 
@@ -150,7 +153,7 @@ export default function Dashboard({ usuario, onLogout }) {
           </button>
 
           <nav className="flex-1 flex flex-col gap-1 px-2">
-            {NAV_ITEMS.map((item) => {
+            {NAV_ITEMS.filter(item => !item.soloAdmin || esAdmin).map((item) => {
               const activo = seccionActiva === item.id
               return (
                 <button
