@@ -14,14 +14,22 @@ const NAV_ITEMS = [
 export default function Dashboard({ usuario, onLogout }) {
   const [seccionActiva, setSeccionActiva] = useState('dashboard')
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
+  const [filtroStockBajo, setFiltroStockBajo] = useState(false)
 
   function navegarA(id) {
     setSeccionActiva(id)
+    setFiltroStockBajo(false)
+    setSidebarAbierto(false)
+  }
+
+  function navegarAStockBajo() {
+    setFiltroStockBajo(true)
+    setSeccionActiva('inventario')
     setSidebarAbierto(false)
   }
 
   function renderContenido() {
-    if (seccionActiva === 'inventario') return <Inventario />
+    if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
 
     if (seccionActiva === 'dashboard') {
       return (
@@ -38,7 +46,10 @@ export default function Dashboard({ usuario, onLogout }) {
                 NUEVA<br />VENTA
               </span>
             </div>
-            <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-not-allowed">
+            <div
+              onClick={navegarAStockBajo}
+              className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-pointer hover:brightness-95 active:scale-95 transition select-none"
+            >
               <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 ALERTA DE<br />STOCK BAJO
               </span>

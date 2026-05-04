@@ -16,7 +16,7 @@ class ProductoModel
         return $consulta->fetch() ?: null;
     }
 
-    public static function contarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null): int
+    public static function contarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, bool $stockBajo = false): int
     {
         $pdo = Database::connect();
         $sql = 'SELECT COUNT(*) FROM PRODUCTO p
@@ -31,13 +31,16 @@ class ProductoModel
             $sql .= ' AND p.idCategoria = :categoria';
             $parametros[':categoria'] = $idCategoria;
         }
+        if ($stockBajo) {
+            $sql .= ' AND p.stock < 15';
+        }
 
         $consulta = $pdo->prepare($sql);
         $consulta->execute($parametros);
         return (int) $consulta->fetchColumn();
     }
 
-    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 15): array
+    public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 15, bool $stockBajo = false): array
     {
         $pdo = Database::connect();
         $sql = 'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.stock, p.estado,
@@ -54,6 +57,9 @@ class ProductoModel
         if ($idCategoria) {
             $sql .= ' AND p.idCategoria = :categoria';
             $parametros[':categoria'] = $idCategoria;
+        }
+        if ($stockBajo) {
+            $sql .= ' AND p.stock < 15';
         }
 
         $offset = ($pagina - 1) * $porPagina;

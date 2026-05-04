@@ -11,10 +11,11 @@ class ProductoController
         $idCategoria = isset($_GET['categoria']) ? (int) $_GET['categoria'] : null;
         $pagina      = max(1, (int) ($_GET['pagina'] ?? 1));
         $porPagina   = 15;
+        $stockBajo   = isset($_GET['stockBajo']) && $_GET['stockBajo'] === '1';
 
         try {
-            $total = ProductoModel::contarTodos($idEmpresa, $busqueda, $idCategoria);
-            $datos = ProductoModel::listarTodos($idEmpresa, $busqueda, $idCategoria, $pagina, $porPagina);
+            $total = ProductoModel::contarTodos($idEmpresa, $busqueda, $idCategoria, $stockBajo);
+            $datos = ProductoModel::listarTodos($idEmpresa, $busqueda, $idCategoria, $pagina, $porPagina, $stockBajo);
 
             echo json_encode([
                 'datos'       => $datos,

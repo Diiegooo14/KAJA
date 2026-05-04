@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Search, Loader2, Check, X } from 'lucide-react'
+import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -12,7 +12,7 @@ const FORM_VACIO = {
     stock: '',
 }
 
-export default function Inventario() {
+export default function Inventario({ filtroStockBajo = false }) {
     const [productos, setProductos] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -40,7 +40,7 @@ export default function Inventario() {
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
-    useEffect(() => { cargarProductos('', 1) }, [])
+    useEffect(() => { cargarProductos('', 1) }, [filtroStockBajo])
 
     function headers() {
         return { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
@@ -61,6 +61,7 @@ export default function Inventario() {
         try {
             const params = new URLSearchParams({ pagina: pag })
             if (search) params.set('search', search)
+            if (filtroStockBajo) params.set('stockBajo', '1')
             const respuesta = await fetchJSON(`${API_URL}/productos?${params}`)
             setProductos(respuesta.datos)
             setTotal(respuesta.total)
@@ -219,6 +220,14 @@ export default function Inventario() {
                 </div>
             </div>
 
+            {/* Mensaje filtro stock bajo */}
+            {filtroStockBajo && (
+                <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-500" />
+                    Mostrando solo productos con stock bajo (&lt;15 unidades)
+                </div>
+            )}
+
             {/* Buscador */}
             <div className="mb-5">
                 <div className="relative max-w-sm">
@@ -252,45 +261,45 @@ export default function Inventario() {
                         <div className="text-center py-16 text-gray-400 text-sm">No se encontraron productos</div>
                     ) : (
                         <div className="overflow-x-auto">
-                        <table className="w-full text-sm min-w-[600px]">
-                            <thead>
-                                <tr className="bg-gray-50 border-b border-gray-100">
-                                    <th className="text-left px-4 py-3 font-semibold text-gray-600 w-12">#</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Nombre</th>
-                                    <th className="text-left px-4 py-3 font-semibold text-gray-600">Categoría</th>
-                                    <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Coste</th>
-                                    <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
-                                    <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
-                                    <th className="w-10"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {productos.map((p, i) => (
-                                    <tr key={p.id}
-                                        className={`border-b border-gray-50 hover:bg-gray-50 transition ${i % 2 !== 0 ? 'bg-gray-50/40' : ''}`}>
-                                        <td className="px-4 py-3 text-gray-400">{p.id}</td>
-                                        <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
-                                        <td className="px-4 py-3">
-                                            <span className="px-2 py-0.5 rounded-full text-xs bg-kaja-light text-kaja-blue font-medium">
-                                                {p.categoria}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
-                                        <td className="px-4 py-3 text-right font-semibold text-kaja-blue">{parseFloat(p.precioVenta).toFixed(2)} €</td>
-                                        <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
-                                        <td className="px-3 py-3 text-center">
-                                            <button
-                                                onClick={() => abrirModal(p)}
-                                                className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
-                                                title="Editar producto"
-                                            >
-                                                <Pencil className="w-4 h-4" />
-                                            </button>
-                                        </td>
+                            <table className="w-full text-sm min-w-150">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b border-gray-100">
+                                        <th className="text-left px-4 py-3 font-semibold text-gray-600 w-12">#</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Nombre</th>
+                                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Categoría</th>
+                                        <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Coste</th>
+                                        <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
+                                        <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
+                                        <th className="w-10"></th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {productos.map((p, i) => (
+                                        <tr key={p.id}
+                                            className={`border-b border-gray-50 hover:bg-gray-50 transition ${i % 2 !== 0 ? 'bg-gray-50/40' : ''}`}>
+                                            <td className="px-4 py-3 text-gray-400">{p.id}</td>
+                                            <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
+                                            <td className="px-4 py-3">
+                                                <span className="px-2 py-0.5 rounded-full text-xs bg-kaja-light text-kaja-blue font-medium">
+                                                    {p.categoria}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
+                                            <td className="px-4 py-3 text-right font-semibold text-kaja-blue">{parseFloat(p.precioVenta).toFixed(2)} €</td>
+                                            <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
+                                            <td className="px-3 py-3 text-center">
+                                                <button
+                                                    onClick={() => abrirModal(p)}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
+                                                    title="Editar producto"
+                                                >
+                                                    <Pencil className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     )}
                 </div>
