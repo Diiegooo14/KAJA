@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search, Menu, X } from 'lucide-react'
 import Inventario from './Inventario'
+import VentasHoy from './VentasHoy'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -30,6 +31,7 @@ export default function Dashboard({ usuario, onLogout }) {
 
   function renderContenido() {
     if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
+    if (seccionActiva === 'ventashoy') return <VentasHoy />
 
     if (seccionActiva === 'dashboard') {
       return (
@@ -54,7 +56,10 @@ export default function Dashboard({ usuario, onLogout }) {
                 ALERTA DE<br />STOCK BAJO
               </span>
             </div>
-            <div className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 col-span-2 cursor-not-allowed">
+            <div
+              onClick={() => navegarA('ventashoy')}
+              className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 col-span-2 cursor-pointer hover:brightness-95 active:scale-95 transition select-none"
+            >
               <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
                 VENTAS HOY
               </span>
