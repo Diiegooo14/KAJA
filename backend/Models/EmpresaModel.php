@@ -2,6 +2,17 @@
 
 class EmpresaModel
 {
+    public static function buscarPorId(int $id): ?array
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare(
+            'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email
+             FROM EMPRESA WHERE id = :id LIMIT 1'
+        );
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch() ?: null;
+    }
+
     public static function existeNif(string $nif): bool
     {
         $pdo = Database::connect();

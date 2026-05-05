@@ -10,7 +10,7 @@ class ProductoController
         $busqueda    = trim($_GET['search'] ?? '');
         $idCategoria = isset($_GET['categoria']) ? (int) $_GET['categoria'] : null;
         $pagina      = max(1, (int) ($_GET['pagina'] ?? 1));
-        $porPagina   = 15;
+        $porPagina   = min(999, max(1, (int) ($_GET['porPagina'] ?? 15)));
         $stockBajo   = isset($_GET['stockBajo']) && $_GET['stockBajo'] === '1';
 
         try {

@@ -77,6 +77,14 @@ class UsuarioModel
         $pdo->prepare($sql)->execute($parametros);
     }
 
+    public static function existeNif(string $nif): bool
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT id FROM USUARIO WHERE nif = :nif LIMIT 1');
+        $stmt->execute([':nif' => $nif]);
+        return (bool) $stmt->fetch();
+    }
+
     public static function desactivar(int $id): void
     {
         $pdo = Database::connect();

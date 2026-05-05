@@ -44,4 +44,73 @@ class VentaModel
 
         return $ventas;
     }
+
+    public static function crear(int $idUsuario, int $idEmpresa, array $lineas): array
+    {
+        $pdo = Database::connect();
+        $pdo->beginTransaction();
+
+        try {
+            $totalFinal = 0.0;
+            foreach ($lineas as $linea) {
+                $totalFinal += (float) $linea['precioVenta'] * (int) $linea['cantidad'];
+            }
+            $baseImponible = round($totalFinal / 1.21, 2);
+            $totalIva      = round($totalFinal - $baseImponible, 2);
+            $totalFinal    = round($totalFinal, 2);
+
+            $pdo->prepare(
+                'INSERT INTO VENTA (idUsuario, fecha, baseImponible, totalIva, totalFinal)
+                 VALUES (:idUsuario, NOW(), :baseImponible, :totalIva, :totalFinal)'
+            )->execute([
+                ':idUsuario'    => $idUsuario,
+                ':baseImponible'=> $baseImponible,
+                ':totalIva'     => $totalIva,
+                ':totalFinal'   => $totalFinal,
+            ]);
+            $idVenta = (int) $pdo->lastInsertId();
+
+            $stmtLinea = $pdo->prepare(
+                'INSERT INTO DETALLE_VENTA (idVenta, idProducto, cantidad, precioVentaHistorico, ivaAplicado, subtotal)
+                 VALUES (:idVenta, :idProducto, :cantidad, :precio, :iva, :subtotal)'
+            );
+            $stmtStock = $pdo->prepare(
+                'UPDATE PRODUCTO SET stock = stock - :cantidad
+                 WHERE id = :id AND idEmpresa = :idEmpresa AND stock >= :cantidadMin'
+            );
+
+            foreach ($lineas as $linea) {
+                $subtotal = round((float) $linea['precioVenta'] * (int) $linea['cantidad'], 2);
+                $stmtLinea->execute([
+                    ':idVenta'   => $idVenta,
+                    ':idProducto'=> (int) $linea['id'],
+                    ':cantidad'  => (int) $linea['cantidad'],
+                    ':precio'    => (float) $linea['precioVenta'],
+                    ':iva'       => 21,
+                    ':subtotal'  => $subtotal,
+                ]);
+                $stmtStock->execute([
+                    ':cantidad'    => (int) $linea['cantidad'],
+                    ':cantidadMin' => (int) $linea['cantidad'],
+                    ':id'          => (int) $linea['id'],
+                    ':idEmpresa'   => $idEmpresa,
+                ]);
+                if ($stmtStock->rowCount() === 0) {
+                    throw new \RuntimeException('Stock insuficiente para: ' . $linea['nombre']);
+                }
+            }
+
+            $pdo->commit();
+
+            return [
+                'id'            => $idVenta,
+                'baseImponible' => $baseImponible,
+                'totalIva'      => $totalIva,
+                'totalFinal'    => $totalFinal,
+            ];
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
 }

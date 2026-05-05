@@ -36,7 +36,7 @@ export default function Dashboard({ usuario, onLogout }) {
     if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos') && !esAdmin) navegarA('dashboard')
     if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
     if (seccionActiva === 'ventashoy') return <VentasHoy />
-    if (seccionActiva === 'tpv') return <TPV />
+    if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
 
     if (seccionActiva === 'dashboard') {
       return (

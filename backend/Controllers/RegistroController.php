@@ -25,9 +25,9 @@ class RegistroController
         if ($adminNombre === '')      $errores['adminNombre']          = 'El nombre del administrador es obligatorio.';
         if ($adminPassword === '')    $errores['adminPassword']        = 'La contraseña es obligatoria.';
         elseif (strlen($adminPassword) < 8)
-                                      $errores['adminPassword']        = 'La contraseña debe tener al menos 8 caracteres.';
+            $errores['adminPassword']        = 'La contraseña debe tener al menos 8 caracteres.';
         if ($adminPassword !== $adminPasswordConfirm)
-                                      $errores['adminPasswordConfirm'] = 'Las contraseñas no coinciden.';
+            $errores['adminPasswordConfirm'] = 'Las contraseñas no coinciden.';
 
         if (!empty($errores)) {
             http_response_code(422);
@@ -42,7 +42,7 @@ class RegistroController
                 exit;
             }
 
-            if (self::existeNifUsuario($adminNif)) {
+            if (UsuarioModel::existeNif($adminNif)) {
                 http_response_code(409);
                 echo json_encode(['error' => 'Ya existe un usuario registrado con ese NIF de administrador.']);
                 exit;
@@ -80,11 +80,4 @@ class RegistroController
         }
     }
 
-    private static function existeNifUsuario(string $nif): bool
-    {
-        $pdo = Database::connect();
-        $stmt = $pdo->prepare('SELECT id FROM USUARIO WHERE nif = :nif LIMIT 1');
-        $stmt->execute([':nif' => $nif]);
-        return (bool) $stmt->fetch();
-    }
 }
