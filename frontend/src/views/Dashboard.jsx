@@ -3,6 +3,7 @@ import { Search, Menu, X } from 'lucide-react'
 import Inventario from './Inventario'
 import VentasHoy from './VentasHoy'
 import TPV from './TPV'
+import Gastos from './Gastos'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -37,6 +38,7 @@ export default function Dashboard({ usuario, onLogout }) {
     if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
     if (seccionActiva === 'ventashoy') return <VentasHoy />
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
+    if (seccionActiva === 'gastos') return <Gastos />
 
     if (seccionActiva === 'dashboard') {
       return (
