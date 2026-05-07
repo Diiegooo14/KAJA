@@ -91,4 +91,42 @@ class UsuarioModel
         $pdo->prepare('UPDATE USUARIO SET estado = "Inactivo" WHERE id = :id')
             ->execute([':id' => $id]);
     }
+
+    public static function listarPorEmpresa(int $idEmpresa): array
+    {
+        $pdo      = Database::connect();
+        $consulta = $pdo->prepare(
+            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
+                    r.nombreRol AS rol
+               FROM USUARIO u
+               JOIN ROL r ON u.idRol = r.id
+              WHERE u.idEmpresa = :idEmpresa
+              ORDER BY u.nombre ASC'
+        );
+        $consulta->execute([':idEmpresa' => $idEmpresa]);
+        return $consulta->fetchAll();
+    }
+
+    public static function buscarPorIdYEmpresa(int $id, int $idEmpresa): ?array
+    {
+        $pdo      = Database::connect();
+        $consulta = $pdo->prepare(
+            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
+                    r.nombreRol AS rol
+               FROM USUARIO u
+               JOIN ROL r ON u.idRol = r.id
+              WHERE u.id = :id AND u.idEmpresa = :idEmpresa'
+        );
+        $consulta->execute([':id' => $id, ':idEmpresa' => $idEmpresa]);
+        return $consulta->fetch() ?: null;
+    }
+
+    public static function idRolPorNombre(string $nombre): ?int
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT id FROM ROL WHERE nombreRol = :nombre LIMIT 1');
+        $stmt->execute([':nombre' => $nombre]);
+        $id = $stmt->fetchColumn();
+        return $id !== false ? (int) $id : null;
+    }
 }

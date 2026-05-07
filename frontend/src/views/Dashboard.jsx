@@ -4,6 +4,7 @@ import Inventario from './Inventario'
 import VentasHoy from './VentasHoy'
 import TPV from './TPV'
 import Gastos from './Gastos'
+import Usuarios from './Usuarios'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -39,6 +40,7 @@ export default function Dashboard({ usuario, onLogout }) {
     if (seccionActiva === 'ventashoy') return <VentasHoy />
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos') return <Gastos />
+    if (seccionActiva === 'usuarios') return <Usuarios usuario={usuario} />
 
     if (seccionActiva === 'dashboard') {
       return (
