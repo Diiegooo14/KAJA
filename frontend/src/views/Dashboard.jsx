@@ -19,24 +19,34 @@ export default function Dashboard({ usuario, onLogout }) {
   const [seccionActiva, setSeccionActiva] = useState('dashboard')
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
   const [filtroStockBajo, setFiltroStockBajo] = useState(false)
+  const [busquedaGlobal, setBusquedaGlobal] = useState('')
 
   function navegarA(id) {
     setSeccionActiva(id)
     setFiltroStockBajo(false)
     setSidebarAbierto(false)
+    if (id !== 'inventario') setBusquedaGlobal('')
   }
 
   function navegarAStockBajo() {
     setFiltroStockBajo(true)
+    setBusquedaGlobal('')
     setSeccionActiva('inventario')
     setSidebarAbierto(false)
+  }
+
+  function handleBusquedaGlobal(e) {
+    const val = e.target.value
+    setBusquedaGlobal(val)
+    setFiltroStockBajo(false)
+    setSeccionActiva('inventario')
   }
 
   const esAdmin = usuario.rol === 'Administrador'
 
   function renderContenido() {
     if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos') && !esAdmin) navegarA('dashboard')
-    if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} />
+    if (seccionActiva === 'inventario') return <Inventario filtroStockBajo={filtroStockBajo} busquedaInicial={busquedaGlobal} />
     if (seccionActiva === 'ventashoy') return <VentasHoy />
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos') return <Gastos />
@@ -113,10 +123,11 @@ export default function Dashboard({ usuario, onLogout }) {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscador"
-              disabled
+              value={busquedaGlobal}
+              onChange={handleBusquedaGlobal}
+              placeholder="Buscar producto..."
               className="w-full pl-9 pr-4 py-2 border border-kaja-blueText/20 rounded-lg text-sm
-                      bg-white/60 text-gray-400 cursor-not-allowed"
+                      bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
             />
           </div>
         </div>

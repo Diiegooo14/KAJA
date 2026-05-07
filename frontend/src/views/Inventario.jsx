@@ -12,11 +12,11 @@ const FORM_VACIO = {
     stock: '',
 }
 
-export default function Inventario({ filtroStockBajo = false }) {
+export default function Inventario({ filtroStockBajo = false, busquedaInicial = '' }) {
     const [productos, setProductos] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    const [busqueda, setBusqueda] = useState('')
+    const [busqueda, setBusqueda] = useState(busquedaInicial)
 
     // Paginación
     const [pagina, setPagina] = useState(1)
@@ -40,7 +40,10 @@ export default function Inventario({ filtroStockBajo = false }) {
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
-    useEffect(() => { cargarProductos('', 1) }, [filtroStockBajo])
+    useEffect(() => {
+        setBusqueda(busquedaInicial)
+        cargarProductos(busquedaInicial, 1)
+    }, [filtroStockBajo, busquedaInicial])
 
     function headers() {
         return { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
