@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { User, Lock, Building2 } from 'lucide-react'
 
-const API = '/api'
+const API_URL = import.meta.env.VITE_API_URL
 
 function Campo({ label, value, onChange, type = 'text', readOnly = false, autoComplete }) {
   return (
@@ -77,7 +77,7 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
   function cargarEmpresa() {
     setErrorCargaEmpresa(false)
     setEmpresa(null)
-    fetch(`${API}/empresa`, {
+    fetch(`${API_URL}/empresa`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
     })
       .then(r => {
@@ -110,7 +110,7 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
     setCargandoEmpresa(true)
     setMensajeEmpresa(null)
     try {
-      const res = await fetch(`${API}/empresa`, {
+      const res = await fetch(`${API_URL}/empresa`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -135,7 +135,7 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
     setCargandoNombre(true)
     setMensajeNombre(null)
     try {
-      const res = await fetch(`${API}/perfil`, {
+      const res = await fetch(`${API_URL}/perfil`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -163,7 +163,7 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
     setCargandoPass(true)
     setMensajePass(null)
     try {
-      const res = await fetch(`${API}/perfil`, {
+      const res = await fetch(`${API_URL}/perfil`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
