@@ -7,11 +7,11 @@ class UsuarioModel
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
             'SELECT u.id, u.idEmpresa, u.nombre, u.password, r.nombreRol AS rol
-               FROM USUARIO u
-               JOIN ROL r ON u.idRol = r.id
-              WHERE u.nif = :nif
+                FROM USUARIO u
+                JOIN ROL r ON u.idRol = r.id
+                WHERE u.nif = :nif
                 AND u.estado = "Activo"
-              LIMIT 1'
+                LIMIT 1'
         );
         $consulta->execute([':nif' => $nif]);
         return $consulta->fetch() ?: null;
@@ -21,11 +21,10 @@ class UsuarioModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
-                    r.nombreRol AS rol
-               FROM USUARIO u
-               JOIN ROL r ON u.idRol = r.id
-              WHERE u.id = :id'
+            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion, r.nombreRol AS rol
+                FROM USUARIO u
+                JOIN ROL r ON u.idRol = r.id
+                WHERE u.id = :id'
         );
         $consulta->execute([':id' => $id]);
         return $consulta->fetch() ?: null;
@@ -35,11 +34,10 @@ class UsuarioModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->query(
-            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
-                    r.nombreRol AS rol
-               FROM USUARIO u
-               JOIN ROL r ON u.idRol = r.id
-              ORDER BY u.nombre ASC'
+            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion, r.nombreRol AS rol
+                FROM USUARIO u
+                JOIN ROL r ON u.idRol = r.id
+                ORDER BY u.nombre ASC'
         );
         return $consulta->fetchAll();
     }
@@ -57,7 +55,7 @@ class UsuarioModel
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
             'INSERT INTO USUARIO (idRol, idEmpresa, nif, nombre, password, estado)
-             VALUES (:rol, :empresa, :nif, :nombre, :pass, "Activo")'
+                VALUES (:rol, :empresa, :nif, :nombre, :pass, "Activo")'
         );
         $consulta->execute([
             ':rol' => $datos['idRol'],
@@ -98,10 +96,10 @@ class UsuarioModel
         $consulta = $pdo->prepare(
             'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
                     r.nombreRol AS rol
-               FROM USUARIO u
-               JOIN ROL r ON u.idRol = r.id
-              WHERE u.idEmpresa = :idEmpresa
-              ORDER BY u.nombre ASC'
+                FROM USUARIO u
+                JOIN ROL r ON u.idRol = r.id
+                WHERE u.idEmpresa = :idEmpresa
+                ORDER BY u.nombre ASC'
         );
         $consulta->execute([':idEmpresa' => $idEmpresa]);
         return $consulta->fetchAll();
@@ -113,11 +111,19 @@ class UsuarioModel
         $consulta = $pdo->prepare(
             'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion,
                     r.nombreRol AS rol
-               FROM USUARIO u
-               JOIN ROL r ON u.idRol = r.id
-              WHERE u.id = :id AND u.idEmpresa = :idEmpresa'
+                FROM USUARIO u
+                JOIN ROL r ON u.idRol = r.id
+                WHERE u.id = :id AND u.idEmpresa = :idEmpresa'
         );
         $consulta->execute([':id' => $id, ':idEmpresa' => $idEmpresa]);
+        return $consulta->fetch() ?: null;
+    }
+
+    public static function buscarPorIdConPassword(int $id): ?array
+    {
+        $pdo      = Database::connect();
+        $consulta = $pdo->prepare('SELECT id, password FROM USUARIO WHERE id = :id LIMIT 1');
+        $consulta->execute([':id' => $id]);
         return $consulta->fetch() ?: null;
     }
 

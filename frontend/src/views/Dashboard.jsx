@@ -5,6 +5,7 @@ import VentasHoy from './VentasHoy'
 import TPV from './TPV'
 import Gastos from './Gastos'
 import Usuarios from './Usuarios'
+import Configuracion from './Configuracion'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -15,7 +16,7 @@ const NAV_ITEMS = [
   { id: 'config', label: 'Configuración' },
 ]
 
-export default function Dashboard({ usuario, onLogout }) {
+export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
   const [seccionActiva, setSeccionActiva] = useState('dashboard')
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
   const [filtroStockBajo, setFiltroStockBajo] = useState(false)
@@ -51,6 +52,7 @@ export default function Dashboard({ usuario, onLogout }) {
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos') return <Gastos />
     if (seccionActiva === 'usuarios') return <Usuarios usuario={usuario} />
+    if (seccionActiva === 'config') return <Configuracion usuario={usuario} onActualizarUsuario={onActualizarUsuario} />
 
     if (seccionActiva === 'dashboard') {
       return (
@@ -87,17 +89,6 @@ export default function Dashboard({ usuario, onLogout }) {
         </div>
       )
     }
-
-    // Resto de secciones pendientes
-    const labels = { tpv: 'TPV', gastos: 'Gastos', usuarios: 'Gestión Usuarios', config: 'Configuración' }
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <p className="text-3xl font-bold text-kaja-blueText/30 uppercase tracking-widest">{labels[seccionActiva]}</p>
-          <p className="text-sm text-gray-400 mt-2">Próximamente disponible</p>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -105,7 +96,6 @@ export default function Dashboard({ usuario, onLogout }) {
 
       <header className="flex items-center bg-kaja-light px-4 md:px-8 h-24 shrink-0 gap-4 md:gap-6">
 
-        {/* Hamburguesa (solo móvil) */}
         <button
           className="md:hidden text-kaja-blueText p-2"
           onClick={() => setSidebarAbierto(true)}
@@ -113,7 +103,6 @@ export default function Dashboard({ usuario, onLogout }) {
           <Menu className="w-6 h-6" />
         </button>
 
-        {/* Logo */}
         <div className="flex items-center gap-2 md:w-64 shrink-0">
           <img src="/img/kaja-transparente.png" alt="Logo KAJA" className="h-13 object-contain" />
         </div>
@@ -146,7 +135,6 @@ export default function Dashboard({ usuario, onLogout }) {
 
       <div className="flex flex-1 overflow-hidden">
 
-        {/* Overlay móvil */}
         {sidebarAbierto && (
           <div
             className="fixed inset-0 bg-black/40 z-20 md:hidden"
@@ -154,14 +142,12 @@ export default function Dashboard({ usuario, onLogout }) {
           />
         )}
 
-        {/* Sidebar */}
         <aside className={`
           fixed md:static inset-y-0 left-0 z-30
           w-64 shrink-0 bg-kaja-light flex flex-col py-4
           transition-transform duration-300
           ${sidebarAbierto ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}>
-          {/* Botón cerrar (solo móvil) */}
           <button
             className="md:hidden self-end px-4 pb-2 text-kaja-blueText"
             onClick={() => setSidebarAbierto(false)}
@@ -188,7 +174,6 @@ export default function Dashboard({ usuario, onLogout }) {
             })}
           </nav>
 
-          {/* Cerrar sesión */}
           <div className="px-2 pt-2 border-t border-kaja-blueText/10 mt-2">
             <button
               onClick={onLogout}
@@ -199,7 +184,6 @@ export default function Dashboard({ usuario, onLogout }) {
           </div>
         </aside>
 
-        {/* Contenido principal */}
         <main className="flex-1 overflow-y-auto bg-white flex flex-col">
           {renderContenido()}
         </main>

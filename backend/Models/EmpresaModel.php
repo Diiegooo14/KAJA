@@ -7,10 +7,28 @@ class EmpresaModel
         $pdo  = Database::connect();
         $stmt = $pdo->prepare(
             'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email
-             FROM EMPRESA WHERE id = :id LIMIT 1'
+                FROM EMPRESA WHERE id = :id LIMIT 1'
         );
         $stmt->execute([':id' => $id]);
         return $stmt->fetch() ?: null;
+    }
+
+    public static function actualizar(int $id, array $datos): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare(
+            'UPDATE EMPRESA
+                SET razonSocial = :razonSocial, nombreComercial = :nombreComercial,
+                direccion = :direccion, telefono = :telefono, email = :email
+                WHERE id = :id'
+        )->execute([
+            ':razonSocial'     => $datos['razonSocial'],
+            ':nombreComercial' => $datos['nombreComercial'],
+            ':direccion'       => $datos['direccion'],
+            ':telefono'        => $datos['telefono'],
+            ':email'           => $datos['email'],
+            ':id'              => $id,
+        ]);
     }
 
     public static function existeNif(string $nif): bool
@@ -26,7 +44,7 @@ class EmpresaModel
         $pdo = Database::connect();
         $stmt = $pdo->prepare(
             'INSERT INTO EMPRESA (nif, razonSocial, nombreComercial, direccion, telefono, email)
-             VALUES (:nif, :razonSocial, :nombreComercial, :direccion, :telefono, :email)'
+                VALUES (:nif, :razonSocial, :nombreComercial, :direccion, :telefono, :email)'
         );
         $stmt->execute([
             ':nif'             => $datos['nif'],

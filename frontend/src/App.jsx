@@ -22,8 +22,19 @@ export default function App() {
         setVista('login')
     }
 
+    function handleActualizarUsuario(userActualizado) {
+        setUsuario(userActualizado)
+        localStorage.setItem('kaja_user', JSON.stringify(userActualizado))
+    }
+
     if (usuario) {
-        return <Dashboard usuario={usuario} onLogout={handleLogout} />
+        return (
+            <Dashboard
+                usuario={usuario}
+                onLogout={handleLogout}
+                onActualizarUsuario={handleActualizarUsuario}
+            />
+        )
     }
 
     if (vista === 'registro') {
