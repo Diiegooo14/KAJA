@@ -55,6 +55,7 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
 
   // Empresa
   const [empresa, setEmpresa] = useState(null)
+  const [errorCargaEmpresa, setErrorCargaEmpresa] = useState(false)
   const [formEmpresa, setFormEmpresa] = useState({
     razonSocial: '', nombreComercial: '', direccion: '', telefono: '', email: '',
   })
@@ -73,25 +74,31 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
   const [mensajePass, setMensajePass] = useState(null)
   const [cargandoPass, setCargandoPass] = useState(false)
 
-  useEffect(() => {
-    if (!esAdmin) return
+  function cargarEmpresa() {
+    setErrorCargaEmpresa(false)
+    setEmpresa(null)
     fetch(`${API}/empresa`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
     })
-      .then(r => r.json())
-      .then(data => {
-        if (data.nif) {
-          setEmpresa(data)
-          setFormEmpresa({
-            razonSocial: data.razonSocial ?? '',
-            nombreComercial: data.nombreComercial ?? '',
-            direccion: data.direccion ?? '',
-            telefono: data.telefono ?? '',
-            email: data.email ?? '',
-          })
-        }
+      .then(r => {
+        if (!r.ok) throw new Error(`Error ${r.status}`)
+        return r.json()
       })
-      .catch(() => { })
+      .then(data => {
+        setEmpresa(data)
+        setFormEmpresa({
+          razonSocial:     data.razonSocial     ?? '',
+          nombreComercial: data.nombreComercial ?? '',
+          direccion:       data.direccion       ?? '',
+          telefono:        data.telefono        ?? '',
+          email:           data.email           ?? '',
+        })
+      })
+      .catch(() => setErrorCargaEmpresa(true))
+  }
+
+  useEffect(() => {
+    if (esAdmin) cargarEmpresa()
   }, [esAdmin])
 
   function campoEmpresa(field) {
@@ -191,7 +198,17 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
             Datos de la empresa
           </h3>
 
-          {empresa === null ? (
+          {errorCargaEmpresa ? (
+            <div className="flex items-center gap-3">
+              <p className="text-sm text-red-500">No se pudieron cargar los datos de la empresa.</p>
+              <button
+                onClick={cargarEmpresa}
+                className="text-sm text-kaja-blueText underline hover:no-underline"
+              >
+                Reintentar
+              </button>
+            </div>
+          ) : empresa === null ? (
             <p className="text-sm text-gray-400">Cargando...</p>
           ) : (
             <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
