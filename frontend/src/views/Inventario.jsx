@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle } from 'lucide-react'
+import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -43,6 +43,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
     const [camposError, setCamposError] = useState({})
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
+
+    // Modal categorías
+    const [modalCategoriasAbierto, setModalCategoriasAbierto] = useState(false)
+    const [categoriasLista, setCategoriasLista] = useState([])
+    const [cargandoCategorias, setCargandoCategorias] = useState(false)
 
     useEffect(() => {
         setBusqueda(busquedaInicial)
@@ -128,6 +133,19 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         setFormError('')
         setCamposError({})
         setProductoEditando(null)
+    }
+
+    async function abrirModalCategorias() {
+        setModalCategoriasAbierto(true)
+        setCargandoCategorias(true)
+        try {
+            const data = await fetchJSON(`${API_URL}/categorias`)
+            setCategoriasLista(data)
+        } catch {
+            setCategoriasLista([])
+        } finally {
+            setCargandoCategorias(false)
+        }
     }
 
     function handleFormChange(e) {
@@ -233,8 +251,16 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                     <h1 className="text-2xl font-bold text-kaja-blue">Inventario</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-400">{total} productos</span>
+                    <button
+                        onClick={abrirModalCategorias}
+                        className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-kaja-blue text-sm font-semibold
+                                    rounded-lg hover:bg-gray-50 active:scale-95 transition"
+                    >
+                        <Tag className="w-4 h-4" />
+                        Categorías
+                    </button>
                     <button
                         onClick={() => abrirModal()}
                         className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
@@ -407,6 +433,49 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 animate-fade-in">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
+                </div>
+            )}
+
+            {/* Modal categorías */}
+            {modalCategoriasAbierto && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalCategoriasAbierto(false)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-lg font-bold text-kaja-blue flex items-center gap-2">
+                                <Tag className="w-5 h-5" />
+                                Categorías
+                            </h2>
+                            <button onClick={() => setModalCategoriasAbierto(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {cargandoCategorias ? (
+                            <div className="flex items-center justify-center gap-2 py-8 text-gray-400">
+                                <Loader2 className="animate-spin w-5 h-5 text-kaja-orange" />
+                                <span className="text-sm">Cargando...</span>
+                            </div>
+                        ) : categoriasLista.length === 0 ? (
+                            <p className="text-sm text-gray-400 text-center py-8">No hay categorías registradas</p>
+                        ) : (
+                            <ul className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+                                {categoriasLista.map(c => (
+                                    <li key={c.id} className="flex items-center gap-3 py-2.5">
+                                        <span className="w-6 h-6 rounded-full bg-kaja-light flex items-center justify-center text-xs font-bold text-kaja-blue shrink-0">
+                                            {c.nombre.charAt(0).toUpperCase()}
+                                        </span>
+                                        <span className="text-sm text-gray-800">{c.nombre}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+
+                        <p className="text-xs text-gray-400 mt-4 text-right">
+                            {!cargandoCategorias && `${categoriasLista.length} categoría${categoriasLista.length !== 1 ? 's' : ''}`}
+                        </p>
+                    </div>
                 </div>
             )}
 
