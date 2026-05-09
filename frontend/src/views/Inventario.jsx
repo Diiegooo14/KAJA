@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
+const POR_PAGINA = 10
 
 const FORM_VACIO = {
     nombre: '',
@@ -71,7 +72,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         setLoading(true)
         setError('')
         try {
-            const params = new URLSearchParams({ pagina: pag })
+            const params = new URLSearchParams({ pagina: pag, porPagina: POR_PAGINA })
             if (search) params.set('search', search)
             if (filtroStockBajo) params.set('stockBajo', '1')
             const respuesta = await fetchJSON(`${API_URL}/productos?${params}`)
@@ -280,9 +281,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 </div>
             )}
 
-            {/* Buscador */}
-            <div className="mb-5">
-                <div className="relative max-w-sm">
+            {/* Buscador + paginación superior */}
+            <div className="flex items-center gap-3 mb-5">
+                <div className="relative max-w-sm flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
@@ -293,6 +294,62 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
                     />
                 </div>
+
+                {!loading && !error && (
+                    <div className="flex items-center gap-2 ml-auto shrink-0">
+                        <span className="text-sm text-gray-400 mr-1">
+                            {total === 0
+                                ? 'Sin resultados'
+                                : `${(pagina - 1) * POR_PAGINA + 1}–${Math.min(pagina * POR_PAGINA, total)} de ${total}`}
+                        </span>
+                        {totalPaginas > 1 && (<>
+                            <button
+                                onClick={() => irAPagina(1)}
+                                disabled={pagina === 1}
+                                className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                title="Primera página"
+                            >«</button>
+                            <button
+                                onClick={() => irAPagina(pagina - 1)}
+                                disabled={pagina === 1}
+                                className="px-2.5 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            >‹</button>
+
+                            {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+                                .filter(p => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 1)
+                                .reduce((acc, p, idx, arr) => {
+                                    if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...')
+                                    acc.push(p)
+                                    return acc
+                                }, [])
+                                .map((item, idx) =>
+                                    item === '...'
+                                        ? <span key={`sep-${idx}`} className="px-1 text-sm text-gray-400">…</span>
+                                        : <button
+                                            key={item}
+                                            onClick={() => irAPagina(item)}
+                                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition
+                                                ${item === pagina
+                                                    ? 'bg-kaja-orange text-white'
+                                                    : 'text-gray-600 hover:bg-gray-100'}`}
+                                        >{item}</button>
+                                )
+                            }
+
+                            <button
+                                onClick={() => irAPagina(pagina + 1)}
+                                disabled={pagina === totalPaginas}
+                                className="px-2.5 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            >›</button>
+                            <button
+                                onClick={() => irAPagina(totalPaginas)}
+                                disabled={pagina === totalPaginas}
+                                className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                                title="Última página"
+                            >»</button>
+                        </>)}
+                    </div>
+                )}
             </div>
 
             {/* Estado carga / error */}
@@ -360,71 +417,6 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 </div>
             )}
 
-            {/* Paginación */}
-            {!loading && !error && totalPaginas > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                    <p className="text-sm text-gray-400">
-                        Página <span className="font-medium text-gray-600">{pagina}</span> de{' '}
-                        <span className="font-medium text-gray-600">{totalPaginas}</span>
-                    </p>
-                    <div className="flex items-center gap-1">
-                        <button
-                            onClick={() => irAPagina(1)}
-                            disabled={pagina === 1}
-                            className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                            title="Primera página"
-                        >
-                            «
-                        </button>
-                        <button
-                            onClick={() => irAPagina(pagina - 1)}
-                            disabled={pagina === 1}
-                            className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                        >
-                            Anterior
-                        </button>
-
-                        {Array.from({ length: totalPaginas }, (_, i) => i + 1)
-                            .filter(p => p === 1 || p === totalPaginas || Math.abs(p - pagina) <= 2)
-                            .reduce((acc, p, idx, arr) => {
-                                if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...')
-                                acc.push(p)
-                                return acc
-                            }, [])
-                            .map((item, idx) =>
-                                item === '...'
-                                    ? <span key={`sep-${idx}`} className="px-2 py-1.5 text-sm text-gray-400">…</span>
-                                    : <button
-                                        key={item}
-                                        onClick={() => irAPagina(item)}
-                                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition
-                                            ${item === pagina
-                                                ? 'bg-kaja-orange text-white'
-                                                : 'text-gray-600 hover:bg-gray-100'}`}
-                                    >
-                                        {item}
-                                    </button>
-                            )
-                        }
-
-                        <button
-                            onClick={() => irAPagina(pagina + 1)}
-                            disabled={pagina === totalPaginas}
-                            className="px-3 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                        >
-                            Siguiente
-                        </button>
-                        <button
-                            onClick={() => irAPagina(totalPaginas)}
-                            disabled={pagina === totalPaginas}
-                            className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
-                            title="Última página"
-                        >
-                            »
-                        </button>
-                    </div>
-                </div>
-            )}
 
             {/* Toast de éxito */}
             {notificacion && (
