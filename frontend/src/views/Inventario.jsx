@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag } from 'lucide-react'
+import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag, Trash2 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 const POR_PAGINA = 10
@@ -49,6 +49,12 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
     const [modalCategoriasAbierto, setModalCategoriasAbierto] = useState(false)
     const [categoriasLista, setCategoriasLista] = useState([])
     const [cargandoCategorias, setCargandoCategorias] = useState(false)
+    const [categoriaParaEliminar, setCategoriaParaEliminar] = useState(null)
+    const [eliminandoCategoria, setEliminandoCategoria] = useState(false)
+
+    // Modal eliminar producto
+    const [productoParaEliminar, setProductoParaEliminar] = useState(null)
+    const [eliminandoProducto, setEliminandoProducto] = useState(false)
 
     useEffect(() => {
         setBusqueda(busquedaInicial)
@@ -146,6 +152,39 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             setCategoriasLista([])
         } finally {
             setCargandoCategorias(false)
+        }
+    }
+
+    async function eliminarProducto() {
+        if (!productoParaEliminar) return
+        setEliminandoProducto(true)
+        try {
+            const data = await fetchJSON(`${API_URL}/productos?id=${productoParaEliminar.id}`, { method: 'DELETE' })
+            setProductoParaEliminar(null)
+            mostrarNotificacion(data.mensaje ?? 'Producto eliminado correctamente')
+            cargarProductos(busqueda, pagina)
+        } catch (e) {
+            mostrarNotificacion('Error: ' + e.message)
+            setProductoParaEliminar(null)
+        } finally {
+            setEliminandoProducto(false)
+        }
+    }
+
+    async function eliminarCategoria() {
+        if (!categoriaParaEliminar) return
+        setEliminandoCategoria(true)
+        try {
+            await fetchJSON(`${API_URL}/categorias?id=${categoriaParaEliminar.id}`, { method: 'DELETE' })
+            setCategoriaParaEliminar(null)
+            const data = await fetchJSON(`${API_URL}/categorias`)
+            setCategoriasLista(data)
+            mostrarNotificacion('Categoría eliminada correctamente')
+        } catch (e) {
+            mostrarNotificacion('Error: ' + e.message)
+            setCategoriaParaEliminar(null)
+        } finally {
+            setEliminandoCategoria(false)
         }
     }
 
@@ -380,7 +419,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
                                         <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
                                         <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
-                                        <th className="w-10"></th>
+                                        <th className="w-20"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -400,13 +439,22 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
                                             <td className="px-4 py-3 text-center">{badgeEstado(p.estado)}</td>
                                             <td className="px-3 py-3 text-center">
-                                                <button
-                                                    onClick={e => { e.stopPropagation(); abrirModal(p) }}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
-                                                    title="Editar producto"
-                                                >
-                                                    <Pencil className="w-4 h-4" />
-                                                </button>
+                                                <div className="flex items-center justify-center gap-1">
+                                                    <button
+                                                        onClick={e => { e.stopPropagation(); abrirModal(p) }}
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
+                                                        title="Editar producto"
+                                                    >
+                                                        <Pencil className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={e => { e.stopPropagation(); setProductoParaEliminar(p) }}
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                                        title="Eliminar producto"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -458,7 +506,17 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <span className="w-6 h-6 rounded-full bg-kaja-light flex items-center justify-center text-xs font-bold text-kaja-blue shrink-0">
                                             {c.nombre.charAt(0).toUpperCase()}
                                         </span>
-                                        <span className="text-sm text-gray-800">{c.nombre}</span>
+                                        <span className="text-sm text-gray-800 flex-1">{c.nombre}</span>
+                                        <span className="text-xs text-gray-400 shrink-0">
+                                            {c.totalProductos} producto{c.totalProductos !== 1 ? 's' : ''}
+                                        </span>
+                                        <button
+                                            onClick={() => setCategoriaParaEliminar(c)}
+                                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition shrink-0"
+                                            title="Eliminar categoría"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                     </li>
                                 ))}
                             </ul>
@@ -467,6 +525,104 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         <p className="text-xs text-gray-400 mt-4 text-right">
                             {!cargandoCategorias && `${categoriasLista.length} categoría${categoriasLista.length !== 1 ? 's' : ''}`}
                         </p>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal aviso / confirmación al eliminar categoría */}
+            {categoriaParaEliminar && (
+                <div className="fixed inset-0 z-60 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminandoCategoria && setCategoriaParaEliminar(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        {parseInt(categoriaParaEliminar.totalProductos) > 0 ? (
+                            <>
+                                <div className="flex flex-col items-center gap-3 mb-5 text-center">
+                                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                        <AlertTriangle className="w-6 h-6 text-red-500" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-gray-800">No se puede eliminar</h3>
+                                    <p className="text-sm text-gray-500">
+                                        La categoría <span className="font-semibold text-gray-700">"{categoriaParaEliminar.nombre}"</span> tiene{' '}
+                                        <span className="font-semibold text-red-600">{categoriaParaEliminar.totalProductos} producto{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}</span> asociado{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}.
+                                        Reasigna o elimina los productos antes de borrar esta categoría.
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setCategoriaParaEliminar(null)}
+                                    className="w-full py-2.5 bg-kaja-orange text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition"
+                                >
+                                    Entendido
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex flex-col items-center gap-3 mb-5 text-center">
+                                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                                        <Trash2 className="w-6 h-6 text-kaja-orange" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-gray-800">Eliminar categoría</h3>
+                                    <p className="text-sm text-gray-500">
+                                        ¿Seguro que quieres eliminar <span className="font-semibold text-gray-700">"{categoriaParaEliminar.nombre}"</span>?
+                                        Esta acción no se puede deshacer.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setCategoriaParaEliminar(null)}
+                                        disabled={eliminandoCategoria}
+                                        className="flex-1 py-2.5 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={eliminarCategoria}
+                                        disabled={eliminandoCategoria}
+                                        className="flex-1 py-2.5 bg-red-500 text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                                    >
+                                        {eliminandoCategoria
+                                            ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
+                                            : 'Sí, eliminar'}
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Modal confirmación eliminar producto */}
+            {productoParaEliminar && (
+                <div className="fixed inset-0 z-60 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminandoProducto && setProductoParaEliminar(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex flex-col items-center gap-3 mb-5 text-center">
+                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <Trash2 className="w-6 h-6 text-red-500" />
+                            </div>
+                            <h3 className="text-base font-bold text-gray-800">Eliminar producto</h3>
+                            <p className="text-sm text-gray-500">
+                                ¿Seguro que quieres eliminar <span className="font-semibold text-gray-700">"{productoParaEliminar.nombre}"</span>?
+                                Esta acción no se puede deshacer.
+                            </p>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setProductoParaEliminar(null)}
+                                disabled={eliminandoProducto}
+                                className="flex-1 py-2.5 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={eliminarProducto}
+                                disabled={eliminandoProducto}
+                                className="flex-1 py-2.5 bg-red-500 text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {eliminandoProducto
+                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
+                                    : 'Sí, eliminar'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

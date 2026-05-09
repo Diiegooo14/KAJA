@@ -6,7 +6,13 @@ class CategoriaModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT id, nombre, descripcion FROM CATEGORIA WHERE idEmpresa = :idEmpresa ORDER BY nombre ASC'
+            'SELECT c.id, c.nombre, c.descripcion,
+                    COUNT(p.id) AS totalProductos
+             FROM CATEGORIA c
+             LEFT JOIN PRODUCTO p ON p.idCategoria = c.id
+             WHERE c.idEmpresa = :idEmpresa
+             GROUP BY c.id, c.nombre, c.descripcion
+             ORDER BY c.nombre ASC'
         );
         $consulta->execute([':idEmpresa' => $idEmpresa]);
         return $consulta->fetchAll();
