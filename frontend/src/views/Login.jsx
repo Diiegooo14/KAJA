@@ -39,10 +39,11 @@ export default function Login({ onLogin, onRegistro }) {
                 return
             }
 
+            const user = { nombre: data.nombre, rol: data.rol, imagen_perfil: data.imagen_perfil ?? null }
             localStorage.setItem('kaja_token', data.token)
-            localStorage.setItem('kaja_user', JSON.stringify({ nombre: data.nombre, rol: data.rol }))
+            localStorage.setItem('kaja_user', JSON.stringify(user))
 
-            if (onLogin) onLogin({ nombre: data.nombre, rol: data.rol })
+            if (onLogin) onLogin(user)
 
         } catch {
             setError('No se pudo conectar con el servidor')

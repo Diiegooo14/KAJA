@@ -81,4 +81,36 @@ class PerfilController
             echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
+
+    public static function subirImagen(): void
+    {
+        $carga = Jwt::requerirAutenticacion();
+        $id    = (int) $carga['id'];
+
+        if (!isset($_FILES['imagen'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No se recibió ningún archivo']);
+            return;
+        }
+
+        try {
+            CloudinaryService::validar($_FILES['imagen']);
+            $url = CloudinaryService::subir(
+                $_FILES['imagen']['tmp_name'],
+                'usuarios KAJA',
+                'user_' . $id
+            );
+            UsuarioModel::actualizarImagenPerfil($id, $url);
+            echo json_encode(['url' => $url]);
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (\RuntimeException $e) {
+            http_response_code(502);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
 }

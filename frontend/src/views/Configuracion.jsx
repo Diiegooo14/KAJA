@@ -1,7 +1,20 @@
-import { useState, useEffect } from 'react'
-import { User, Lock, Building2 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { User, Lock, Building2, Camera, Loader2 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
+
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
+
+const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const MAX_BYTES = 5 * 1024 * 1024 // 5MB
+
+function validarArchivo(file) {
+  if (!TIPOS_IMAGEN.includes(file.type))
+    return 'Solo se permiten imágenes JPG, PNG, GIF o WEBP'
+  if (file.size > MAX_BYTES)
+    return 'La imagen no puede superar 5MB'
+  return null
+}
 
 function Campo({ label, value, onChange, type = 'text', readOnly = false, autoComplete }) {
   return (
@@ -46,6 +59,94 @@ function BtnGuardar({ cargando, disabled, label, labelCargando }) {
       >
         {cargando ? labelCargando : label}
       </button>
+    </div>
+  )
+}
+
+function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida }) {
+  const inputRef = useRef(null)
+  const [preview, setPreview] = useState(urlActual ?? (publicLabel === 'Foto de perfil' ? DEFAULT_AVATAR : null))
+  const [subiendo, setSubiendo] = useState(false)
+  const [mensaje, setMensaje] = useState(null)
+
+  function seleccionar(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const error = validarArchivo(file)
+    if (error) {
+      setMensaje({ ok: false, texto: error })
+      e.target.value = ''
+      return
+    }
+    setMensaje(null)
+    setPreview(URL.createObjectURL(file))
+    subir(file)
+  }
+
+  async function subir(file) {
+    setSubiendo(true)
+    setMensaje(null)
+    const fd = new FormData()
+    fd.append('imagen', file)
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+        body: fd,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al subir')
+      setMensaje({ ok: true, texto: `${publicLabel} actualizada correctamente` })
+      onSubida(data.url)
+    } catch (err) {
+      setMensaje({ ok: false, texto: err.message })
+      setPreview(urlActual ?? null)
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-4 mb-6">
+      <div className="relative shrink-0">
+        <div className="w-20 h-20 rounded-full overflow-hidden bg-kaja-light flex items-center justify-center border-2 border-gray-100">
+          {preview
+            ? <img src={preview} alt={publicLabel} className="w-full h-full object-cover" />
+            : <span className="text-2xl font-bold text-kaja-blueText">{placeholder}</span>
+          }
+        </div>
+        {subiendo && (
+          <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center">
+            <Loader2 className="w-5 h-5 text-white animate-spin" />
+          </div>
+        )}
+      </div>
+
+      <div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={seleccionar}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => inputRef.current.click()}
+          disabled={subiendo}
+          className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-sm
+                     text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Camera className="w-4 h-4" />
+          Cambiar imagen
+        </button>
+        <p className="text-xs text-gray-400 mt-1">JPG, PNG, GIF o WEBP · Máx. 5MB</p>
+        {mensaje && (
+          <p className={`text-xs mt-1 ${mensaje.ok ? 'text-green-600' : 'text-red-500'}`}>
+            {mensaje.texto}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -211,44 +312,53 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
           ) : empresa === null ? (
             <p className="text-sm text-gray-400">Cargando...</p>
           ) : (
-            <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
-              <Campo label="NIF / CIF" value={empresa.nif} readOnly />
-              <Campo
-                label="Razón social"
-                value={formEmpresa.razonSocial}
-                onChange={campoEmpresa('razonSocial')}
+            <>
+              <SubidaImagen
+                urlActual={empresa.logo_empresa}
+                placeholder={empresa.nombreComercial?.charAt(0)?.toUpperCase() ?? 'E'}
+                endpoint={`${API_URL}/empresa`}
+                publicLabel="Logo"
+                onSubida={url => setEmpresa(prev => ({ ...prev, logo_empresa: url }))}
               />
-              <Campo
-                label="Nombre comercial"
-                value={formEmpresa.nombreComercial}
-                onChange={campoEmpresa('nombreComercial')}
-              />
-              <Campo
-                label="Dirección"
-                value={formEmpresa.direccion}
-                onChange={campoEmpresa('direccion')}
-              />
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
+                <Campo label="NIF / CIF" value={empresa.nif} readOnly />
                 <Campo
-                  label="Teléfono"
-                  value={formEmpresa.telefono}
-                  onChange={campoEmpresa('telefono')}
-                  type="tel"
+                  label="Razón social"
+                  value={formEmpresa.razonSocial}
+                  onChange={campoEmpresa('razonSocial')}
                 />
                 <Campo
-                  label="Email"
-                  value={formEmpresa.email}
-                  onChange={campoEmpresa('email')}
-                  type="email"
+                  label="Nombre comercial"
+                  value={formEmpresa.nombreComercial}
+                  onChange={campoEmpresa('nombreComercial')}
                 />
-              </div>
-              <Aviso msg={mensajeEmpresa} />
-              <BtnGuardar
-                cargando={cargandoEmpresa}
-                label="Guardar empresa"
-                labelCargando="Guardando..."
-              />
-            </form>
+                <Campo
+                  label="Dirección"
+                  value={formEmpresa.direccion}
+                  onChange={campoEmpresa('direccion')}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Campo
+                    label="Teléfono"
+                    value={formEmpresa.telefono}
+                    onChange={campoEmpresa('telefono')}
+                    type="tel"
+                  />
+                  <Campo
+                    label="Email"
+                    value={formEmpresa.email}
+                    onChange={campoEmpresa('email')}
+                    type="email"
+                  />
+                </div>
+                <Aviso msg={mensajeEmpresa} />
+                <BtnGuardar
+                  cargando={cargandoEmpresa}
+                  label="Guardar empresa"
+                  labelCargando="Guardando..."
+                />
+              </form>
+            </>
           )}
         </section>
       )}
@@ -259,6 +369,14 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
           <User className="w-5 h-5" />
           Mi perfil
         </h3>
+
+        <SubidaImagen
+          urlActual={usuario.imagen_perfil ?? null}
+          placeholder={usuario.nombre.charAt(0).toUpperCase()}
+          endpoint={`${API_URL}/perfil`}
+          publicLabel="Foto de perfil"
+          onSubida={url => onActualizarUsuario({ ...usuario, imagen_perfil: url })}
+        />
 
         <form onSubmit={guardarNombre} className="mb-6">
           <label className="block text-sm font-medium text-gray-600 mb-1">

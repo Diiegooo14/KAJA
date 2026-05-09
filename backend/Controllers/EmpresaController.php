@@ -59,4 +59,36 @@ class EmpresaController
             echo json_encode(['error' => 'Error interno del servidor']);
         }
     }
+
+    public static function subirLogo(): void
+    {
+        $carga     = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
+
+        if (!isset($_FILES['imagen'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No se recibió ningún archivo']);
+            return;
+        }
+
+        try {
+            CloudinaryService::validar($_FILES['imagen']);
+            $url = CloudinaryService::subir(
+                $_FILES['imagen']['tmp_name'],
+                'empresas KAJA',
+                'empresa_' . $idEmpresa
+            );
+            EmpresaModel::actualizarLogo($idEmpresa, $url);
+            echo json_encode(['url' => $url]);
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (\RuntimeException $e) {
+            http_response_code(502);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
 }

@@ -31,9 +31,10 @@ class AuthController
             ]);
 
             echo json_encode([
-                'token' => $token,
-                'nombre' => $usuario['nombre'],
-                'rol' => $usuario['rol'],
+                'token'         => $token,
+                'nombre'        => $usuario['nombre'],
+                'rol'           => $usuario['rol'],
+                'imagen_perfil' => $usuario['imagen_perfil'],
             ]);
 
         } catch (PDOException $e) {

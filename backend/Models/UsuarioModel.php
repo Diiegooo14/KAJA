@@ -6,7 +6,7 @@ class UsuarioModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT u.id, u.idEmpresa, u.nombre, u.password, r.nombreRol AS rol
+            'SELECT u.id, u.idEmpresa, u.nombre, u.password, u.imagen_perfil, r.nombreRol AS rol
                 FROM USUARIO u
                 JOIN ROL r ON u.idRol = r.id
                 WHERE u.nif = :nif
@@ -21,13 +21,20 @@ class UsuarioModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion, r.nombreRol AS rol
+            'SELECT u.id, u.nif, u.nombre, u.estado, u.fechaCreacion, u.imagen_perfil, r.nombreRol AS rol
                 FROM USUARIO u
                 JOIN ROL r ON u.idRol = r.id
                 WHERE u.id = :id'
         );
         $consulta->execute([':id' => $id]);
         return $consulta->fetch() ?: null;
+    }
+
+    public static function actualizarImagenPerfil(int $id, string $url): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('UPDATE USUARIO SET imagen_perfil = :url WHERE id = :id')
+            ->execute([':url' => $url, ':id' => $id]);
     }
 
     public static function listarTodos(): array

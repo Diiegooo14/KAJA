@@ -1,4 +1,29 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
+
+function Avatar({ nombre, imagenPerfil }) {
+  const [src, setSrc] = useState(imagenPerfil || DEFAULT_AVATAR)
+
+  const handleError = useCallback(() => setSrc(null), [])
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={nombre}
+        onError={handleError}
+        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0"
+      />
+    )
+  }
+
+  return (
+    <div className="w-12 h-12 rounded-full bg-kaja-orange flex items-center justify-center text-gray-600 font-bold text-base shrink-0">
+      {nombre.charAt(0).toUpperCase()}
+    </div>
+  )
+}
 import { Search, Menu, X } from 'lucide-react'
 import Inventario from './Inventario'
 import VentasHoy from './VentasHoy'
@@ -122,9 +147,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
         </div>
 
         <div className="flex items-center gap-3 ml-auto">
-          <div className="w-12 h-12 rounded-full bg-kaja-orange flex items-center justify-center text-gray-600 font-bold text-base">
-            {usuario.nombre.charAt(0).toUpperCase()}
-          </div>
+          <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} />
           <div className="text-right leading-tight">
             <p className="text-base font-semibold text-kaja-blueText">{usuario.nombre}</p>
             <p className="text-sm text-gray-400 capitalize">{usuario.rol}</p>

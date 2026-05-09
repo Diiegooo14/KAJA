@@ -6,11 +6,18 @@ class EmpresaModel
     {
         $pdo  = Database::connect();
         $stmt = $pdo->prepare(
-            'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email
+            'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email, logo_empresa
                 FROM EMPRESA WHERE id = :id LIMIT 1'
         );
         $stmt->execute([':id' => $id]);
         return $stmt->fetch() ?: null;
+    }
+
+    public static function actualizarLogo(int $id, string $url): void
+    {
+        $pdo = Database::connect();
+        $pdo->prepare('UPDATE EMPRESA SET logo_empresa = :url WHERE id = :id')
+            ->execute([':url' => $url, ':id' => $id]);
     }
 
     public static function actualizar(int $id, array $datos): void
