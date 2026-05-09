@@ -78,6 +78,10 @@ class VentaModel
                 'UPDATE PRODUCTO SET stock = stock - :cantidad
                  WHERE id = :id AND idEmpresa = :idEmpresa AND stock >= :cantidadMin'
             );
+            $stmtDesactivar = $pdo->prepare(
+                'UPDATE PRODUCTO SET estado = "Inactivo"
+                 WHERE id = :id AND idEmpresa = :idEmpresa AND stock = 0'
+            );
 
             foreach ($lineas as $linea) {
                 $subtotal = round((float) $linea['precioVenta'] * (int) $linea['cantidad'], 2);
@@ -98,6 +102,10 @@ class VentaModel
                 if ($stmtStock->rowCount() === 0) {
                     throw new \RuntimeException('Stock insuficiente para: ' . $linea['nombre']);
                 }
+                $stmtDesactivar->execute([
+                    ':id'        => (int) $linea['id'],
+                    ':idEmpresa' => $idEmpresa,
+                ]);
             }
 
             $pdo->commit();

@@ -10,6 +10,7 @@ const FORM_VACIO = {
     precioCoste: '',
     precioVenta: '',
     stock: '',
+    estado: 'Activo',
 }
 
 export default function Inventario({ filtroStockBajo = false, busquedaInicial = '' }) {
@@ -31,7 +32,10 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         setTimeout(() => setToast(''), 3000)
     }
 
-    // Modal
+    // Modal detalle (solo lectura)
+    const [productoVisor, setProductoVisor] = useState(null)
+
+    // Modal edición
     const [modalAbierto, setModalAbierto] = useState(false)
     const [productoEditando, setProductoEditando] = useState(null) // null = crear, objeto = editar
     const [categorias, setCategorias] = useState([])
@@ -98,6 +102,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             precioCoste: producto.precioCoste,
             precioVenta: producto.precioVenta,
             stock: producto.stock,
+            estado: producto.estado ?? 'Activo',
         } : FORM_VACIO)
         setFormError('')
         setModalAbierto(true)
@@ -107,6 +112,14 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         } catch (e) {
             setFormError('No se pudieron cargar las categorías: ' + e.message)
         }
+    }
+
+    function abrirVisor(producto) {
+        setProductoVisor(producto)
+    }
+
+    function cerrarVisor() {
+        setProductoVisor(null)
     }
 
     function cerrarModal() {
@@ -119,7 +132,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     function handleFormChange(e) {
         const { name, value } = e.target
-        setForm(prev => ({ ...prev, [name]: value }))
+        setForm(prev => {
+            const updated = { ...prev, [name]: value }
+            if (name === 'stock' && parseInt(value, 10) === 0) updated.estado = 'Inactivo'
+            return updated
+        })
         setCamposError(prev => ({ ...prev, [name]: '' }))
     }
 
@@ -165,7 +182,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 await fetchJSON(`${API_URL}/productos?id=${productoEditando.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock }),
+                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock, estado: form.estado }),
                 })
             } else {
                 await fetchJSON(`${API_URL}/productos`, {
@@ -192,6 +209,12 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         if (stock <= 5)
             return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">{stock} uds</span>
         return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">{stock} uds</span>
+    }
+
+    function badgeEstado(estado) {
+        if (estado === 'Activo')
+            return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Activo</span>
+        return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactivo</span>
     }
 
     function inputCls(campo) {
@@ -273,13 +296,15 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Coste</th>
                                         <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
                                         <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
+                                        <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
                                         <th className="w-10"></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {productos.map((p, i) => (
                                         <tr key={p.id}
-                                            className={`border-b border-gray-50 hover:bg-gray-50 transition ${i % 2 !== 0 ? 'bg-gray-50/40' : ''}`}>
+                                            onClick={() => abrirVisor(p)}
+                                            className={`border-b border-gray-50 hover:bg-kaja-light/30 transition cursor-pointer ${i % 2 !== 0 ? 'bg-gray-50/40' : ''}`}>
                                             <td className="px-4 py-3 text-gray-400">{p.id}</td>
                                             <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
                                             <td className="px-4 py-3">
@@ -290,9 +315,10 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
                                             <td className="px-4 py-3 text-right font-semibold text-kaja-blue">{parseFloat(p.precioVenta).toFixed(2)} €</td>
                                             <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
+                                            <td className="px-4 py-3 text-center">{badgeEstado(p.estado)}</td>
                                             <td className="px-3 py-3 text-center">
                                                 <button
-                                                    onClick={() => abrirModal(p)}
+                                                    onClick={e => { e.stopPropagation(); abrirModal(p) }}
                                                     className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
                                                     title="Editar producto"
                                                 >
@@ -381,6 +407,69 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 animate-fade-in">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
+                </div>
+            )}
+
+            {/* Modal detalle producto (solo lectura) */}
+            {productoVisor && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarVisor} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold text-kaja-blue">Detalle del producto</h2>
+                            <button onClick={cerrarVisor}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Nombre del producto</p>
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">{productoVisor.nombre}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Precio de coste</p>
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">
+                                        {parseFloat(productoVisor.precioCoste).toFixed(2)} €
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Precio de venta</p>
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-kaja-blue">
+                                        {parseFloat(productoVisor.precioVenta).toFixed(2)} €
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Stock</p>
+                                    <div className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg">
+                                        {badgeStock(productoVisor.stock)}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Estado</p>
+                                    <div className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg">
+                                        {badgeEstado(productoVisor.estado)}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={cerrarVisor}
+                                className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                                Cerrar
+                            </button>
+                            <button onClick={() => { cerrarVisor(); abrirModal(productoVisor) }}
+                                className="flex-1 py-2.5 bg-kaja-orange text-white rounded-lg text-sm font-semibold
+                                           hover:brightness-90 active:scale-95 transition">
+                                Editar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -482,6 +571,20 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     {camposError.stock && <p className="mt-1 text-xs text-red-500">{camposError.stock}</p>}
                                 </div>
                             </div>
+                            {productoEditando && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                                        Estado
+                                    </label>
+                                    <select
+                                        name="estado" value={form.estado} onChange={handleFormChange}
+                                        className={inputCls('estado')}
+                                    >
+                                        <option value="Activo">Activo</option>
+                                        <option value="Inactivo">Inactivo</option>
+                                    </select>
+                                </div>
+                            )}
                             {/* Error del formulario */}
                             {formError && (
                                 <div className="mt-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

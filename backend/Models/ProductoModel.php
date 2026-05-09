@@ -102,14 +102,16 @@ class ProductoModel
                     nombre      = :nombre,
                     precioCoste = :coste,
                     precioVenta = :venta,
-                    stock       = :stock
-                    WHERE id = :id'
+                    stock       = :stock,
+                    estado      = :estado
+                WHERE id = :id'
         )->execute([
                     ':categoria' => $datos['idCategoria'],
                     ':nombre' => $datos['nombre'],
                     ':coste' => $datos['precioCoste'],
                     ':venta' => $datos['precioVenta'],
                     ':stock' => $datos['stock'],
+                    ':estado' => $datos['estado'],
                     ':id' => $id,
                 ]);
     }

@@ -96,6 +96,7 @@ class ProductoController
         $precioCoste = (float) ($datos['precioCoste'] ?? 0);
         $precioVenta = (float) ($datos['precioVenta'] ?? 0);
         $stock = (int) ($datos['stock'] ?? 0);
+        $estado = $datos['estado'] ?? 'Activo';
 
         if ($nombre === '' || $idCategoria <= 0 || $precioCoste <= 0 || $precioVenta <= 0) {
             http_response_code(400);
@@ -107,9 +108,18 @@ class ProductoController
             echo json_encode(['error' => 'El stock no puede ser negativo']);
             exit;
         }
+        if (!in_array($estado, ['Activo', 'Inactivo'], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Estado inválido']);
+            exit;
+        }
+
+        if ($stock === 0) {
+            $estado = 'Inactivo';
+        }
 
         try {
-            ProductoModel::actualizar($id, compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'stock'));
+            ProductoModel::actualizar($id, compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'stock', 'estado'));
             echo json_encode(['mensaje' => 'Producto actualizado']);
         } catch (PDOException $e) {
             http_response_code(500);
