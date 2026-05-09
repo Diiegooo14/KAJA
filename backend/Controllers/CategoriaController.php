@@ -4,10 +4,11 @@ class CategoriaController
 {
     public static function listar(): void
     {
-        Jwt::requerirAutenticacion();
+        $carga = Jwt::requerirAutenticacion();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         try {
-            echo json_encode(CategoriaModel::listarTodas());
+            echo json_encode(CategoriaModel::listarTodas($idEmpresa));
         } catch (PDOException $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
@@ -16,7 +17,8 @@ class CategoriaController
 
     public static function crear(): void
     {
-        Jwt::requerirAdministrador();
+        $carga = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
 
         $datos = json_decode(file_get_contents('php://input'), true) ?? [];
         $nombre = trim($datos['nombre'] ?? '');
@@ -29,7 +31,7 @@ class CategoriaController
         }
 
         try {
-            $id = CategoriaModel::crear($nombre, $descripcion);
+            $id = CategoriaModel::crear($nombre, $descripcion, $idEmpresa);
             http_response_code(201);
             echo json_encode(['id' => $id, 'mensaje' => 'Categoría creada']);
         } catch (PDOException $e) {

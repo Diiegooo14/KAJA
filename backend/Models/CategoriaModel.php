@@ -2,21 +2,23 @@
 
 class CategoriaModel
 {
-    public static function listarTodas(): array
-    {
-        $pdo = Database::connect();
-        return $pdo->query(
-            'SELECT id, nombre, descripcion FROM CATEGORIA ORDER BY nombre ASC'
-        )->fetchAll();
-    }
-
-    public static function crear(string $nombre, ?string $descripcion): int
+    public static function listarTodas(int $idEmpresa): array
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'INSERT INTO CATEGORIA (nombre, descripcion) VALUES (:nombre, :descripcion)'
+            'SELECT id, nombre, descripcion FROM CATEGORIA WHERE idEmpresa = :idEmpresa ORDER BY nombre ASC'
         );
-        $consulta->execute([':nombre' => $nombre, ':descripcion' => $descripcion]);
+        $consulta->execute([':idEmpresa' => $idEmpresa]);
+        return $consulta->fetchAll();
+    }
+
+    public static function crear(string $nombre, ?string $descripcion, int $idEmpresa): int
+    {
+        $pdo = Database::connect();
+        $consulta = $pdo->prepare(
+            'INSERT INTO CATEGORIA (idEmpresa, nombre, descripcion) VALUES (:idEmpresa, :nombre, :descripcion)'
+        );
+        $consulta->execute([':idEmpresa' => $idEmpresa, ':nombre' => $nombre, ':descripcion' => $descripcion]);
         return (int) $pdo->lastInsertId();
     }
 

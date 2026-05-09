@@ -14,7 +14,8 @@ CREATE TABLE EMPRESA (
     nombreComercial VARCHAR(100) NOT NULL,
     direccion VARCHAR(200),
     telefono VARCHAR(20),
-    email VARCHAR(100)
+    email VARCHAR(100),
+    logo_empresa VARCHAR(255)
 );
 
 CREATE TABLE USUARIO (
@@ -24,6 +25,7 @@ CREATE TABLE USUARIO (
     nif VARCHAR(20) NOT NULL UNIQUE,
     nombre VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    imagen_perfil VARCHAR(255),
     fechaCreacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
     FOREIGN KEY (idRol) REFERENCES ROL(id) ON DELETE RESTRICT,
@@ -32,8 +34,10 @@ CREATE TABLE USUARIO (
 
 CREATE TABLE CATEGORIA (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    idEmpresa INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(255)
+    descripcion VARCHAR(255),
+    FOREIGN KEY (idEmpresa) REFERENCES EMPRESA(id) ON DELETE RESTRICT
 );
 
 CREATE TABLE PRODUCTO (
@@ -102,11 +106,11 @@ INSERT INTO USUARIO (idRol, idEmpresa, nif, nombre, password) VALUES
 (1, 1, '11111111A', 'Diego Prieto (Admin)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
 (2, 1, '22222222B', 'Carlos López (Vendedor)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 
-INSERT INTO CATEGORIA (nombre, descripcion) VALUES 
-('Herramienta Eléctrica', 'Taladros, sierras, radiales'),
-('Tornillería', 'Cajas de tornillos, clavos'),
-('Electricidad', 'Cables, enchufes, bombillas'),
-('Ropa de Trabajo', 'EPIs, botas, guantes');
+INSERT INTO CATEGORIA (idEmpresa, nombre, descripcion) VALUES
+(1, 'Herramienta Eléctrica', 'Taladros, sierras, radiales'),
+(1, 'Tornillería', 'Cajas de tornillos, clavos'),
+(1, 'Electricidad', 'Cables, enchufes, bombillas'),
+(1, 'Ropa de Trabajo', 'EPIs, botas, guantes');
 
 INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, stock) VALUES
 (1, 1, 'Taladro Percutor 500W', 35.00, 45.99, 12),     
