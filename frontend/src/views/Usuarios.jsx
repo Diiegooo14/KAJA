@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Pencil, UserX, Loader2, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Camera, Pencil, UserX, Loader2, X } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 
 const FORM_VACIO = { nombre: '', nif: '', password: '', rol: 'Empleado' }
 
@@ -22,6 +23,88 @@ async function fetchJSON(url, opciones = {}) {
     try { data = JSON.parse(text) } catch { throw new Error(`Respuesta inesperada del servidor (${res.status})`) }
     if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`)
     return data
+}
+
+function FotoUsuario({ idUsuario, imagenActual, nombre, onSubida }) {
+    const inputRef = useRef(null)
+    const [preview, setPreview] = useState(imagenActual || DEFAULT_AVATAR)
+    const [subiendo, setSubiendo] = useState(false)
+    const [errorFoto, setErrorFoto] = useState('')
+
+    async function handleFile(e) {
+        const file = e.target.files[0]
+        if (!file) return
+        if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+            setErrorFoto('Solo JPG, PNG, GIF o WEBP')
+            return
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            setErrorFoto('Máximo 5MB')
+            return
+        }
+        setErrorFoto('')
+        setPreview(URL.createObjectURL(file))
+        setSubiendo(true)
+        const fd = new FormData()
+        fd.append('imagen', file)
+        try {
+            const res = await fetch(`${API_URL}/usuarios?id=${idUsuario}`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+                body: fd,
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Error al subir')
+            onSubida(data.url)
+        } catch (err) {
+            setErrorFoto(err.message)
+            setPreview(imagenActual || DEFAULT_AVATAR)
+        } finally {
+            setSubiendo(false)
+            e.target.value = ''
+        }
+    }
+
+    return (
+        <div className="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+            <div className="relative shrink-0">
+                <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-100">
+                    <img
+                        src={preview}
+                        alt={nombre}
+                        className="w-full h-full object-cover"
+                        onError={e => { e.target.src = DEFAULT_AVATAR }}
+                    />
+                </div>
+                {subiendo && (
+                    <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center">
+                        <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    </div>
+                )}
+            </div>
+            <div>
+                <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleFile}
+                    className="hidden"
+                />
+                <button
+                    type="button"
+                    onClick={() => inputRef.current.click()}
+                    disabled={subiendo}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 border border-gray-200 rounded-lg
+                               text-xs text-gray-600 hover:bg-gray-50 transition disabled:opacity-50"
+                >
+                    <Camera className="w-3.5 h-3.5" />
+                    Cambiar foto
+                </button>
+                <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, GIF o WEBP · Máx. 5MB</p>
+                {errorFoto && <p className="text-xs text-red-500 mt-0.5">{errorFoto}</p>}
+            </div>
+        </div>
+    )
 }
 
 export default function Usuarios({ usuario }) {
@@ -151,9 +234,22 @@ export default function Usuarios({ usuario }) {
                 {/* Panel izquierdo — formulario */}
                 <div className="w-80 shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-y-auto">
                     <div className="p-5">
-                        <h2 className="text-m font-bold text-kaja-blueText mb-5">
+                        <h2 className="text-m font-bold text-kaja-blueText mb-4">
                             {editando ? 'Editar Usuario' : 'Nuevo Empleado'}
                         </h2>
+
+                        {editando && (
+                            <FotoUsuario
+                                idUsuario={editando.id}
+                                imagenActual={editando.imagen_perfil}
+                                nombre={editando.nombre}
+                                onSubida={url => {
+                                    setEditando(prev => ({ ...prev, imagen_perfil: url }))
+                                    setUsuarios(prev => prev.map(u => u.id === editando.id ? { ...u, imagen_perfil: url } : u))
+                                    mostrarToast('Foto actualizada correctamente')
+                                }}
+                            />
+                        )}
 
                         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
 
@@ -301,7 +397,15 @@ export default function Usuarios({ usuario }) {
                                         text-sm border-b border-gray-50 hover:bg-gray-50 transition
                                         ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                                 >
-                                    <div className="px-5 py-3 font-medium text-kaja-blueText truncate">{u.nombre}</div>
+                                    <div className="px-5 py-3 font-medium text-kaja-blueText truncate flex items-center gap-2">
+                                        <img
+                                            src={u.imagen_perfil || DEFAULT_AVATAR}
+                                            alt={u.nombre}
+                                            className="w-7 h-7 rounded-full object-cover shrink-0"
+                                            onError={e => { e.target.src = DEFAULT_AVATAR }}
+                                        />
+                                        {u.nombre}
+                                    </div>
                                     <div className="px-3 py-3 text-gray-500 font-mono text-xs">{u.nif}</div>
                                     <div className="px-3 py-3">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold

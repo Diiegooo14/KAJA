@@ -1,11 +1,21 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
+import { Search, Menu, X } from 'lucide-react'
+import Inventario from './Inventario'
+import VentasHoy from './VentasHoy'
+import TPV from './TPV'
+import Gastos from './Gastos'
+import Usuarios from './Usuarios'
+import Configuracion from './Configuracion'
 
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
+const DEFAULT_EMPRESA_LOGO = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778342336/empresa-basico_ykh1p1.png'
+const API_URL = import.meta.env.VITE_API_URL
 
 function Avatar({ nombre, imagenPerfil }) {
   const [src, setSrc] = useState(imagenPerfil || DEFAULT_AVATAR)
-
   const handleError = useCallback(() => setSrc(null), [])
+
+  useEffect(() => { setSrc(imagenPerfil || DEFAULT_AVATAR) }, [imagenPerfil])
 
   if (src) {
     return (
@@ -24,13 +34,30 @@ function Avatar({ nombre, imagenPerfil }) {
     </div>
   )
 }
-import { Search, Menu, X } from 'lucide-react'
-import Inventario from './Inventario'
-import VentasHoy from './VentasHoy'
-import TPV from './TPV'
-import Gastos from './Gastos'
-import Usuarios from './Usuarios'
-import Configuracion from './Configuracion'
+
+function EmpresaAvatar({ nombre, logo }) {
+  const [src, setSrc] = useState(logo || DEFAULT_EMPRESA_LOGO)
+  const handleError = useCallback(() => setSrc(null), [])
+
+  useEffect(() => { setSrc(logo || DEFAULT_EMPRESA_LOGO) }, [logo])
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt={nombre}
+        onError={handleError}
+        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm shrink-0"
+      />
+    )
+  }
+
+  return (
+    <div className="w-12 h-12 rounded-full bg-kaja-orange flex items-center justify-center text-white font-bold text-sm shrink-0">
+      {nombre?.charAt(0)?.toUpperCase() ?? 'E'}
+    </div>
+  )
+}
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -46,6 +73,16 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
   const [sidebarAbierto, setSidebarAbierto] = useState(false)
   const [filtroStockBajo, setFiltroStockBajo] = useState(false)
   const [busquedaGlobal, setBusquedaGlobal] = useState('')
+  const [empresa, setEmpresa] = useState(null)
+
+  useEffect(() => {
+    fetch(`${API_URL}/empresa`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+    })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setEmpresa(data))
+      .catch(() => {})
+  }, [])
 
   function navegarA(id) {
     setSeccionActiva(id)
@@ -77,7 +114,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos') return <Gastos />
     if (seccionActiva === 'usuarios') return <Usuarios usuario={usuario} />
-    if (seccionActiva === 'config') return <Configuracion usuario={usuario} onActualizarUsuario={onActualizarUsuario} />
+    if (seccionActiva === 'config') return <Configuracion usuario={usuario} onActualizarUsuario={onActualizarUsuario} onActualizarEmpresa={url => setEmpresa(prev => ({ ...prev, logo_empresa: url }))} />
 
     if (seccionActiva === 'dashboard') {
       return (
@@ -146,11 +183,22 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 ml-auto">
-          <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} />
-          <div className="text-right leading-tight">
-            <p className="text-base font-semibold text-kaja-blueText">{usuario.nombre}</p>
-            <p className="text-sm text-gray-400 capitalize">{usuario.rol}</p>
+        <div className="flex items-center gap-6 ml-auto">
+          {empresa && (
+            <div className="flex items-center gap-3 pr-5 border-r border-kaja-blueText/15">
+              <EmpresaAvatar nombre={empresa.nombreComercial} logo={empresa.logo_empresa} />
+              <div className="text-right leading-tight hidden md:block">
+                <p className="text-base font-semibold text-kaja-blueText">{empresa.nombreComercial}</p>
+                <p className="text-sm text-gray-400">Empresa</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-center gap-3">
+            <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} />
+            <div className="text-right leading-tight">
+              <p className="text-base font-semibold text-kaja-blueText">{usuario.nombre}</p>
+              <p className="text-sm text-gray-400 capitalize">{usuario.rol}</p>
+            </div>
           </div>
         </div>
 

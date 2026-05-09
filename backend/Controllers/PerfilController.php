@@ -82,6 +82,20 @@ class PerfilController
         }
     }
 
+    public static function eliminarImagen(): void
+    {
+        $carga = Jwt::requerirAutenticacion();
+        $id    = (int) $carga['id'];
+
+        try {
+            UsuarioModel::actualizarImagenPerfil($id, null);
+            echo json_encode(['mensaje' => 'Imagen de perfil eliminada correctamente']);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function subirImagen(): void
     {
         $carga = Jwt::requerirAutenticacion();

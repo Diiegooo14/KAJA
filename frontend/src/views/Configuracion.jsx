@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { User, Lock, Building2, Camera, Loader2 } from 'lucide-react'
+import { User, Lock, Building2, Camera, Loader2, Trash2 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
+const DEFAULT_EMPRESA_LOGO = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778342336/empresa-basico_ykh1p1.png'
 
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 const MAX_BYTES = 5 * 1024 * 1024 // 5MB
@@ -65,9 +66,14 @@ function BtnGuardar({ cargando, disabled, label, labelCargando }) {
 
 function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida }) {
   const inputRef = useRef(null)
-  const [preview, setPreview] = useState(urlActual ?? (publicLabel === 'Foto de perfil' ? DEFAULT_AVATAR : null))
+  const defaultPreview = publicLabel === 'Foto de perfil' ? DEFAULT_AVATAR : DEFAULT_EMPRESA_LOGO
+  const [preview, setPreview] = useState(urlActual || defaultPreview)
+  const [hayImagen, setHayImagen] = useState(!!urlActual)
   const [subiendo, setSubiendo] = useState(false)
+  const [eliminando, setEliminando] = useState(false)
   const [mensaje, setMensaje] = useState(null)
+
+  const ocupado = subiendo || eliminando
 
   function seleccionar(e) {
     const file = e.target.files[0]
@@ -96,13 +102,35 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al subir')
+      setHayImagen(true)
       setMensaje({ ok: true, texto: `${publicLabel} actualizada correctamente` })
       onSubida(data.url)
     } catch (err) {
       setMensaje({ ok: false, texto: err.message })
-      setPreview(urlActual ?? null)
+      setPreview(urlActual || defaultPreview)
     } finally {
       setSubiendo(false)
+    }
+  }
+
+  async function eliminar() {
+    setEliminando(true)
+    setMensaje(null)
+    try {
+      const res = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar')
+      setPreview(defaultPreview)
+      setHayImagen(false)
+      setMensaje({ ok: true, texto: `${publicLabel} eliminada correctamente` })
+      onSubida(null)
+    } catch (err) {
+      setMensaje({ ok: false, texto: err.message })
+    } finally {
+      setEliminando(false)
     }
   }
 
@@ -115,7 +143,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
             : <span className="text-2xl font-bold text-kaja-blueText">{placeholder}</span>
           }
         </div>
-        {subiendo && (
+        {ocupado && (
           <div className="absolute inset-0 rounded-full bg-black/30 flex items-center justify-center">
             <Loader2 className="w-5 h-5 text-white animate-spin" />
           </div>
@@ -130,16 +158,30 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
           onChange={seleccionar}
           className="hidden"
         />
-        <button
-          type="button"
-          onClick={() => inputRef.current.click()}
-          disabled={subiendo}
-          className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-sm
-                     text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Camera className="w-4 h-4" />
-          Cambiar imagen
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current.click()}
+            disabled={ocupado}
+            className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg text-sm
+                       text-gray-600 hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Camera className="w-4 h-4" />
+            Cambiar imagen
+          </button>
+          {hayImagen && (
+            <button
+              type="button"
+              onClick={eliminar}
+              disabled={ocupado}
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-sm
+                         text-red-500 hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar
+            </button>
+          )}
+        </div>
         <p className="text-xs text-gray-400 mt-1">JPG, PNG, GIF o WEBP · Máx. 5MB</p>
         {mensaje && (
           <p className={`text-xs mt-1 ${mensaje.ok ? 'text-green-600' : 'text-red-500'}`}>
@@ -151,7 +193,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
   )
 }
 
-export default function Configuracion({ usuario, onActualizarUsuario }) {
+export default function Configuracion({ usuario, onActualizarUsuario, onActualizarEmpresa }) {
   const esAdmin = usuario.rol === 'Administrador'
 
   // Empresa
@@ -318,7 +360,10 @@ export default function Configuracion({ usuario, onActualizarUsuario }) {
                 placeholder={empresa.nombreComercial?.charAt(0)?.toUpperCase() ?? 'E'}
                 endpoint={`${API_URL}/empresa`}
                 publicLabel="Logo"
-                onSubida={url => setEmpresa(prev => ({ ...prev, logo_empresa: url }))}
+                onSubida={url => {
+                  setEmpresa(prev => ({ ...prev, logo_empresa: url }))
+                  onActualizarEmpresa?.(url)
+                }}
               />
               <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
                 <Campo label="NIF / CIF" value={empresa.nif} readOnly />

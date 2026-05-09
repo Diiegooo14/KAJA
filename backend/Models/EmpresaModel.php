@@ -13,7 +13,7 @@ class EmpresaModel
         return $stmt->fetch() ?: null;
     }
 
-    public static function actualizarLogo(int $id, string $url): void
+    public static function actualizarLogo(int $id, ?string $url): void
     {
         $pdo = Database::connect();
         $pdo->prepare('UPDATE EMPRESA SET logo_empresa = :url WHERE id = :id')

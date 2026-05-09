@@ -4,7 +4,10 @@ class RegistroController
 {
     public static function registrar(): void
     {
-        $datos = json_decode(file_get_contents('php://input'), true) ?? [];
+        // Acepta tanto multipart/form-data (con imágenes) como application/json
+        $datos = !empty($_POST)
+            ? $_POST
+            : (json_decode(file_get_contents('php://input'), true) ?? []);
 
         $empresaNif           = trim($datos['empresaNif']           ?? '');
         $razonSocial          = trim($datos['razonSocial']          ?? '');
@@ -60,15 +63,44 @@ class RegistroController
                 'email'           => $empresaEmail ?: null,
             ]);
 
-            UsuarioModel::crear([
-                'idRol'    => 1, // Administrador
-                'idEmpresa'=> $idEmpresa,
-                'nif'      => $adminNif,
-                'nombre'   => $adminNombre,
-                'password' => password_hash($adminPassword, PASSWORD_DEFAULT),
+            $idAdmin = UsuarioModel::crear([
+                'idRol'     => 1, // Administrador
+                'idEmpresa' => $idEmpresa,
+                'nif'       => $adminNif,
+                'nombre'    => $adminNombre,
+                'password'  => password_hash($adminPassword, PASSWORD_DEFAULT),
             ]);
 
             $pdo->commit();
+
+            // Subir imágenes opcionales tras el commit (fallos silenciosos)
+            if (!empty($_FILES['logoEmpresa']['tmp_name'])) {
+                try {
+                    CloudinaryService::validar($_FILES['logoEmpresa']);
+                    $url = CloudinaryService::subir(
+                        $_FILES['logoEmpresa']['tmp_name'],
+                        'empresas KAJA',
+                        'empresa_' . $idEmpresa
+                    );
+                    EmpresaModel::actualizarLogo($idEmpresa, $url);
+                } catch (\Exception $e) {
+                    // La imagen es opcional; el admin puede subirla después
+                }
+            }
+
+            if (!empty($_FILES['fotoAdmin']['tmp_name'])) {
+                try {
+                    CloudinaryService::validar($_FILES['fotoAdmin']);
+                    $url = CloudinaryService::subir(
+                        $_FILES['fotoAdmin']['tmp_name'],
+                        'usuarios KAJA',
+                        'user_' . $idAdmin
+                    );
+                    UsuarioModel::actualizarImagenPerfil($idAdmin, $url);
+                } catch (\Exception $e) {
+                    // La foto es opcional; el admin puede subirla después
+                }
+            }
 
             http_response_code(201);
             echo json_encode(['mensaje' => 'Empresa registrada correctamente. Ya puede iniciar sesión.']);

@@ -60,6 +60,20 @@ class EmpresaController
         }
     }
 
+    public static function eliminarLogo(): void
+    {
+        $carga     = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
+
+        try {
+            EmpresaModel::actualizarLogo($idEmpresa, null);
+            echo json_encode(['mensaje' => 'Logo de empresa eliminado correctamente']);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function subirLogo(): void
     {
         $carga     = Jwt::requerirAdministrador();

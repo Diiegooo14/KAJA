@@ -188,6 +188,51 @@ class UsuarioController
         }
     }
 
+    public static function subirImagen(): void
+    {
+        $carga     = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
+        $id        = (int) ($_GET['id'] ?? 0);
+
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de usuario no válido']);
+            return;
+        }
+
+        if (!isset($_FILES['imagen'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'No se recibió ningún archivo']);
+            return;
+        }
+
+        try {
+            if (!UsuarioModel::buscarPorIdYEmpresa($id, $idEmpresa)) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Usuario no encontrado']);
+                return;
+            }
+
+            CloudinaryService::validar($_FILES['imagen']);
+            $url = CloudinaryService::subir(
+                $_FILES['imagen']['tmp_name'],
+                'usuarios KAJA',
+                'user_' . $id
+            );
+            UsuarioModel::actualizarImagenPerfil($id, $url);
+            echo json_encode(['url' => $url]);
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (\RuntimeException $e) {
+            http_response_code(502);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function desactivar(): void
     {
         $carga     = Jwt::requerirAdministrador();
