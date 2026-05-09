@@ -317,9 +317,18 @@ export default function TPV({ usuario }) {
                                         >
                                             <span className="text-xs text-gray-400 mb-1 truncate w-full">{p.categoria}</span>
                                             <span className="text-sm font-semibold text-gray-800 leading-tight mb-3 line-clamp-2">{p.nombre}</span>
-                                            <span className="text-base font-bold text-kaja-orange mt-auto">
-                                                {parseFloat(p.precioVenta).toFixed(2)} €
-                                            </span>
+                                            <div className="flex items-end justify-between w-full mt-auto">
+                                                <span className="text-base font-bold text-kaja-orange">
+                                                    {parseFloat(p.precioVenta).toFixed(2)} €
+                                                </span>
+                                                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
+                                                    p.stock <= 5
+                                                        ? 'bg-yellow-100 text-yellow-700'
+                                                        : 'bg-green-100 text-green-700'
+                                                }`}>
+                                                    {p.stock} uds
+                                                </span>
+                                            </div>
                                             {enCarrito && (
                                                 <span className="absolute top-2 right-2 w-5 h-5 bg-kaja-orange rounded-full text-white text-xs flex items-center justify-center font-bold">
                                                     {enCarrito.cantidad}
