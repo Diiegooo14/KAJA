@@ -113,14 +113,37 @@ INSERT INTO CATEGORIA (idEmpresa, nombre, descripcion) VALUES
 (1, 'Ropa de Trabajo', 'EPIs, botas, guantes');
 
 INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, stock) VALUES
-(1, 1, 'Taladro Percutor 500W', 35.00, 45.99, 12),     
-(1, 1, 'Sierra Circular Pro', 80.00, 115.50, 5),       
-(2, 1, 'Caja Tornillos Madera 4x40', 1.50, 3.20, 50),  
-(3, 1, 'Rollo Cable Cobre 1.5mm', 15.00, 24.99, 10),   
-(3, 1, 'Enchufe Superficie Doble', 2.50, 4.50, 30),    
-(3, 1, 'Bombilla LED E27 10W', 4.00, 7.50, 45),        
-(4, 1, 'Pantalón Multibolsillos Talla L', 12.00, 22.50, 15), 
-(4, 1, 'Botas de Seguridad S3 Talla 42', 25.00, 45.00, 8);   
+(1, 1, 'Taladro Percutor 500W', 35.00, 45.99, 12),
+(1, 1, 'Sierra Circular Pro', 80.00, 115.50, 5),
+(1, 1, 'Amoladora Angular 115mm', 28.00, 42.99, 8),
+(1, 1, 'Lijadora Orbital 200W', 22.00, 34.50, 10),
+(1, 1, 'Atornillador a Batería 18V', 45.00, 69.99, 6),
+(1, 1, 'Caladora de Vaivén 450W', 38.00, 57.50, 7),
+(1, 1, 'Compresor de Aire 24L', 90.00, 139.99, 3),
+(2, 1, 'Caja Tornillos Madera 4x40', 1.50, 3.20, 50),
+(2, 1, 'Caja Tornillos Metal 3x20', 1.20, 2.80, 60),
+(2, 1, 'Caja Tornillos Aglomerado 5x50', 1.80, 3.70, 40),
+(2, 1, 'Caja Clavos Acero 40mm', 2.00, 3.90, 35),
+(2, 1, 'Surtido Tuercas y Arandelas M6', 3.50, 6.50, 25),
+(2, 1, 'Varilla Roscada M8 1m', 1.90, 3.50, 30),
+(2, 1, 'Caja Pernos Hexagonales M10', 4.00, 7.20, 20),
+(2, 1, 'Taco de Expansión 8mm (100u)', 2.50, 4.90, 45),
+(3, 1, 'Rollo Cable Cobre 1.5mm', 15.00, 24.99, 10),
+(3, 1, 'Enchufe Superficie Doble', 2.50, 4.50, 30),
+(3, 1, 'Bombilla LED E27 10W', 4.00, 7.50, 45),
+(3, 1, 'Bombilla LED GU10 7W', 3.50, 6.50, 40),
+(3, 1, 'Interruptor Simple Superficie', 1.80, 3.50, 25),
+(3, 1, 'Caja Empotrar Cuadrada', 0.90, 1.80, 50),
+(3, 1, 'Tubo Corrugado Eléctrico 16mm (50m)', 8.00, 14.50, 15),
+(3, 1, 'Cuadro Eléctrico 12 Módulos', 18.00, 29.99, 8),
+(4, 1, 'Pantalón Multibolsillos Talla L', 12.00, 22.50, 15),
+(4, 1, 'Botas de Seguridad S3 Talla 42', 25.00, 45.00, 8),
+(4, 1, 'Chaleco Reflectante Alta Visibilidad', 5.00, 9.50, 20),
+(4, 1, 'Guantes de Trabajo Talla L', 3.00, 5.90, 35),
+(4, 1, 'Casco de Seguridad ABS', 7.00, 13.50, 18),
+(4, 1, 'Gafas Protectoras Antipimpacto', 4.50, 8.90, 22),
+(4, 1, 'Chaqueta de Trabajo Talla L', 18.00, 32.00, 10),
+(4, 1, 'Rodilleras Profesionales', 6.00, 11.50, 14);
 
 INSERT INTO TIPO_GASTO (nombreTipo) VALUES ('Fijo'), ('Variable');
 
