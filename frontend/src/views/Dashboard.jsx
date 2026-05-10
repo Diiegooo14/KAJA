@@ -6,6 +6,7 @@ import TPV from './TPV'
 import Gastos from './Gastos'
 import Usuarios from './Usuarios'
 import Configuracion from './Configuracion'
+import GestionFinanciera from './GestionFinanciera'
 
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 const DEFAULT_EMPRESA_LOGO = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778342336/empresa-basico_ykh1p1.png'
@@ -65,6 +66,7 @@ const NAV_ITEMS = [
   { id: 'inventario', label: 'Inventario' },
   { id: 'gastos', label: 'Gastos', soloAdmin: true },
   { id: 'usuarios', label: 'Gestión Usuarios', soloAdmin: true },
+  { id: 'financiero', label: 'Gestión Financiera', soloAdmin: true },
   { id: 'config', label: 'Configuración' },
 ]
 
@@ -114,6 +116,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
     if (seccionActiva === 'tpv') return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos') return <Gastos />
     if (seccionActiva === 'usuarios') return <Usuarios usuario={usuario} />
+    if (seccionActiva === 'financiero') return <GestionFinanciera />
     if (seccionActiva === 'config') return <Configuracion usuario={usuario} onActualizarUsuario={onActualizarUsuario} onActualizarEmpresa={url => setEmpresa(prev => ({ ...prev, logo_empresa: url }))} />
 
     if (seccionActiva === 'dashboard') {
@@ -124,11 +127,11 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           </h1>
           <div className="grid grid-cols-2 gap-5 w-full max-w-2xl">
             <div
-              onClick={() => navegarA('tpv')}
+              onClick={() => navegarA('ventashoy')}
               className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 cursor-pointer hover:brightness-95 active:scale-95 transition select-none"
             >
               <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
-                NUEVA<br />VENTA
+                VENTAS<br />HOY
               </span>
             </div>
             <div
@@ -140,11 +143,11 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
               </span>
             </div>
             <div
-              onClick={() => navegarA('ventashoy')}
+              onClick={() => navegarA('financiero')}
               className="bg-kaja-orange rounded-xl flex items-center justify-center h-48 col-span-2 cursor-pointer hover:brightness-95 active:scale-95 transition select-none"
             >
               <span className="text-2xl font-bold text-kaja-blueText tracking-wide text-center px-4">
-                VENTAS HOY
+                GESTIÓN<br />FINANCIERA
               </span>
             </div>
           </div>
@@ -229,6 +232,19 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           <nav className="flex-1 flex flex-col gap-1 px-2">
             {NAV_ITEMS.filter(item => !item.soloAdmin || esAdmin).map((item) => {
               const activo = seccionActiva === item.id
+              if (item.proximamente) {
+                return (
+                  <div
+                    key={item.id}
+                    className="w-full flex items-center justify-between px-6 py-4 rounded-lg text-base font-medium text-kaja-blueText/40 cursor-not-allowed select-none"
+                  >
+                    {item.label}
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-kaja-blueText/10 text-kaja-blueText/50">
+                      Pronto
+                    </span>
+                  </div>
+                )
+              }
               return (
                 <button
                   key={item.id}

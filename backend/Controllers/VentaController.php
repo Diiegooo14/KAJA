@@ -4,21 +4,29 @@ class VentaController
 {
     public static function listar(): void
     {
-        $carga = Jwt::requerirAutenticacion();
+        $carga     = Jwt::requerirAutenticacion();
         $idEmpresa = (int) $carga['idEmpresa'];
 
+        $mes  = isset($_GET['mes'])  ? max(1, min(12, (int) $_GET['mes']))  : null;
+        $anio = isset($_GET['anio']) ? max(2000, (int) $_GET['anio'])       : null;
+
         try {
-            $ventas = VentaModel::listarHoy($idEmpresa);
+            if ($mes !== null && $anio !== null) {
+                $ventas = VentaModel::listarPorMes($idEmpresa, $mes, $anio);
+            } else {
+                $ventas = VentaModel::listarHoy($idEmpresa);
+            }
+
             $totalRecaudado = array_sum(array_map(fn($v) => (float) $v['totalFinal'], $ventas));
 
             echo json_encode([
                 'ventas'  => $ventas,
                 'resumen' => [
-                    'totalVentas'     => count($ventas),
-                    'totalRecaudado'  => round($totalRecaudado, 2),
+                    'totalVentas'    => count($ventas),
+                    'totalRecaudado' => round($totalRecaudado, 2),
                 ],
             ]);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }

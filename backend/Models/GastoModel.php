@@ -44,6 +44,39 @@ class GastoModel
         return $stmt->rowCount() > 0;
     }
 
+    public static function resumenDiario(int $idEmpresa, int $mes, int $anio): array
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare(
+            'SELECT DAY(g.fechaRegistro) AS dia,
+                    ROUND(SUM(g.importe), 2) AS totalGastos
+             FROM GASTO g
+             WHERE g.idEmpresa = :idEmpresa
+               AND MONTH(g.fechaRegistro) = :mes
+               AND YEAR(g.fechaRegistro)  = :anio
+             GROUP BY DAY(g.fechaRegistro)
+             ORDER BY dia ASC'
+        );
+        $stmt->execute([':idEmpresa' => $idEmpresa, ':mes' => $mes, ':anio' => $anio]);
+        return $stmt->fetchAll();
+    }
+
+    public static function resumenMensual(int $idEmpresa, int $anio): array
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare(
+            'SELECT MONTH(g.fechaRegistro) AS mes,
+                    ROUND(SUM(g.importe), 2) AS totalGastos
+             FROM GASTO g
+             WHERE g.idEmpresa = :idEmpresa
+               AND YEAR(g.fechaRegistro) = :anio
+             GROUP BY MONTH(g.fechaRegistro)
+             ORDER BY mes ASC'
+        );
+        $stmt->execute([':idEmpresa' => $idEmpresa, ':anio' => $anio]);
+        return $stmt->fetchAll();
+    }
+
     public static function idTipoGasto(string $nombreTipo): ?int
     {
         $pdo  = Database::connect();
