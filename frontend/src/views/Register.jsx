@@ -1,285 +1,344 @@
 import { useRef, useState } from 'react'
-import { Camera } from 'lucide-react'
+import {
+  Camera, Building2, User, ShoppingCart,
+  Package, BarChart3, ArrowLeft, CheckCircle,
+} from 'lucide-react'
 
-const API_URL = import.meta.env.VITE_API_URL
-
-const TIPOS_VALIDOS = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const API_URL        = import.meta.env.VITE_API_URL
+const TIPOS_VALIDOS  = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
 
 const campoVacio = () => ({
-    empresaNif: '', razonSocial: '', nombreComercial: '',
-    direccion: '', telefono: '', empresaEmail: '',
-    adminNif: '', adminNombre: '', adminPassword: '', adminPasswordConfirm: '',
+  empresaNif: '', razonSocial: '', nombreComercial: '',
+  direccion: '', telefono: '', empresaEmail: '',
+  adminNif: '', adminNombre: '', adminPassword: '', adminPasswordConfirm: '',
 })
 
-function SelectorImagen({ label, preview, onSeleccionar, error }) {
-    const inputRef = useRef(null)
+// ─── Subcomponentes ────────────────────────────────────────────────────────────
 
-    return (
-        <div className="flex items-center gap-3 mb-5">
-            <div
-                className={`w-16 h-16 rounded-full overflow-hidden border-2 bg-gray-50 shrink-0 cursor-pointer hover:border-kaja-orange transition
-                    ${error ? 'border-red-400' : 'border-gray-200'}`}
-                onClick={() => inputRef.current.click()}
-            >
-                {preview
-                    ? <img src={preview} alt={label} className="w-full h-full object-cover" />
-                    : <div className="w-full h-full flex items-center justify-center">
-                        <Camera className={`w-5 h-5 ${error ? 'text-red-300' : 'text-gray-300'}`} />
-                      </div>
-                }
+function AvatarUpload({ preview, onSeleccionar, error, label }) {
+  const inputRef = useRef(null)
+
+  return (
+    <div className="flex items-center gap-4 mb-5">
+      <button
+        type="button"
+        onClick={() => inputRef.current.click()}
+        className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 group transition
+          ${error ? 'ring-2 ring-rose-400' : 'ring-2 ring-gray-200 hover:ring-kaja-orange'}`}
+      >
+        {preview
+          ? <img src={preview} alt={label} className="w-full h-full object-cover" />
+          : <div className="w-full h-full bg-kaja-light flex items-center justify-center">
+              <Camera className="w-6 h-6 text-gray-400" />
             </div>
-            <div>
-                <input
-                    ref={inputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    onChange={onSeleccionar}
-                    className="hidden"
-                />
-                <button
-                    type="button"
-                    onClick={() => inputRef.current.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 rounded-lg
-                               text-xs text-gray-600 hover:bg-gray-50 transition"
-                >
-                    <Camera className="w-3.5 h-3.5" />
-                    {label}
-                </button>
-                <p className="text-xs text-gray-400 mt-0.5">Opcional · JPG, PNG, GIF o WEBP · Máx. 5MB</p>
-                {error && <p className="text-xs text-red-500 mt-0.5">{error}</p>}
-            </div>
+        }
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+          <Camera className="w-5 h-5 text-white" />
         </div>
-    )
-}
-
-export default function Register({ onVolver }) {
-    const [form, setForm] = useState(campoVacio)
-    const [errores, setErrores] = useState({})
-    const [error, setError] = useState('')
-    const [exito, setExito] = useState(false)
-    const [loading, setLoading] = useState(false)
-
-    const [logoEmpresa, setLogoEmpresa] = useState(null)
-    const [logoPreview, setLogoPreview] = useState(null)
-    const [errorLogo, setErrorLogo] = useState('')
-    const [fotoAdmin, setFotoAdmin] = useState(null)
-    const [fotoPreview, setFotoPreview] = useState(null)
-    const [errorFoto, setErrorFoto] = useState('')
-
-    function handleChange(e) {
-        const { name, value } = e.target
-        setForm(prev => ({ ...prev, [name]: value }))
-        setErrores(prev => ({ ...prev, [name]: '' }))
-    }
-
-    function seleccionarLogo(e) {
-        const file = e.target.files[0]
-        if (!file) return
-        if (!TIPOS_VALIDOS.includes(file.type)) {
-            setErrorLogo('Solo se permiten imágenes JPG, PNG, GIF o WEBP')
-            e.target.value = ''
-            return
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            setErrorLogo('La imagen no puede superar 5MB')
-            e.target.value = ''
-            return
-        }
-        setErrorLogo('')
-        setLogoEmpresa(file)
-        setLogoPreview(URL.createObjectURL(file))
-        e.target.value = ''
-    }
-
-    function seleccionarFoto(e) {
-        const file = e.target.files[0]
-        if (!file) return
-        if (!TIPOS_VALIDOS.includes(file.type)) {
-            setErrorFoto('Solo se permiten imágenes JPG, PNG, GIF o WEBP')
-            e.target.value = ''
-            return
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            setErrorFoto('La imagen no puede superar 5MB')
-            e.target.value = ''
-            return
-        }
-        setErrorFoto('')
-        setFotoAdmin(file)
-        setFotoPreview(URL.createObjectURL(file))
-        e.target.value = ''
-    }
-
-    async function handleSubmit(e) {
-        e.preventDefault()
-        setError('')
-        setLoading(true)
-
-        try {
-            const fd = new FormData()
-            Object.entries(form).forEach(([k, v]) => fd.append(k, v))
-            if (logoEmpresa) fd.append('logoEmpresa', logoEmpresa)
-            if (fotoAdmin)   fd.append('fotoAdmin', fotoAdmin)
-
-            const res = await fetch(`${API_URL}/registro`, {
-                method: 'POST',
-                body: fd,
-            })
-
-            const data = await res.json()
-
-            if (res.status === 422) {
-                setErrores(data.errores ?? {})
-                return
-            }
-
-            if (!res.ok) {
-                setError(data.error ?? 'Error al registrar la empresa')
-                return
-            }
-
-            setExito(true)
-
-        } catch {
-            setError('No se pudo conectar con el servidor')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    if (exito) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-kaja-light px-4">
-                <div className="w-full max-w-sm text-center">
-                    <div className="text-center mb-1">
-                        <img src="/img/kaja-transparente.png" alt="Logo KAJA" />
-                    </div>
-                    <div className="bg-white rounded-2xl shadow-2xl p-8">
-                        <div className="mb-4 text-green-600">
-                            <svg className="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h2 className="text-xl font-semibold text-kaja-blueText mb-2">¡Alta completada!</h2>
-                            <p className="text-sm text-gray-600">
-                                Tu empresa ha sido registrada correctamente en el sistema KAJA.
-                                Ya puedes iniciar sesión con las credenciales del administrador.
-                            </p>
-                        </div>
-                        <button
-                            onClick={onVolver}
-                            className="w-full py-2.5 bg-kaja-orange text-white font-semibold rounded-lg hover:opacity-90 active:scale-95 transition"
-                        >
-                            Ir al inicio de sesión
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    return (
-        <div className="h-screen flex flex-col items-center justify-center bg-kaja-light px-6 gap-4">
-
-            <img src="/img/kaja-transparente.png" alt="Logo KAJA" className="h-14 object-contain" />
-
-            <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl px-10 py-8">
-                <h2 className="text-xl font-semibold text-kaja-blueText mb-1">Alta en el sistema KAJA</h2>
-                <p className="text-sm text-gray-500 mb-6">Introduce los datos de tu empresa y del administrador principal.</p>
-
-                <form onSubmit={handleSubmit} noValidate>
-                    <div className="grid grid-cols-2 gap-x-10">
-
-                        {/* Columna izquierda — Empresa */}
-                        <div>
-                            <p className="text-xs font-semibold text-kaja-orange uppercase tracking-wide mb-4">Datos de la empresa</p>
-
-                            <SelectorImagen
-                                label="Subir logo de la empresa"
-                                preview={logoPreview}
-                                onSeleccionar={seleccionarLogo}
-                                error={errorLogo}
-                            />
-
-                            <div className="flex flex-col gap-3">
-                                <Campo label="NIF de la empresa *" name="empresaNif" value={form.empresaNif} onChange={handleChange} placeholder="B12345678" error={errores.empresaNif} />
-                                <Campo label="Razón Social *" name="razonSocial" value={form.razonSocial} onChange={handleChange} placeholder="Empresa S.L." error={errores.razonSocial} />
-                                <Campo label="Nombre Comercial *" name="nombreComercial" value={form.nombreComercial} onChange={handleChange} placeholder="Mi Tienda" error={errores.nombreComercial} />
-                                <Campo label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} placeholder="Calle Mayor 1" error={errores.direccion} />
-                                <Campo label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} placeholder="600 000 000" error={errores.telefono} />
-                                <Campo label="Email de la empresa" name="empresaEmail" type="email" value={form.empresaEmail} onChange={handleChange} placeholder="contacto@empresa.es" error={errores.empresaEmail} />
-                            </div>
-                        </div>
-
-                        {/* Columna derecha — Administrador */}
-                        <div className="flex flex-col">
-                            <p className="text-xs font-semibold text-kaja-orange uppercase tracking-wide mb-4">Datos del administrador</p>
-
-                            <SelectorImagen
-                                label="Subir foto de perfil"
-                                preview={fotoPreview}
-                                onSeleccionar={seleccionarFoto}
-                                error={errorFoto}
-                            />
-
-                            <div className="flex flex-col gap-3">
-                                <Campo label="NIF del administrador *" name="adminNif" value={form.adminNif} onChange={handleChange} placeholder="12345678A" error={errores.adminNif} />
-                                <Campo label="Nombre completo *" name="adminNombre" value={form.adminNombre} onChange={handleChange} placeholder="Ana García" error={errores.adminNombre} />
-                                <Campo label="Contraseña *" name="adminPassword" type="password" value={form.adminPassword} onChange={handleChange} placeholder="Mínimo 8 caracteres" error={errores.adminPassword} autoComplete="new-password" />
-                                <Campo label="Confirmar contraseña *" name="adminPasswordConfirm" type="password" value={form.adminPasswordConfirm} onChange={handleChange} placeholder="Repite la contraseña" error={errores.adminPasswordConfirm} autoComplete="new-password" />
-                            </div>
-
-                            <div className="mt-auto pt-6">
-                                {error && (
-                                    <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                                        {error}
-                                    </div>
-                                )}
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="w-full py-2.5 bg-kaja-orange text-white font-semibold rounded-lg hover:opacity-90 active:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed mb-3"
-                                >
-                                    {loading ? 'Registrando...' : 'Crear cuenta'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={onVolver}
-                                    className="w-full py-2.5 border border-gray-300 text-gray-600 text-sm font-medium rounded-lg hover:bg-gray-50 active:scale-95 transition"
-                                >
-                                    Volver al inicio de sesión
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
-                </form>
-            </div>
-
-            <p className="text-xs text-kaja-light opacity-60">Sistema KAJA</p>
-        </div>
-    )
+      </button>
+      <div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          onChange={onSeleccionar}
+          className="hidden"
+        />
+        <p className="text-sm font-medium text-kaja-blueText mb-0.5">{label}</p>
+        <p className="text-xs text-gray-400">Opcional · JPG, PNG, GIF, WEBP · Máx. 5MB</p>
+        {error && <p className="text-xs text-rose-500 mt-0.5">{error}</p>}
+      </div>
+    </div>
+  )
 }
 
 function Campo({ label, name, value, onChange, placeholder, error, type = 'text', autoComplete }) {
-    return (
-        <div>
-            <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-                {label}
-            </label>
-            <input
-                id={name}
-                name={name}
-                type={type}
-                value={value}
-                onChange={onChange}
-                placeholder={placeholder}
-                autoComplete={autoComplete}
-                className={`w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 transition
-                    ${error
-                        ? 'border-red-400 focus:ring-red-100 focus:border-red-400'
-                        : 'border-gray-300 focus:ring-kaja-light focus:border-kaja-blueText'}`}
-            />
-            {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={name} className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+        {label}
+      </label>
+      <input
+        id={name}
+        name={name}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className={`w-full px-4 py-3 rounded-xl border text-sm bg-gray-50 text-gray-900 placeholder-gray-400
+          focus:outline-none focus:bg-white focus:ring-2 transition
+          ${error
+            ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-400'
+            : 'border-gray-200 focus:ring-kaja-orange/20 focus:border-kaja-orange/50'
+          }`}
+      />
+      {error && <p className="text-xs text-rose-500">{error}</p>}
+    </div>
+  )
+}
+
+function SeccionHeader({ icon: Icon, label, title }) {
+  return (
+    <div className="flex items-center gap-3 mb-5">
+      <div className="w-9 h-9 rounded-xl bg-kaja-orange/10 flex items-center justify-center shrink-0">
+        <Icon className="w-4.5 h-4.5 text-kaja-orange" />
+      </div>
+      <div>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-kaja-orange">{label}</p>
+        <h3 className="text-sm font-bold text-kaja-blueText leading-tight">{title}</h3>
+      </div>
+    </div>
+  )
+}
+
+function Feature({ icon: Icon, text }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+        <Icon className="w-4 h-4 text-white/70" />
+      </div>
+      <span className="text-sm text-white/60">{text}</span>
+    </div>
+  )
+}
+
+// ─── Pantalla de éxito ─────────────────────────────────────────────────────────
+
+function PantallaExito({ onVolver }) {
+  return (
+    <div className="min-h-screen flex">
+      <div className="hidden lg:flex lg:w-2/5 bg-kaja-sidebar flex-col justify-between p-12 relative overflow-hidden">
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
+        <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-white/5" />
+        <div className="relative z-10">
+          <img src="/img/kaja-transparente.png" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
         </div>
-    )
+        <div className="relative z-10">
+          <h2 className="text-3xl font-bold text-white mb-3">¡Todo listo!</h2>
+          <p className="text-white/50 text-sm leading-relaxed">Tu empresa ya está registrada en el sistema KAJA. Ahora puedes empezar a gestionar tus ventas.</p>
+        </div>
+        <p className="relative z-10 text-white/25 text-xs">© 2026 Sistema KAJA</p>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-20 h-20 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-emerald-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-kaja-blueText mb-2">¡Alta completada!</h2>
+          <p className="text-sm text-gray-400 leading-relaxed mb-8">
+            Tu empresa ha sido registrada correctamente en el sistema KAJA.
+            Ya puedes iniciar sesión con las credenciales del administrador.
+          </p>
+          <button
+            onClick={onVolver}
+            className="w-full py-3 bg-kaja-orange text-white font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition"
+          >
+            Ir al inicio de sesión
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Formulario principal ──────────────────────────────────────────────────────
+
+export default function Register({ onVolver }) {
+  const [form, setForm]       = useState(campoVacio)
+  const [errores, setErrores] = useState({})
+  const [error, setError]     = useState('')
+  const [exito, setExito]     = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const [logoEmpresa, setLogoEmpresa] = useState(null)
+  const [logoPreview, setLogoPreview] = useState(null)
+  const [errorLogo, setErrorLogo]     = useState('')
+  const [fotoAdmin, setFotoAdmin]     = useState(null)
+  const [fotoPreview, setFotoPreview] = useState(null)
+  const [errorFoto, setErrorFoto]     = useState('')
+
+  function handleChange(e) {
+    const { name, value } = e.target
+    setForm(prev => ({ ...prev, [name]: value }))
+    setErrores(prev => ({ ...prev, [name]: '' }))
+  }
+
+  function seleccionar(setter, setPreview, setErr) {
+    return (e) => {
+      const file = e.target.files[0]
+      if (!file) return
+      if (!TIPOS_VALIDOS.includes(file.type)) { setErr('Solo JPG, PNG, GIF o WEBP'); e.target.value = ''; return }
+      if (file.size > 5 * 1024 * 1024)        { setErr('Máximo 5MB');                e.target.value = ''; return }
+      setErr('')
+      setter(file)
+      setPreview(URL.createObjectURL(file))
+      e.target.value = ''
+    }
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const fd = new FormData()
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v))
+      if (logoEmpresa) fd.append('logoEmpresa', logoEmpresa)
+      if (fotoAdmin)   fd.append('fotoAdmin', fotoAdmin)
+
+      const res  = await fetch(`${API_URL}/registro`, { method: 'POST', body: fd })
+      const data = await res.json()
+
+      if (res.status === 422) { setErrores(data.errores ?? {}); return }
+      if (!res.ok)             { setError(data.error ?? 'Error al registrar la empresa'); return }
+
+      setExito(true)
+    } catch {
+      setError('No se pudo conectar con el servidor')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (exito) return <PantallaExito onVolver={onVolver} />
+
+  return (
+    <div className="min-h-screen flex">
+
+      {/* ─── Panel izquierdo ─────────────────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[38%] bg-kaja-sidebar flex-col justify-between p-12 relative overflow-hidden shrink-0">
+
+        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
+        <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-white/5" />
+        <div className="absolute top-1/2 right-8 w-48 h-48 rounded-full bg-kaja-orange/8" />
+
+        <div className="relative z-10">
+          <img src="/img/kaja-transparente.png" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
+        </div>
+
+        <div className="relative z-10 space-y-8">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-kaja-orange mb-3">Nuevo registro</p>
+            <h1 className="text-3xl font-bold text-white leading-tight mb-4">
+              Empieza a gestionar<br />
+              <span className="text-kaja-orange">tu negocio hoy</span>
+            </h1>
+            <p className="text-white/50 text-sm leading-relaxed max-w-xs">
+              Crea tu cuenta empresarial y accede a todas las herramientas del sistema KAJA en minutos.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <Feature icon={ShoppingCart} text="Punto de venta rápido e intuitivo" />
+            <Feature icon={Package}      text="Control de inventario en tiempo real" />
+            <Feature icon={BarChart3}    text="Análisis financiero detallado" />
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center gap-3">
+          <button
+            onClick={onVolver}
+            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Volver al inicio de sesión
+          </button>
+        </div>
+      </div>
+
+      {/* ─── Panel derecho ───────────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto bg-kaja-light">
+        <div className="min-h-full flex items-start justify-center p-8">
+          <div className="w-full max-w-2xl">
+
+            {/* Header */}
+            <div className="mb-8 pt-2">
+              <h2 className="text-2xl font-bold text-kaja-blueText mb-1">Alta en el sistema KAJA</h2>
+              <p className="text-sm text-gray-400">Introduce los datos de tu empresa y del administrador principal.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
+
+              {/* ── Sección empresa ──────────────────────────────────────────── */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100/80 p-6">
+                <SeccionHeader icon={Building2} label="Paso 1" title="Datos de la empresa" />
+
+                <AvatarUpload
+                  preview={logoPreview}
+                  onSeleccionar={seleccionar(setLogoEmpresa, setLogoPreview, setErrorLogo)}
+                  error={errorLogo}
+                  label="Logo de la empresa"
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Campo label="NIF de la empresa *"  name="empresaNif"       value={form.empresaNif}       onChange={handleChange} placeholder="B12345678"           error={errores.empresaNif} />
+                  <Campo label="Razón Social *"        name="razonSocial"      value={form.razonSocial}      onChange={handleChange} placeholder="Empresa S.L."         error={errores.razonSocial} />
+                  <Campo label="Nombre Comercial *"    name="nombreComercial"  value={form.nombreComercial}  onChange={handleChange} placeholder="Mi Tienda"             error={errores.nombreComercial} />
+                  <Campo label="Dirección"             name="direccion"        value={form.direccion}        onChange={handleChange} placeholder="Calle Mayor 1"         error={errores.direccion} />
+                  <Campo label="Teléfono"              name="telefono"         value={form.telefono}         onChange={handleChange} placeholder="600 000 000"           error={errores.telefono} />
+                  <Campo label="Email de la empresa"   name="empresaEmail"     value={form.empresaEmail}     onChange={handleChange} placeholder="contacto@empresa.es"   error={errores.empresaEmail} type="email" />
+                </div>
+              </div>
+
+              {/* ── Sección administrador ─────────────────────────────────────── */}
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100/80 p-6">
+                <SeccionHeader icon={User} label="Paso 2" title="Datos del administrador" />
+
+                <AvatarUpload
+                  preview={fotoPreview}
+                  onSeleccionar={seleccionar(setFotoAdmin, setFotoPreview, setErrorFoto)}
+                  error={errorFoto}
+                  label="Foto de perfil"
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Campo label="NIF del administrador *"  name="adminNif"            value={form.adminNif}            onChange={handleChange} placeholder="12345678A"         error={errores.adminNif} />
+                  <Campo label="Nombre completo *"         name="adminNombre"         value={form.adminNombre}         onChange={handleChange} placeholder="Ana García"         error={errores.adminNombre} />
+                  <Campo label="Contraseña *"              name="adminPassword"       value={form.adminPassword}       onChange={handleChange} placeholder="Mínimo 8 caracteres" error={errores.adminPassword}       type="password" autoComplete="new-password" />
+                  <Campo label="Confirmar contraseña *"    name="adminPasswordConfirm" value={form.adminPasswordConfirm} onChange={handleChange} placeholder="Repite la contraseña" error={errores.adminPasswordConfirm} type="password" autoComplete="new-password" />
+                </div>
+              </div>
+
+              {/* ── Acciones ─────────────────────────────────────────────────── */}
+              <div className="flex flex-col gap-3">
+                {error && (
+                  <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3.5 bg-kaja-orange text-white font-bold rounded-xl
+                    hover:opacity-90 active:scale-[0.98] transition disabled:opacity-60 disabled:cursor-not-allowed
+                    flex items-center justify-center gap-2 text-sm"
+                >
+                  {loading
+                    ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Registrando empresa...</>
+                    : 'Crear cuenta'
+                  }
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onVolver}
+                  className="w-full py-3 border border-gray-200 bg-white text-gray-500 text-sm font-medium rounded-xl hover:bg-gray-50 active:scale-[0.98] transition lg:hidden"
+                >
+                  Volver al inicio de sesión
+                </button>
+              </div>
+
+            </form>
+
+            <p className="text-center text-xs text-gray-400 mt-8 pb-4">© 2026 Sistema KAJA</p>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
 }

@@ -131,9 +131,12 @@ export default function Gastos() {
             )}
 
             <div className="shrink-0 px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
-                <h1 className="text-xl font-bold text-kaja-blueText flex-1">
-                    Gastos — <span className="text-kaja-orange">{MESES[mes - 1]} {anio}</span>
-                </h1>
+                <div className="flex-1">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
+                    <h1 className="text-xl font-bold text-kaja-blueText">
+                        Gastos — <span className="text-kaja-orange">{MESES[mes - 1]} {anio}</span>
+                    </h1>
+                </div>
                 <div className="flex items-center gap-2">
                     <select
                         value={mes}
@@ -242,7 +245,7 @@ export default function Gastos() {
                             <button
                                 type="submit"
                                 disabled={guardando}
-                                className="w-full py-2.5 bg-kaja-orange text-white font-bold rounded-lg
+                                className="w-full py-2.5 bg-kaja-orange text-white font-bold rounded-xl
                                             hover:brightness-90 active:scale-95 transition
                                             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
@@ -255,38 +258,32 @@ export default function Gastos() {
                 </div>
 
                 {/* Panel derecho — resumen + tabla */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light">
 
                     {/* Tarjetas datos */}
                     <div className="shrink-0 px-6 py-4 grid grid-cols-3 gap-4">
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Total Mes</p>
-                            <p className="text-2xl font-bold text-kaja-blueText">
-                                {parseFloat(resumen.totalMes).toFixed(2)} €
-                            </p>
+                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total Mes</p>
+                            <p className="text-2xl font-bold text-white">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Fijos</p>
-                            <p className="text-2xl font-bold text-blue-500">
-                                {parseFloat(resumen.totalFijos).toFixed(2)} €
-                            </p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Gastos fijos</p>
+                            <p className="text-2xl font-bold text-kaja-blueText">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Variables</p>
-                            <p className="text-2xl font-bold text-kaja-orange">
-                                {parseFloat(resumen.totalVariables).toFixed(2)} €
-                            </p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Gastos variables</p>
+                            <p className="text-2xl font-bold text-kaja-orange">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
                         </div>
                     </div>
 
                     {/* Tabla */}
                     <div className="flex-1 overflow-auto mx-6 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_120px_140px_120px_64px] bg-kaja-light text-kaja-blueText text-xs font-semibold uppercase tracking-wide rounded-t-xl">
-                            <div className="px-5 py-3">Concepto</div>
-                            <div className="px-3 py-3">Tipo</div>
-                            <div className="px-3 py-3">Fecha</div>
-                            <div className="px-3 py-3 text-right">Importe</div>
-                            <div className="px-3 py-3 text-center">Acc.</div>
+                        <div className="grid grid-cols-[1fr_120px_140px_120px_64px] border-b border-gray-100">
+                            <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Concepto</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Tipo</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Fecha</div>
+                            <div className="px-3 py-3.5 text-right text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Importe</div>
+                            <div className="px-3 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Acc.</div>
                         </div>
 
                         {loading ? (

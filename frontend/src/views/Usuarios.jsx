@@ -224,9 +224,10 @@ export default function Usuarios({ usuario }) {
             )}
 
             <div className="shrink-0 px-6 py-4 border-b border-gray-100 flex items-center bg-white">
-                <h1 className="text-xl font-bold text-kaja-blueText">
-                    Gestión de <span className="text-kaja-orange">Usuarios</span>
-                </h1>
+                <div>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
+                    <h1 className="text-xl font-bold text-kaja-blueText">Gestión de Usuarios</h1>
+                </div>
             </div>
 
             <div className="flex flex-1 overflow-hidden gap-0">
@@ -329,7 +330,7 @@ export default function Usuarios({ usuario }) {
                             <button
                                 type="submit"
                                 disabled={guardando}
-                                className="w-full py-2.5 bg-kaja-orange text-white font-bold rounded-lg
+                                className="w-full py-2.5 bg-kaja-orange text-white font-bold rounded-xl
                                             hover:brightness-90 active:scale-95 transition
                                             disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
@@ -342,7 +343,7 @@ export default function Usuarios({ usuario }) {
                                 <button
                                     type="button"
                                     onClick={cancelarEdicion}
-                                    className="w-full py-2.5 border border-gray-200 text-kaja-blueText font-medium rounded-lg
+                                    className="w-full py-2.5 border border-gray-200 text-kaja-blueText font-medium rounded-xl
                                                 hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-2"
                                 >
                                     <X className="w-4 h-4" /> Cancelar
@@ -353,31 +354,31 @@ export default function Usuarios({ usuario }) {
                 </div>
 
                 {/* Panel derecho — resumen + tabla */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light">
 
                     <div className="shrink-0 px-6 py-4 grid grid-cols-3 gap-4">
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Total Usuarios</p>
-                            <p className="text-2xl font-bold text-kaja-blueText">{resumen.total}</p>
+                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total usuarios</p>
+                            <p className="text-2xl font-bold text-white">{resumen.total}</p>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Activos</p>
-                            <p className="text-2xl font-bold text-green-600">{resumen.activos}</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Activos</p>
+                            <p className="text-2xl font-bold text-emerald-600">{resumen.activos}</p>
                         </div>
-                        <div className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-xs text-gray-400 font-medium mb-1">Inactivos</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Inactivos</p>
                             <p className="text-2xl font-bold text-kaja-orange">{resumen.inactivos}</p>
                         </div>
                     </div>
 
                     <div className="flex-1 overflow-auto mx-6 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] bg-kaja-light text-kaja-blueText text-xs font-semibold uppercase tracking-wide rounded-t-xl">
-                            <div className="px-5 py-3">Nombre</div>
-                            <div className="px-3 py-3">NIF</div>
-                            <div className="px-3 py-3">Rol</div>
-                            <div className="px-3 py-3">Estado</div>
-                            <div className="px-3 py-3">Alta</div>
-                            <div className="px-3 py-3 text-center">Acc.</div>
+                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100">
+                            <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Nombre</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">NIF</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Rol</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Estado</div>
+                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Alta</div>
+                            <div className="px-3 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Acc.</div>
                         </div>
 
                         {loading ? (

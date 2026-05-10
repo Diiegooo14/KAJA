@@ -62,10 +62,10 @@ function SelectField({ label, value, onChange, options }) {
 function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
   const styles = {
     default:  'bg-white border border-gray-100 text-kaja-blueText',
-    orange:   'bg-gradient-to-br from-kaja-orange to-amber-500 text-white',
-    navy:     'bg-gradient-to-br from-kaja-blueText to-slate-600 text-white',
-    green:    'bg-gradient-to-br from-emerald-500 to-teal-500 text-white',
-    red:      'bg-gradient-to-br from-rose-500 to-red-600 text-white',
+    orange:   'bg-linear-to-br from-kaja-orange to-amber-500 text-white',
+    navy:     'bg-linear-to-br from-kaja-sidebar to-slate-700 text-white',
+    green:    'bg-linear-to-br from-emerald-500 to-teal-500 text-white',
+    red:      'bg-linear-to-br from-rose-500 to-red-600 text-white',
   }
   const iconBg = {
     default: 'bg-kaja-light/60',

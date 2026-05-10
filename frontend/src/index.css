@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-	--color-kaja-blueText: #2C3E50;
-	--color-kaja-orange: #D97706;
-	--color-kaja-light: #B4D4FB;
+	--color-kaja-blueText: #111827;
+	--color-kaja-orange:   #f97316;
+	--color-kaja-light:    #f0f4ff;
+	--color-kaja-sidebar:  #1a1f36;
 }
