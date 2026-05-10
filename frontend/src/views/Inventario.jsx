@@ -45,6 +45,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
     const [formError, setFormError] = useState('')
     const [guardando, setGuardando] = useState(false)
 
+    // Pestaña activos/inactivos
+    const [tabEstado, setTabEstado] = useState('Activo')
+
     // Modal categorías
     const [modalCategoriasAbierto, setModalCategoriasAbierto] = useState(false)
     const [categoriasLista, setCategoriasLista] = useState([])
@@ -58,8 +61,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     useEffect(() => {
         setBusqueda(busquedaInicial)
-        cargarProductos(busquedaInicial, 1)
-    }, [filtroStockBajo, busquedaInicial])
+        cargarProductos(busquedaInicial, 1, tabEstado)
+    }, [filtroStockBajo, busquedaInicial, tabEstado])
 
     function headers() {
         return { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
@@ -74,13 +77,14 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         return data
     }
 
-    async function cargarProductos(search = '', pag = 1) {
+    async function cargarProductos(search = '', pag = 1, estado = tabEstado) {
         setLoading(true)
         setError('')
         try {
             const params = new URLSearchParams({ pagina: pag, porPagina: POR_PAGINA })
             if (search) params.set('search', search)
             if (filtroStockBajo) params.set('stockBajo', '1')
+            params.set('estado', estado)
             const respuesta = await fetchJSON(`${API_URL}/productos?${params}`)
             setProductos(respuesta.datos)
             setTotal(respuesta.total)
@@ -97,11 +101,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         const val = e.target.value
         setBusqueda(val)
         clearTimeout(window._busquedaTimer)
-        window._busquedaTimer = setTimeout(() => cargarProductos(val, 1), 300)
+        window._busquedaTimer = setTimeout(() => cargarProductos(val, 1, tabEstado), 300)
     }
 
     function irAPagina(pag) {
-        cargarProductos(busqueda, pag)
+        cargarProductos(busqueda, pag, tabEstado)
     }
 
     async function abrirModal(producto = null) {
@@ -162,7 +166,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             const data = await fetchJSON(`${API_URL}/productos?id=${productoParaEliminar.id}`, { method: 'DELETE' })
             setProductoParaEliminar(null)
             mostrarNotificacion(data.mensaje ?? 'Producto eliminado correctamente')
-            cargarProductos(busqueda, pagina)
+            cargarProductos(busqueda, pagina, tabEstado)
         } catch (e) {
             mostrarNotificacion('Error: ' + e.message)
             setProductoParaEliminar(null)
@@ -253,7 +257,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             setModalAbierto(false)
             setProductoEditando(null)
             mostrarNotificacion(productoEditando ? 'Producto actualizado correctamente' : 'Producto creado correctamente')
-            cargarProductos(busqueda, productoEditando ? pagina : 1)
+            cargarProductos(busqueda, productoEditando ? pagina : 1, tabEstado)
         } catch (e) {
             setFormError(e.message)
         } finally {
@@ -310,6 +314,22 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         Añadir producto
                     </button>
                 </div>
+            </div>
+
+            {/* Pestañas Activos / Inactivos */}
+            <div className="flex gap-1 mb-5 p-1 bg-gray-100 rounded-xl w-fit">
+                {['Activo', 'Inactivo'].map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => setTabEstado(tab)}
+                        className={`px-5 py-1.5 rounded-lg text-sm font-semibold transition
+                            ${tabEstado === tab
+                                ? 'bg-white text-kaja-blue shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        {tab === 'Activo' ? 'Activos' : 'Inactivos'}
+                    </button>
+                ))}
             </div>
 
             {/* Mensaje filtro stock bajo */}
