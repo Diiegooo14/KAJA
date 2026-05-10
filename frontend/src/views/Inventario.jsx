@@ -431,15 +431,15 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-150">
                                 <thead>
-                                    <tr className="bg-gray-50 border-b border-gray-100">
-                                        <th className="text-left px-4 py-3 font-semibold text-gray-600 w-12">#</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Nombre</th>
-                                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Categoría</th>
-                                        <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Coste</th>
-                                        <th className="text-right px-4 py-3 font-semibold text-gray-600">P. Venta</th>
-                                        <th className="text-center px-4 py-3 font-semibold text-gray-600">Stock</th>
-                                        <th className="text-center px-4 py-3 font-semibold text-gray-600">Estado</th>
-                                        <th className="w-20"></th>
+                                    <tr className="bg-kaja-sidebar border-b border-white/10">
+                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50 w-12">#</th>
+                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Nombre</th>
+                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Categoría</th>
+                                        <th className="text-right px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">P. Coste</th>
+                                        <th className="text-right px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">P. Venta</th>
+                                        <th className="text-center px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Stock</th>
+                                        <th className="text-center px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Estado</th>
+                                        <th className="w-20 bg-kaja-sidebar"></th>
                                     </tr>
                                 </thead>
                                 <tbody>

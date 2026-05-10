@@ -16,13 +16,19 @@ class Database
                 Config::$CHARSET
             );
 
-            self::$instance = new PDO($dsn, Config::$USERNAME, Config::$PASSWORD, [
+            $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
-                PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/ca-certificates.crt',
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]);
+            ];
+
+            $sslCa = '/etc/ssl/certs/ca-certificates.crt';
+            if (file_exists($sslCa)) {
+                $options[PDO::MYSQL_ATTR_SSL_CA] = $sslCa;
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+
+            self::$instance = new PDO($dsn, Config::$USERNAME, Config::$PASSWORD, $options);
         }
 
         return self::$instance;

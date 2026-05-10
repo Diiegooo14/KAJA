@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import {
   Search, Menu, X, LogOut,
   Home, ShoppingCart, Package, Receipt, Users, BarChart3, Settings,
-  ShoppingBag, AlertTriangle, ArrowRight, TrendingUp,
+  ShoppingBag, AlertTriangle, ArrowRight, TrendingUp, Clock, Zap,
 } from 'lucide-react'
 import Inventario from './Inventario'
 import VentasHoy from './VentasHoy'
@@ -47,7 +47,7 @@ function EmpresaAvatar({ nombre, logo, size = 'md' }) {
   const handleError   = useCallback(() => setSrc(null), [])
   useEffect(() => { setSrc(logo || DEFAULT_EMPRESA_LOGO) }, [logo])
 
-  const cls = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
+  const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-sm'
 
   if (src) {
     return (
@@ -78,21 +78,223 @@ const NAV_ITEMS = [
   { id: 'config',     label: 'Configuración',      icon: Settings },
 ]
 
-// ─── Tarjeta de acceso rápido ─────────────────────────────────────────────────
+// ─── KPI stat card ────────────────────────────────────────────────────────────
 
-function ActionCard({ icon: Icon, iconBg, title, description, onClick }) {
+function KpiStat({ icon: Icon, label, value, sub, gradient, onClick, clickable }) {
   return (
     <div
       onClick={onClick}
-      className="group bg-white rounded-2xl p-6 shadow-sm border border-gray-100/80 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+      className={`bg-linear-to-br ${gradient} rounded-2xl p-5 shadow-sm text-white flex flex-col gap-3
+        ${clickable ? 'cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all' : ''}`}
     >
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${iconBg}`}>
-        <Icon className="w-6 h-6 text-white" />
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-white/60">{label}</p>
+        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+          <Icon className="w-4 h-4" />
+        </div>
       </div>
-      <h3 className="font-semibold text-kaja-blueText text-base mb-1.5">{title}</h3>
-      <p className="text-sm text-gray-400 leading-relaxed">{description}</p>
-      <div className="mt-5 flex items-center gap-1.5 text-sm font-semibold text-kaja-orange group-hover:gap-3 transition-all duration-200">
-        Ver <ArrowRight className="w-3.5 h-3.5" />
+      <div>
+        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p className="text-xs text-white/50 mt-1.5 capitalize">{sub}</p>
+      </div>
+    </div>
+  )
+}
+
+// ─── Quick action row ─────────────────────────────────────────────────────────
+
+function QuickAction({ icon: Icon, color, label, sub, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3 w-full px-4 py-3 rounded-xl hover:bg-kaja-light active:scale-[0.98] transition-all group text-left"
+    >
+      <div className={`w-9 h-9 rounded-xl ${color} flex items-center justify-center shrink-0`}>
+        <Icon className="w-4 h-4 text-white" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-kaja-blueText">{label}</p>
+        <p className="text-xs text-gray-400">{sub}</p>
+      </div>
+      <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-kaja-orange group-hover:translate-x-0.5 transition-all shrink-0" />
+    </button>
+  )
+}
+
+// ─── Home panel ───────────────────────────────────────────────────────────────
+
+function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
+  const [kpis, setKpis]         = useState(null)
+  const [loadingKpis, setLoading] = useState(true)
+
+  useEffect(() => { cargarKpis() }, [])
+
+  async function cargarKpis() {
+    setLoading(true)
+    const h   = { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
+    const hoy = new Date()
+    try {
+      const [ventasRes, stockRes, gastosRes] = await Promise.all([
+        fetch(`${API_URL}/ventas`, { headers: h }),
+        fetch(`${API_URL}/productos?stockBajo=1&porPagina=1`, { headers: h }),
+        esAdmin
+          ? fetch(`${API_URL}/gastos?mes=${hoy.getMonth() + 1}&anio=${hoy.getFullYear()}`, { headers: h })
+          : Promise.resolve(null),
+      ])
+      const ventas = ventasRes.ok ? await ventasRes.json() : null
+      const stock  = stockRes.ok  ? await stockRes.json()  : null
+      const gastos = gastosRes?.ok ? await gastosRes.json() : null
+
+      setKpis({
+        ventasHoy:      ventas?.resumen?.totalVentas    ?? 0,
+        recaudadoHoy:   ventas?.resumen?.totalRecaudado ?? 0,
+        stockBajoCount: stock?.total ?? 0,
+        gastosMes:      gastos?.resumen?.totalMes ?? 0,
+        ultimasVentas:  (ventas?.ventas ?? []).slice(-4).reverse(),
+      })
+    } catch {
+      setKpis({ ventasHoy: 0, recaudadoHoy: 0, stockBajoCount: 0, gastosMes: 0, ultimasVentas: [] })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const hora    = new Date().getHours()
+  const saludo  = hora < 13 ? 'Buenos días' : hora < 21 ? 'Buenas tardes' : 'Buenas noches'
+  const fmtEur  = v => Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
+  const fmtHora = iso => new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  const mesTxt  = new Date().toLocaleDateString('es-ES', { month: 'long' })
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto w-full animate-fade-in flex flex-col gap-5">
+
+      {/* ── Hero ─────────────────────────────────────────────────────── */}
+      <div className="relative bg-kaja-sidebar rounded-2xl overflow-hidden px-8 py-7 flex items-center justify-between gap-6 shadow-lg">
+        <div className="absolute -top-14 -right-14 w-52 h-52 rounded-full bg-white/4 pointer-events-none" />
+        <div className="absolute -bottom-10 right-28 w-36 h-36 rounded-full bg-kaja-orange/8 pointer-events-none" />
+        <div className="absolute top-6 right-60 w-14 h-14 rounded-full bg-white/3 pointer-events-none" />
+
+        <div className="relative z-10">
+          <p className="text-kaja-orange text-xs font-bold uppercase tracking-widest mb-1">{saludo}</p>
+          <h1 className="text-3xl font-bold text-white mb-1">{usuario.nombre}</h1>
+          <p className="text-white/40 text-sm capitalize">
+            {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        </div>
+
+        {empresa && (
+          <div className="relative z-10 hidden sm:flex items-center gap-3 shrink-0">
+            <div className="text-right">
+              <p className="text-white font-semibold text-sm">{empresa.nombreComercial}</p>
+              <p className="text-white/40 text-xs mt-0.5">{empresa.razonSocial ?? 'Empresa'}</p>
+            </div>
+            <EmpresaAvatar nombre={empresa.nombreComercial} logo={empresa.logo_empresa} size="lg" />
+          </div>
+        )}
+      </div>
+
+      {/* ── KPIs ─────────────────────────────────────────────────────── */}
+      <div className={`grid gap-4 ${esAdmin ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
+        <KpiStat
+          icon={ShoppingBag}
+          label="Ventas hoy"
+          value={loadingKpis ? '—' : kpis.ventasHoy}
+          sub="tickets realizados"
+          gradient="from-kaja-orange to-amber-400"
+          onClick={() => onNavegar('ventashoy')}
+          clickable
+        />
+        <KpiStat
+          icon={TrendingUp}
+          label="Recaudado hoy"
+          value={loadingKpis ? '—' : fmtEur(kpis.recaudadoHoy)}
+          sub="total del día"
+          gradient="from-kaja-sidebar to-slate-600"
+        />
+        <KpiStat
+          icon={AlertTriangle}
+          label="Stock bajo"
+          value={loadingKpis ? '—' : kpis.stockBajoCount}
+          sub="productos a reponer"
+          gradient="from-rose-500 to-rose-400"
+          onClick={onStockBajo}
+          clickable
+        />
+        {esAdmin && (
+          <KpiStat
+            icon={Receipt}
+            label="Gastos del mes"
+            value={loadingKpis ? '—' : fmtEur(kpis.gastosMes)}
+            sub={mesTxt}
+            gradient="from-indigo-600 to-indigo-400"
+          />
+        )}
+      </div>
+
+      {/* ── Bottom row ───────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+        {/* Quick actions */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+            <Zap className="w-3.5 h-3.5 text-kaja-orange" />
+            Acceso rápido
+          </p>
+          <div className="flex flex-col gap-1">
+            <QuickAction icon={ShoppingCart} color="bg-kaja-orange"  label="TPV"            sub="Cobrar una venta"          onClick={() => onNavegar('tpv')} />
+            <QuickAction icon={ShoppingBag}  color="bg-amber-500"    label="Ventas de hoy"  sub="Historial del día"         onClick={() => onNavegar('ventashoy')} />
+            <QuickAction icon={Package}      color="bg-emerald-500"  label="Inventario"     sub="Gestión de productos"      onClick={() => onNavegar('inventario')} />
+            {esAdmin && (
+              <QuickAction icon={BarChart3} color="bg-indigo-500"  label="Financiero"     sub="Análisis de resultados"    onClick={() => onNavegar('financiero')} />
+            )}
+          </div>
+        </div>
+
+        {/* Últimas ventas */}
+        <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-kaja-orange" />
+              Últimas ventas
+            </p>
+            <button
+              onClick={() => onNavegar('ventashoy')}
+              className="text-xs font-semibold text-kaja-orange hover:underline"
+            >
+              Ver todas
+            </button>
+          </div>
+
+          {loadingKpis ? (
+            <div className="flex items-center justify-center py-10">
+              <div className="w-6 h-6 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+            </div>
+          ) : !kpis || kpis.ultimasVentas.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 gap-2 text-gray-300">
+              <ShoppingBag className="w-10 h-10" />
+              <p className="text-sm font-medium">Sin ventas hoy todavía</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {kpis.ultimasVentas.map(v => (
+                <div key={v.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-kaja-light hover:bg-gray-100/80 transition">
+                  <div className="w-9 h-9 rounded-xl bg-kaja-orange/10 flex items-center justify-center shrink-0">
+                    <ShoppingCart className="w-4 h-4 text-kaja-orange" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-kaja-blueText truncate">{v.vendedor}</p>
+                    <p className="text-xs text-gray-400">{v.lineas.length} producto{v.lineas.length !== 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-kaja-blueText">{fmtEur(v.totalFinal)}</p>
+                    <p className="text-xs text-gray-400 font-mono">{fmtHora(v.fecha)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   )
@@ -157,47 +359,13 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
 
     // ─── Home ──────────────────────────────────────────────────────────────────
     return (
-      <div className="p-8 max-w-4xl mx-auto w-full animate-fade-in">
-
-        <div className="mb-10">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-2">Panel principal</p>
-          <h1 className="text-3xl font-bold text-kaja-blueText mb-1">
-            Bienvenido, {usuario.nombre}
-          </h1>
-          <p className="text-gray-400 text-sm">
-            {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            {empresa && <span className="ml-3 text-gray-300">·</span>}
-            {empresa && <span className="ml-3 text-gray-400">{empresa.nombreComercial}</span>}
-          </p>
-        </div>
-
-        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-4">Acceso rápido</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <ActionCard
-            icon={ShoppingBag}
-            iconBg="bg-kaja-orange"
-            title="Ventas de hoy"
-            description="Consulta el historial completo de ventas realizadas hoy"
-            onClick={() => navegarA('ventashoy')}
-          />
-          <ActionCard
-            icon={AlertTriangle}
-            iconBg="bg-rose-500"
-            title="Stock bajo"
-            description="Productos que necesitan reposición urgente"
-            onClick={navegarAStockBajo}
-          />
-          {esAdmin && (
-            <ActionCard
-              icon={BarChart3}
-              iconBg="bg-indigo-500"
-              title="Gestión Financiera"
-              description="Analiza las ventas y gastos de tu negocio"
-              onClick={() => navegarA('financiero')}
-            />
-          )}
-        </div>
-      </div>
+      <HomePanel
+        usuario={usuario}
+        empresa={empresa}
+        esAdmin={esAdmin}
+        onNavegar={navegarA}
+        onStockBajo={navegarAStockBajo}
+      />
     )
   }
 
@@ -243,16 +411,16 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
               <button
                 key={item.id}
                 onClick={() => navegarA(item.id)}
-                className={`relative w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-left
+                className={`relative w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-medium transition-all text-left
                   ${activo
                     ? 'bg-kaja-orange/15 text-kaja-orange'
                     : 'text-white/50 hover:bg-white/8 hover:text-white/80'
                   }`}
               >
                 {activo && (
-                  <span className="absolute left-0 top-2 bottom-2 w-0.75 bg-kaja-orange rounded-full" />
+                  <span className="absolute left-0 top-2.5 bottom-2.5 w-0.75 bg-kaja-orange rounded-full" />
                 )}
-                <item.icon className="w-4 h-4 shrink-0" />
+                <item.icon className="w-5 h-5 shrink-0" />
                 {item.label}
               </button>
             )
@@ -261,13 +429,16 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
 
         {/* Usuario + logout */}
         <div className="px-3 py-3 border-t border-white/10 shrink-0">
-          <div className="flex items-center gap-3 px-4 py-2 mb-1">
+          <button
+            onClick={() => navegarA('config')}
+            className="w-full flex items-center gap-3 px-4 py-2.5 mb-1 rounded-xl hover:bg-white/8 transition-all text-left group"
+          >
             <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} size="sm" />
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold leading-tight truncate">{usuario.nombre}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-white text-sm font-semibold leading-tight truncate group-hover:text-white/90">{usuario.nombre}</p>
               <p className="text-white/40 text-xs capitalize mt-0.5">{usuario.rol}</p>
             </div>
-          </div>
+          </button>
           <button
             onClick={onLogout}
             className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-white/8 hover:text-white/70 transition-all"
