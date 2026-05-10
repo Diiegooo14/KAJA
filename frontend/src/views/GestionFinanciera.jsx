@@ -1,46 +1,174 @@
 import { useState, useEffect } from 'react'
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
+  CategoryScale, LinearScale, BarElement,
+  Title, Tooltip, Legend,
 } from 'chart.js'
 import { Bar } from 'react-chartjs-2'
+import {
+  TrendingUp, TrendingDown, Wallet,
+  ChevronDown, ChevronUp, Calendar,
+  ReceiptText, BarChart3, CalendarDays,
+} from 'lucide-react'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-const API_URL = import.meta.env.VITE_API_URL
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-const MESES_CORTOS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const API_URL   = import.meta.env.VITE_API_URL
+const MESES     = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const MESES_C   = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 
-function token() {
-  return localStorage.getItem('kaja_token')
-}
-
-function fmtEur(valor) {
-  return Number(valor).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
-}
-
-function fmtFecha(iso) {
+const token     = () => localStorage.getItem('kaja_token')
+const authHdr   = () => ({ Authorization: `Bearer ${token()}` })
+const fmtEur    = v  => Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
+const fmtFecha  = iso => {
   const d = new Date(iso)
-  return d.toLocaleDateString('es-ES') + ' ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString('es-ES') + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+}
+const anios = () => {
+  const y = new Date().getFullYear()
+  return Array.from({ length: y - 2023 }, (_, i) => 2024 + i)
 }
 
-function aniosDisponibles() {
-  const actual = new Date().getFullYear()
-  return Array.from({ length: actual - 2023 }, (_, i) => 2024 + i)
+// ─── Shared UI ────────────────────────────────────────────────────────────────
+
+function Filtros({ children }) {
+  return (
+    <div className="flex flex-wrap gap-3 items-end mb-6">
+      {children}
+    </div>
+  )
 }
 
-// ─── Tab Ventas ──────────────────────────────────────────────────────────────
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[11px] font-bold text-kaja-blueText/50 uppercase tracking-widest">{label}</label>
+      <div className="relative">
+        <select
+          value={value}
+          onChange={e => onChange(Number(e.target.value))}
+          className="appearance-none bg-white border border-gray-200 rounded-xl px-4 pr-9 py-2.5 text-sm font-medium text-kaja-blueText shadow-sm focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 cursor-pointer"
+        >
+          {options.map(({ value: v, label: l }) => (
+            <option key={v} value={v}>{l}</option>
+          ))}
+        </select>
+        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+      </div>
+    </div>
+  )
+}
+
+function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
+  const styles = {
+    default:  'bg-white border border-gray-100 text-kaja-blueText',
+    orange:   'bg-gradient-to-br from-kaja-orange to-amber-500 text-white',
+    navy:     'bg-gradient-to-br from-kaja-blueText to-slate-600 text-white',
+    green:    'bg-gradient-to-br from-emerald-500 to-teal-500 text-white',
+    red:      'bg-gradient-to-br from-rose-500 to-red-600 text-white',
+  }
+  const iconBg = {
+    default: 'bg-kaja-light/60',
+    orange:  'bg-white/20',
+    navy:    'bg-white/20',
+    green:   'bg-white/20',
+    red:     'bg-white/20',
+  }
+  return (
+    <div className={`rounded-2xl p-5 shadow-sm flex items-center gap-4 ${styles[variant]}`}>
+      <div className={`rounded-xl p-3 shrink-0 ${iconBg[variant]}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="min-w-0">
+        <p className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${variant === 'default' ? 'text-kaja-blueText/50' : 'text-white/70'}`}>
+          {label}
+        </p>
+        <p className="text-2xl font-bold leading-tight truncate">{value}</p>
+        {sub && <p className={`text-xs mt-0.5 ${variant === 'default' ? 'text-kaja-blueText/40' : 'text-white/60'}`}>{sub}</p>}
+      </div>
+    </div>
+  )
+}
+
+function ChartCard({ title, children }) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      {title && (
+        <div className="px-6 pt-5 pb-1">
+          <h3 className="text-sm font-bold text-kaja-blueText/60 uppercase tracking-widest">{title}</h3>
+        </div>
+      )}
+      <div className="p-6 pt-4">{children}</div>
+    </div>
+  )
+}
+
+const CHART_OPTS = (tooltipTitle) => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+      align: 'end',
+      labels: { font: { size: 12, family: 'inherit', weight: '600' }, padding: 16, boxWidth: 12, boxHeight: 12, borderRadius: 4, useBorderRadius: true },
+    },
+    tooltip: {
+      backgroundColor: '#1e293b',
+      titleFont: { size: 12, weight: '600' },
+      bodyFont: { size: 13, weight: '700' },
+      padding: 12,
+      cornerRadius: 10,
+      callbacks: {
+        title: ([ctx]) => tooltipTitle ? tooltipTitle(ctx) : ctx.label,
+        label: ctx => `  ${ctx.dataset.label}: ${fmtEur(ctx.parsed.y)}`,
+      },
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      border: { display: false },
+      grid: { color: 'rgba(0,0,0,0.04)' },
+      ticks: { callback: v => fmtEur(v), font: { size: 11 }, color: '#94a3b8' },
+    },
+    x: {
+      border: { display: false },
+      grid: { display: false },
+      ticks: { font: { size: 12, weight: '500' }, color: '#64748b' },
+    },
+  },
+})
+
+const DATASETS = (ventas, gastos) => ({
+  datasets: [
+    {
+      label: 'Ventas',
+      data: ventas,
+      backgroundColor: 'rgba(217,119,6,0.85)',
+      borderColor: 'rgba(217,119,6,1)',
+      borderWidth: 0,
+      borderRadius: 8,
+      borderSkipped: false,
+    },
+    {
+      label: 'Gastos',
+      data: gastos,
+      backgroundColor: 'rgba(44,62,80,0.75)',
+      borderColor: 'rgba(44,62,80,1)',
+      borderWidth: 0,
+      borderRadius: 8,
+      borderSkipped: false,
+    },
+  ],
+})
+
+// ─── Tab Ventas ────────────────────────────────────────────────────────────────
 
 function TabVentas() {
   const ahora = new Date()
-  const [mes, setMes]   = useState(ahora.getMonth() + 1)
-  const [anio, setAnio] = useState(ahora.getFullYear())
-  const [datos, setDatos]     = useState(null)
+  const [mes, setMes]           = useState(ahora.getMonth() + 1)
+  const [anio, setAnio]         = useState(ahora.getFullYear())
+  const [datos, setDatos]       = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError]       = useState(null)
   const [expandida, setExpandida] = useState(null)
@@ -49,9 +177,7 @@ function TabVentas() {
     setCargando(true)
     setError(null)
     setExpandida(null)
-    fetch(`${API_URL}/ventas?mes=${mes}&anio=${anio}`, {
-      headers: { Authorization: `Bearer ${token()}` },
-    })
+    fetch(`${API_URL}/ventas?mes=${mes}&anio=${anio}`, { headers: authHdr() })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(setDatos)
       .catch(() => setError('No se pudieron cargar las ventas'))
@@ -62,127 +188,132 @@ function TabVentas() {
   const resumen = datos?.resumen ?? {}
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 animate-fade-in">
 
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mes</label>
-          <select
-            value={mes}
-            onChange={e => setMes(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-blue/30"
-          >
-            {MESES.map((m, i) => (
-              <option key={i + 1} value={i + 1}>{m}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Año</label>
-          <select
-            value={anio}
-            onChange={e => setAnio(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-blue/30"
-          >
-            {aniosDisponibles().map(a => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        </div>
-        <div className="ml-auto text-sm text-gray-400 self-end pb-2">
+      <Filtros>
+        <SelectField
+          label="Mes"
+          value={mes}
+          onChange={setMes}
+          options={MESES.map((m, i) => ({ value: i + 1, label: m }))}
+        />
+        <SelectField
+          label="Año"
+          value={anio}
+          onChange={setAnio}
+          options={anios().map(a => ({ value: a, label: String(a) }))}
+        />
+        <div className="ml-auto self-end flex items-center gap-2 text-sm text-kaja-blueText/50 font-medium pb-0.5">
+          <Calendar className="w-4 h-4" />
           {MESES[mes - 1]} {anio}
         </div>
-      </div>
+      </Filtros>
 
-      {/* Tarjetas resumen */}
       {!cargando && !error && (
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total ventas</p>
-            <p className="text-3xl font-bold text-kaja-blueText">{resumen.totalVentas ?? 0}</p>
-          </div>
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Total recaudado</p>
-            <p className="text-3xl font-bold text-kaja-blueText">{fmtEur(resumen.totalRecaudado ?? 0)}</p>
+          <KpiCard
+            label="Total ventas"
+            value={resumen.totalVentas ?? 0}
+            icon={ReceiptText}
+            variant="orange"
+            sub={`${MESES[mes - 1]} ${anio}`}
+          />
+          <KpiCard
+            label="Total recaudado"
+            value={fmtEur(resumen.totalRecaudado ?? 0)}
+            icon={TrendingUp}
+            variant="navy"
+            sub={`${MESES[mes - 1]} ${anio}`}
+          />
+        </div>
+      )}
+
+      {cargando && (
+        <div className="flex items-center justify-center py-20 text-kaja-blueText/30">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+            <span className="text-sm font-medium">Cargando ventas...</span>
           </div>
         </div>
       )}
 
-      {/* Estado */}
-      {cargando && (
-        <p className="text-center text-gray-400 py-12">Cargando ventas...</p>
-      )}
       {error && (
-        <p className="text-center text-red-500 py-12">{error}</p>
+        <div className="flex items-center justify-center py-16">
+          <p className="text-sm text-rose-500 font-medium">{error}</p>
+        </div>
       )}
 
-      {/* Tabla */}
       {!cargando && !error && ventas.length === 0 && (
-        <p className="text-center text-gray-400 py-12">
-          No hay ventas registradas en {MESES[mes - 1]} de {anio}.
-        </p>
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-kaja-blueText/30">
+          <ReceiptText className="w-12 h-12" />
+          <p className="text-sm font-medium">Sin ventas en {MESES[mes - 1]} de {anio}</p>
+        </div>
       )}
 
       {!cargando && !error && ventas.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-gray-100">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-kaja-light text-kaja-blueText text-xs font-semibold uppercase tracking-wide">
-                <th className="px-4 py-3 text-left">Fecha / Hora</th>
-                <th className="px-4 py-3 text-left">Vendedor</th>
-                <th className="px-4 py-3 text-right">Base imponible</th>
-                <th className="px-4 py-3 text-right">IVA</th>
-                <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-center">Detalle</th>
+              <tr className="border-b border-gray-100">
+                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Fecha</th>
+                <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Vendedor</th>
+                <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Base</th>
+                <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">IVA</th>
+                <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Total</th>
+                <th className="px-5 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Líneas</th>
               </tr>
             </thead>
             <tbody>
-              {ventas.map((venta, idx) => (
+              {ventas.map((venta) => (
                 <>
                   <tr
                     key={venta.id}
-                    className={`border-t border-gray-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
+                    onClick={() => setExpandida(expandida === venta.id ? null : venta.id)}
+                    className="border-t border-gray-50 hover:bg-kaja-light/30 cursor-pointer transition-colors"
                   >
-                    <td className="px-4 py-3 text-gray-700">{fmtFecha(venta.fecha)}</td>
-                    <td className="px-4 py-3 text-gray-700">{venta.vendedor}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{fmtEur(venta.baseImponible)}</td>
-                    <td className="px-4 py-3 text-right text-gray-600">{fmtEur(venta.totalIva)}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-kaja-blueText">{fmtEur(venta.totalFinal)}</td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={() => setExpandida(expandida === venta.id ? null : venta.id)}
-                        className="text-xs font-medium text-kaja-blue hover:underline"
-                      >
-                        {expandida === venta.id ? 'Ocultar' : `Ver (${venta.lineas?.length ?? 0})`}
-                      </button>
+                    <td className="px-5 py-3.5 text-kaja-blueText/70 font-medium">{fmtFecha(venta.fecha)}</td>
+                    <td className="px-5 py-3.5 text-kaja-blueText/70">{venta.vendedor}</td>
+                    <td className="px-5 py-3.5 text-right text-kaja-blueText/50">{fmtEur(venta.baseImponible)}</td>
+                    <td className="px-5 py-3.5 text-right text-kaja-blueText/50">{fmtEur(venta.totalIva)}</td>
+                    <td className="px-5 py-3.5 text-right font-bold text-kaja-blueText">{fmtEur(venta.totalFinal)}</td>
+                    <td className="px-5 py-3.5 text-center">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-kaja-orange">
+                        {venta.lineas?.length ?? 0} art.
+                        {expandida === venta.id
+                          ? <ChevronUp className="w-3.5 h-3.5" />
+                          : <ChevronDown className="w-3.5 h-3.5" />
+                        }
+                      </span>
                     </td>
                   </tr>
+
                   {expandida === venta.id && (
-                    <tr key={`det-${venta.id}`} className="border-t border-gray-100 bg-kaja-light/40">
-                      <td colSpan={6} className="px-6 py-3">
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr className="text-gray-500 font-semibold uppercase tracking-wide">
-                              <th className="text-left pb-1">Producto</th>
-                              <th className="text-right pb-1">Cant.</th>
-                              <th className="text-right pb-1">Precio unit.</th>
-                              <th className="text-right pb-1">IVA</th>
-                              <th className="text-right pb-1">Subtotal</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {(venta.lineas ?? []).map((l, li) => (
-                              <tr key={li} className="border-t border-gray-100/60">
-                                <td className="py-1 text-gray-700">{l.producto}</td>
-                                <td className="py-1 text-right text-gray-600">{l.cantidad}</td>
-                                <td className="py-1 text-right text-gray-600">{fmtEur(l.precioVentaHistorico)}</td>
-                                <td className="py-1 text-right text-gray-600">{l.ivaAplicado}%</td>
-                                <td className="py-1 text-right font-medium text-gray-700">{fmtEur(l.subtotal)}</td>
+                    <tr key={`det-${venta.id}`}>
+                      <td colSpan={6} className="px-5 pb-3 pt-0 bg-kaja-light/20">
+                        <div className="rounded-xl overflow-hidden border border-gray-100 mt-1">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="bg-gray-50">
+                                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-gray-400">Producto</th>
+                                <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Cant.</th>
+                                <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">P. Unit.</th>
+                                <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">IVA</th>
+                                <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-gray-400">Subtotal</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {(venta.lineas ?? []).map((l, li) => (
+                                <tr key={li} className="border-t border-gray-100">
+                                  <td className="px-4 py-2.5 font-medium text-kaja-blueText/70">{l.producto}</td>
+                                  <td className="px-4 py-2.5 text-right text-gray-500">{l.cantidad}</td>
+                                  <td className="px-4 py-2.5 text-right text-gray-500">{fmtEur(l.precioVentaHistorico)}</td>
+                                  <td className="px-4 py-2.5 text-right text-gray-500">{l.ivaAplicado}%</td>
+                                  <td className="px-4 py-2.5 text-right font-semibold text-kaja-blueText">{fmtEur(l.subtotal)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </td>
                     </tr>
                   )}
@@ -196,9 +327,9 @@ function TabVentas() {
   )
 }
 
-// ─── Tab Resumen Financiero ───────────────────────────────────────────────────
+// ─── Tab Resumen Mensual ───────────────────────────────────────────────────────
 
-function TabResumen() {
+function TabResumenMensual() {
   const ahora = new Date()
   const [mes, setMes]           = useState(ahora.getMonth() + 1)
   const [anio, setAnio]         = useState(ahora.getFullYear())
@@ -209,12 +340,10 @@ function TabResumen() {
   useEffect(() => {
     setCargando(true)
     setError(null)
-    fetch(`${API_URL}/financiero?mes=${mes}&anio=${anio}`, {
-      headers: { Authorization: `Bearer ${token()}` },
-    })
+    fetch(`${API_URL}/financiero?mes=${mes}&anio=${anio}`, { headers: authHdr() })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(setDatos)
-      .catch(() => setError('No se pudo cargar el resumen financiero'))
+      .catch(() => setError('No se pudo cargar el resumen mensual'))
       .finally(() => setCargando(false))
   }, [mes, anio])
 
@@ -225,154 +354,66 @@ function TabResumen() {
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
   const beneficio   = totalVentas - totalGastos
-
-  const labels = dias > 0
-    ? Array.from({ length: dias }, (_, i) => String(i + 1))
-    : []
+  const positivo    = beneficio >= 0
 
   const chartData = {
-    labels,
-    datasets: [
-      {
-        label: 'Ventas',
-        data: ventas,
-        backgroundColor: 'rgba(255, 163, 26, 0.85)',
-        borderColor: 'rgba(255, 163, 26, 1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
-      {
-        label: 'Gastos',
-        data: gastos,
-        backgroundColor: 'rgba(30, 64, 110, 0.75)',
-        borderColor: 'rgba(30, 64, 110, 1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: {
-          font: { size: 13, family: 'inherit' },
-          padding: 20,
-        },
-      },
-      tooltip: {
-        callbacks: {
-          title: ([ctx]) => `Día ${ctx.label}`,
-          label: ctx => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y)}`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: v => fmtEur(v),
-          font: { size: 11 },
-        },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-      x: {
-        ticks: { font: { size: 11 } },
-        grid: { display: false },
-        title: {
-          display: true,
-          text: 'Día del mes',
-          font: { size: 12 },
-          color: '#6b7280',
-        },
-      },
-    },
+    labels: dias > 0 ? Array.from({ length: dias }, (_, i) => String(i + 1)) : [],
+    ...DATASETS(ventas, gastos),
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 animate-fade-in">
 
-      {/* Selectores */}
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Mes</label>
-          <select
-            value={mes}
-            onChange={e => setMes(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-blue/30"
-          >
-            {MESES.map((m, i) => (
-              <option key={i + 1} value={i + 1}>{m}</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Año</label>
-          <select
-            value={anio}
-            onChange={e => setAnio(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-blue/30"
-          >
-            {aniosDisponibles().map(a => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        </div>
-        <div className="ml-auto text-sm text-gray-400 self-end pb-2">
+      <Filtros>
+        <SelectField
+          label="Mes"
+          value={mes}
+          onChange={setMes}
+          options={MESES.map((m, i) => ({ value: i + 1, label: m }))}
+        />
+        <SelectField
+          label="Año"
+          value={anio}
+          onChange={setAnio}
+          options={anios().map(a => ({ value: a, label: String(a) }))}
+        />
+        <div className="ml-auto self-end flex items-center gap-2 text-sm text-kaja-blueText/50 font-medium pb-0.5">
+          <Calendar className="w-4 h-4" />
           {MESES[mes - 1]} {anio}
         </div>
-      </div>
+      </Filtros>
 
-      {/* Tarjetas */}
       {!cargando && !error && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Ventas {MESES[mes - 1]}
-            </p>
-            <p className="text-2xl font-bold text-kaja-blueText">{fmtEur(totalVentas)}</p>
-          </div>
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Gastos {MESES[mes - 1]}
-            </p>
-            <p className="text-2xl font-bold text-kaja-blueText">{fmtEur(totalGastos)}</p>
-          </div>
-          <div className={`rounded-xl px-6 py-4 ${beneficio >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-              Beneficio {MESES[mes - 1]}
-            </p>
-            <p className={`text-2xl font-bold ${beneficio >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-              {fmtEur(beneficio)}
-            </p>
-          </div>
+          <KpiCard label={`Ventas ${MESES[mes - 1]}`}  value={fmtEur(totalVentas)} icon={TrendingUp}   variant="orange" />
+          <KpiCard label={`Gastos ${MESES[mes - 1]}`}  value={fmtEur(totalGastos)} icon={TrendingDown}  variant="navy"   />
+          <KpiCard label={`Beneficio ${MESES[mes - 1]}`} value={fmtEur(beneficio)} icon={Wallet}       variant={positivo ? 'green' : 'red'} />
         </div>
       )}
 
-      {/* Estado */}
       {cargando && (
-        <p className="text-center text-gray-400 py-12">Cargando resumen financiero...</p>
-      )}
-      {error && (
-        <p className="text-center text-red-500 py-12">{error}</p>
-      )}
-
-      {/* Gráfico */}
-      {!cargando && !error && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <div style={{ height: 380 }}>
-            <Bar data={chartData} options={chartOptions} />
-          </div>
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-kaja-blueText/30">
+          <div className="w-8 h-8 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+          <span className="text-sm font-medium">Cargando resumen mensual...</span>
         </div>
+      )}
+      {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
+
+      {!cargando && !error && (
+        <ChartCard title={`Ventas vs Gastos · ${MESES[mes - 1]} ${anio} · por día`}>
+          <div style={{ height: 360 }}>
+            <Bar
+              data={chartData}
+              options={CHART_OPTS(ctx => `Día ${ctx.label} de ${MESES[mes - 1]}`)}
+            />
+          </div>
+        </ChartCard>
       )}
     </div>
   )
 }
 
-// ─── Tab Resumen Anual ────────────────────────────────────────────────────────
+// ─── Tab Resumen Anual ─────────────────────────────────────────────────────────
 
 function TabResumenAnual() {
   const [anio, setAnio]         = useState(new Date().getFullYear())
@@ -383,9 +424,7 @@ function TabResumenAnual() {
   useEffect(() => {
     setCargando(true)
     setError(null)
-    fetch(`${API_URL}/financiero?anio=${anio}`, {
-      headers: { Authorization: `Bearer ${token()}` },
-    })
+    fetch(`${API_URL}/financiero?anio=${anio}`, { headers: authHdr() })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(setDatos)
       .catch(() => setError('No se pudo cargar el resumen anual'))
@@ -398,145 +437,101 @@ function TabResumenAnual() {
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
   const beneficio   = totalVentas - totalGastos
+  const positivo    = beneficio >= 0
 
-  const chartData = {
-    labels: MESES_CORTOS,
-    datasets: [
-      {
-        label: 'Ventas',
-        data: ventas,
-        backgroundColor: 'rgba(255, 163, 26, 0.85)',
-        borderColor: 'rgba(255, 163, 26, 1)',
-        borderWidth: 1,
-        borderRadius: 6,
-      },
-      {
-        label: 'Gastos',
-        data: gastos,
-        backgroundColor: 'rgba(30, 64, 110, 0.75)',
-        borderColor: 'rgba(30, 64, 110, 1)',
-        borderWidth: 1,
-        borderRadius: 6,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        labels: { font: { size: 13, family: 'inherit' }, padding: 20 },
-      },
-      tooltip: {
-        callbacks: {
-          label: ctx => `${ctx.dataset.label}: ${fmtEur(ctx.parsed.y)}`,
-        },
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { callback: v => fmtEur(v), font: { size: 11 } },
-        grid: { color: 'rgba(0,0,0,0.05)' },
-      },
-      x: {
-        ticks: { font: { size: 12 } },
-        grid: { display: false },
-      },
-    },
-  }
+  const chartData = { labels: MESES_C, ...DATASETS(ventas, gastos) }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 animate-fade-in">
 
-      {/* Selector de año */}
-      <div className="flex flex-wrap gap-3 items-end">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Año</label>
-          <select
-            value={anio}
-            onChange={e => setAnio(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-kaja-blue/30"
-          >
-            {aniosDisponibles().map(a => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <Filtros>
+        <SelectField
+          label="Año"
+          value={anio}
+          onChange={setAnio}
+          options={anios().map(a => ({ value: a, label: String(a) }))}
+        />
+      </Filtros>
 
-      {/* Tarjetas anuales */}
       {!cargando && !error && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Ventas {anio}</p>
-            <p className="text-2xl font-bold text-kaja-blueText">{fmtEur(totalVentas)}</p>
-          </div>
-          <div className="bg-kaja-light rounded-xl px-6 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Gastos {anio}</p>
-            <p className="text-2xl font-bold text-kaja-blueText">{fmtEur(totalGastos)}</p>
-          </div>
-          <div className={`rounded-xl px-6 py-4 ${beneficio >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Beneficio {anio}</p>
-            <p className={`text-2xl font-bold ${beneficio >= 0 ? 'text-green-700' : 'text-red-600'}`}>
-              {fmtEur(beneficio)}
-            </p>
-          </div>
+          <KpiCard label={`Ventas ${anio}`}    value={fmtEur(totalVentas)} icon={TrendingUp}  variant="orange" />
+          <KpiCard label={`Gastos ${anio}`}    value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy"   />
+          <KpiCard label={`Beneficio ${anio}`} value={fmtEur(beneficio)}   icon={Wallet}      variant={positivo ? 'green' : 'red'} />
         </div>
       )}
 
-      {cargando && <p className="text-center text-gray-400 py-12">Cargando resumen anual...</p>}
-      {error    && <p className="text-center text-red-500 py-12">{error}</p>}
-
-      {/* Gráfico */}
-      {!cargando && !error && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6">
-          <div style={{ height: 380 }}>
-            <Bar data={chartData} options={chartOptions} />
-          </div>
+      {cargando && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-kaja-blueText/30">
+          <div className="w-8 h-8 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+          <span className="text-sm font-medium">Cargando resumen anual...</span>
         </div>
+      )}
+      {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
+
+      {!cargando && !error && (
+        <ChartCard title={`Ventas vs Gastos · ${anio} · por mes`}>
+          <div style={{ height: 360 }}>
+            <Bar data={chartData} options={CHART_OPTS()} />
+          </div>
+        </ChartCard>
       )}
     </div>
   )
 }
 
-// ─── Componente principal ─────────────────────────────────────────────────────
+// ─── Componente principal ──────────────────────────────────────────────────────
+
+const TABS = [
+  { id: 'ventas',   label: 'Ventas',           icon: ReceiptText  },
+  { id: 'mensual',  label: 'Resumen mensual',   icon: BarChart3    },
+  { id: 'anual',    label: 'Resumen anual',     icon: CalendarDays },
+]
 
 export default function GestionFinanciera() {
   const [tab, setTab] = useState('ventas')
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-8 pt-8 pb-0 shrink-0">
-        <h1 className="text-2xl font-bold text-kaja-blueText mb-6">Gestión Financiera</h1>
-        <div className="flex gap-1 border-b border-gray-200">
-          {[
-            { id: 'ventas',         label: 'Ventas' },
-            { id: 'resumenMensual', label: 'Resumen mensual' },
-            { id: 'resumenAnual',   label: 'Resumen anual' },
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-6 py-3 text-sm font-semibold rounded-t-lg transition border-b-2 -mb-px
-                ${tab === t.id
-                  ? 'border-kaja-blueText text-kaja-blueText bg-white'
-                  : 'border-transparent text-gray-400 hover:text-kaja-blueText hover:bg-gray-50'
-                }`}
-            >
-              {t.label}
-            </button>
-          ))}
+    <div className="flex flex-col h-full bg-gray-50/50">
+
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 px-8 pt-7 pb-0 shrink-0">
+        <div className="flex items-end justify-between mb-5">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Panel</p>
+            <h1 className="text-2xl font-bold text-kaja-blueText">Gestión Financiera</h1>
+          </div>
+        </div>
+
+        {/* Tab nav */}
+        <div className="flex gap-1">
+          {TABS.map(t => {
+            const activo = tab === t.id
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold rounded-t-xl border-b-2 -mb-px transition-all
+                  ${activo
+                    ? 'bg-kaja-blueText text-white border-kaja-blueText'
+                    : 'text-kaja-blueText/50 border-transparent hover:text-kaja-blueText hover:bg-gray-50'
+                  }`}
+              >
+                <t.icon className="w-4 h-4" />
+                {t.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
+      {/* Contenido */}
       <div className="flex-1 overflow-y-auto px-8 py-6">
-        {tab === 'ventas'         && <TabVentas />}
-        {tab === 'resumenMensual' && <TabResumen />}
-        {tab === 'resumenAnual'   && <TabResumenAnual />}
+        {tab === 'ventas'  && <TabVentas />}
+        {tab === 'mensual' && <TabResumenMensual />}
+        {tab === 'anual'   && <TabResumenAnual />}
       </div>
+
     </div>
   )
 }
