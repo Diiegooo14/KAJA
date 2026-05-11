@@ -305,7 +305,7 @@ function TabVentas() {
                                 <tr key={li} className="border-t border-gray-100">
                                   <td className="px-4 py-2.5 font-medium text-kaja-blueText/70">{l.producto}</td>
                                   <td className="px-4 py-2.5 text-right text-gray-500">{l.cantidad}</td>
-                                  <td className="px-4 py-2.5 text-right text-gray-500">{fmtEur(l.precioVentaHistorico)}</td>
+                                  <td className="px-4 py-2.5 text-right text-gray-500">{fmtEur(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100))}</td>
                                   <td className="px-4 py-2.5 text-right text-gray-500">{l.ivaAplicado}%</td>
                                   <td className="px-4 py-2.5 text-right font-semibold text-kaja-blueText">{fmtEur(l.subtotal)}</td>
                                 </tr>
