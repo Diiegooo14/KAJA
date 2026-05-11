@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Camera, Pencil, UserX, Loader2, X } from 'lucide-react'
+﻿import { useEffect, useRef, useState } from 'react'
+import { Camera, Pencil, UserX, Loader2, X, Plus } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
@@ -120,6 +120,7 @@ export default function Usuarios({ usuario }) {
 
     const [procesando, setProcesando] = useState(null)
     const [toast, setToast] = useState('')
+    const [mostrarForm, setMostrarForm] = useState(false)
 
     function mostrarToast(msg) {
         setToast(msg)
@@ -223,17 +224,24 @@ export default function Usuarios({ usuario }) {
                 </div>
             )}
 
-            <div className="shrink-0 px-6 py-4 border-b border-gray-100 flex items-center bg-white">
-                <div>
+            <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center bg-white">
+                <div className="flex-1">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
                     <h1 className="text-xl font-bold text-kaja-blueText">Gestión de Usuarios</h1>
                 </div>
+                <button
+                    onClick={() => setMostrarForm(v => !v)}
+                    className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition shrink-0"
+                >
+                    {mostrarForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    {mostrarForm ? 'Cerrar' : editando ? 'Editar usuario' : 'Nuevo usuario'}
+                </button>
             </div>
 
-            <div className="flex flex-1 overflow-hidden gap-0">
+            <div className="flex flex-col lg:flex-row flex-1 overflow-auto lg:overflow-hidden">
 
                 {/* Panel izquierdo — formulario */}
-                <div className="w-80 shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-y-auto">
+                <div className={"w-full lg:w-80 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col bg-white" + (mostrarForm ? "" : " hidden")}>
                     <div className="p-5">
                         <h2 className="text-m font-bold text-kaja-blueText mb-4">
                             {editando ? 'Editar Usuario' : 'Nuevo Empleado'}
@@ -354,9 +362,9 @@ export default function Usuarios({ usuario }) {
                 </div>
 
                 {/* Panel derecho — resumen + tabla */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light">
+                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light min-h-0">
 
-                    <div className="shrink-0 px-6 py-4 grid grid-cols-3 gap-4">
+                    <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
                         <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
                             <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total usuarios</p>
                             <p className="text-2xl font-bold text-white">{resumen.total}</p>
@@ -371,8 +379,8 @@ export default function Usuarios({ usuario }) {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-auto mx-6 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100">
+                    <div className="flex-1 overflow-x-auto mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
+                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100 min-w-[780px]">
                             <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Nombre</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">NIF</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Rol</div>
@@ -394,11 +402,11 @@ export default function Usuarios({ usuario }) {
                             usuarios.map((u, i) => (
                                 <div
                                     key={u.id}
-                                    className={`grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center
+                                    className={`grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-[780px]
                                         text-sm border-b border-gray-50 hover:bg-gray-50 transition
                                         ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                                 >
-                                    <div className="px-5 py-3 font-medium text-kaja-blueText truncate flex items-center gap-2">
+                                    <div className="px-5 py-3 font-medium text-kaja-blueText flex items-center gap-2 min-w-0">
                                         <img
                                             src={u.imagen_perfil || DEFAULT_AVATAR}
                                             alt={u.nombre}

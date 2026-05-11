@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Trash2, Loader2, Plus } from 'lucide-react'
+﻿import { useEffect, useState } from 'react'
+import { Trash2, Loader2, Plus, X } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -45,6 +45,7 @@ export default function Gastos() {
 
     const [eliminando, setEliminando] = useState(null)
     const [toast, setToast] = useState('')
+    const [mostrarForm, setMostrarForm] = useState(false)
 
     function mostrarToast(msg) {
         setToast(msg)
@@ -130,7 +131,7 @@ export default function Gastos() {
                 </div>
             )}
 
-            <div className="shrink-0 px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
+            <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
                 <div className="flex-1">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
                     <h1 className="text-xl font-bold text-kaja-blueText">
@@ -157,13 +158,20 @@ export default function Gastos() {
                         {anios.map(a => <option key={a} value={a}>{a}</option>)}
                     </select>
                 </div>
+                <button
+                    onClick={() => setMostrarForm(v => !v)}
+                    className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition shrink-0"
+                >
+                    {mostrarForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                    {mostrarForm ? 'Cerrar' : 'Registrar gasto'}
+                </button>
             </div>
 
             {/* Cuerpo */}
-            <div className="flex flex-1 overflow-hidden gap-0">
+            <div className="flex flex-col lg:flex-row flex-1 overflow-auto lg:overflow-hidden">
 
                 {/* Panel izquierdo — formulario */}
-                <div className="w-80 shrink-0 border-r border-gray-100 flex flex-col bg-white overflow-y-auto">
+                <div className={"w-full lg:w-80 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col bg-white" + (mostrarForm ? "" : " hidden")}>
                     <div className="p-5">
                         <h2 className="text-m font-bold text-kaja-blueText flex items-center gap-2 mb-5">
                             Registrar Gasto
@@ -258,10 +266,10 @@ export default function Gastos() {
                 </div>
 
                 {/* Panel derecho — resumen + tabla */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light">
+                <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light min-h-0">
 
                     {/* Tarjetas datos */}
-                    <div className="shrink-0 px-6 py-4 grid grid-cols-3 gap-4">
+                    <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
                         <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
                             <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total Mes</p>
                             <p className="text-2xl font-bold text-white">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
@@ -277,8 +285,8 @@ export default function Gastos() {
                     </div>
 
                     {/* Tabla */}
-                    <div className="flex-1 overflow-auto mx-6 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_120px_140px_120px_64px] border-b border-gray-100">
+                    <div className="flex-1 overflow-x-auto mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
+                        <div className="grid grid-cols-[1fr_120px_140px_120px_64px] border-b border-gray-100 min-w-[560px]">
                             <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Concepto</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Tipo</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Fecha</div>
@@ -301,11 +309,11 @@ export default function Gastos() {
                             gastos.map((g, i) => (
                                 <div
                                     key={g.id}
-                                    className={`grid grid-cols-[1fr_120px_140px_120px_64px] items-center
+                                    className={`grid grid-cols-[1fr_120px_140px_120px_64px] items-center min-w-[560px]
                                         text-sm border-b border-gray-50 hover:bg-gray-50 transition
                                         ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                                 >
-                                    <div className="px-5 py-3 font-medium text-kaja-blueText truncate">{g.concepto}</div>
+                                    <div className="px-5 py-3 font-medium text-kaja-blueText">{g.concepto}</div>
                                     <div className="px-3 py-3">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                                             ${g.tipo === 'Fijo'

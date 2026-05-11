@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement,
@@ -210,7 +210,7 @@ function TabVentas() {
       </Filtros>
 
       {!cargando && !error && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <KpiCard
             label="Total ventas"
             value={resumen.totalVentas ?? 0}
@@ -251,8 +251,7 @@ function TabVentas() {
       )}
 
       {!cargando && !error && ventas.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-sm min-w-160">
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Fecha</th>
@@ -320,8 +319,7 @@ function TabVentas() {
                 </>
               ))}
             </tbody>
-          </table>
-        </div>
+          </table></div></div>
       )}
     </div>
   )
@@ -384,7 +382,7 @@ function TabResumenMensual() {
       </Filtros>
 
       {!cargando && !error && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <KpiCard label={`Ventas ${MESES[mes - 1]}`}  value={fmtEur(totalVentas)} icon={TrendingUp}   variant="orange" />
           <KpiCard label={`Gastos ${MESES[mes - 1]}`}  value={fmtEur(totalGastos)} icon={TrendingDown}  variant="navy"   />
           <KpiCard label={`Beneficio ${MESES[mes - 1]}`} value={fmtEur(beneficio)} icon={Wallet}       variant={positivo ? 'green' : 'red'} />
@@ -454,7 +452,7 @@ function TabResumenAnual() {
       </Filtros>
 
       {!cargando && !error && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <KpiCard label={`Ventas ${anio}`}    value={fmtEur(totalVentas)} icon={TrendingUp}  variant="orange" />
           <KpiCard label={`Gastos ${anio}`}    value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy"   />
           <KpiCard label={`Beneficio ${anio}`} value={fmtEur(beneficio)}   icon={Wallet}      variant={positivo ? 'green' : 'red'} />
@@ -495,7 +493,7 @@ export default function GestionFinanciera() {
     <div className="flex flex-col h-full bg-gray-50/50">
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-8 pt-7 pb-0 shrink-0">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-8 pt-5 sm:pt-7 pb-0 shrink-0">
         <div className="flex items-end justify-between mb-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Panel</p>
@@ -504,7 +502,7 @@ export default function GestionFinanciera() {
         </div>
 
         {/* Tab nav */}
-        <div className="flex gap-1">
+        <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-none">
           {TABS.map(t => {
             const activo = tab === t.id
             return (
@@ -517,8 +515,7 @@ export default function GestionFinanciera() {
                     : 'text-kaja-blueText/50 border-transparent hover:text-kaja-blueText hover:bg-gray-50'
                   }`}
               >
-                <t.icon className="w-4 h-4" />
-                {t.label}
+                <t.icon className="w-4 h-4" /><span className="hidden sm:inline">{t.label}</span>
               </button>
             )
           })}
@@ -526,7 +523,7 @@ export default function GestionFinanciera() {
       </div>
 
       {/* Contenido */}
-      <div className="flex-1 overflow-y-auto px-8 py-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 sm:py-6">
         {tab === 'ventas'  && <TabVentas />}
         {tab === 'mensual' && <TabResumenMensual />}
         {tab === 'anual'   && <TabResumenAnual />}
