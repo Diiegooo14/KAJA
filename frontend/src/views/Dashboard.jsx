@@ -390,11 +390,13 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
 
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-5 shrink-0 border-b border-white/10">
-          <img
-            src="/img/kaja-transparente.png"
-            alt="KAJA"
-            className="h-9 object-contain brightness-0 invert"
-          />
+          <button onClick={() => navegarA('dashboard')} className="focus:outline-none cursor-pointer">
+            <img
+              src="/img/kaja-transparente.png"
+              alt="KAJA"
+              className="h-9 object-contain brightness-0 invert"
+            />
+          </button>
           <button
             className="md:hidden text-white/50 hover:text-white transition"
             onClick={() => setSidebarAbierto(false)}
