@@ -380,7 +380,7 @@ export default function Usuarios({ usuario }) {
                     </div>
 
                     <div className="flex-1 overflow-x-auto mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100 min-w-[780px]">
+                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100 min-w-195">
                             <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Nombre</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">NIF</div>
                             <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Rol</div>
@@ -402,7 +402,7 @@ export default function Usuarios({ usuario }) {
                             usuarios.map((u, i) => (
                                 <div
                                     key={u.id}
-                                    className={`grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-[780px]
+                                    className={`grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-195
                                         text-sm border-b border-gray-50 hover:bg-gray-50 transition
                                         ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
                                 >
