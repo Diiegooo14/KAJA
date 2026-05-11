@@ -285,65 +285,70 @@ export default function Gastos() {
                     </div>
 
                     {/* Tabla */}
-                    <div className="flex-1 overflow-x-auto mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_120px_140px_120px_64px] border-b border-gray-100 min-w-[560px]">
-                            <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Concepto</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Tipo</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Fecha</div>
-                            <div className="px-3 py-3.5 text-right text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Importe</div>
-                            <div className="px-3 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Acc.</div>
-                        </div>
+                    <div className="flex-1 min-h-0 mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="overflow-auto h-full">
+                            <div className="grid grid-cols-[1fr_120px_140px_120px_64px] min-w-140 bg-kaja-sidebar">
+                                <div className="px-5 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Concepto</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Tipo</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Fecha</div>
+                                <div className="px-3 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">Importe</div>
+                                <div className="px-3 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Acc.</div>
+                            </div>
 
-                        {loading ? (
-                            <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
-                                <Loader2 className="w-5 h-5 animate-spin text-kaja-orange" />
-                                <span className="text-sm">Cargando gastos…</span>
-                            </div>
-                        ) : error ? (
-                            <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
-                        ) : gastos.length === 0 ? (
-                            <div className="text-center py-16 text-gray-400 text-sm">
-                                Sin gastos para este período
-                            </div>
-                        ) : (
-                            gastos.map((g, i) => (
-                                <div
-                                    key={g.id}
-                                    className={`grid grid-cols-[1fr_120px_140px_120px_64px] items-center min-w-[560px]
-                                        text-sm border-b border-gray-50 hover:bg-gray-50 transition
-                                        ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
-                                >
-                                    <div className="px-5 py-3 font-medium text-kaja-blueText">{g.concepto}</div>
-                                    <div className="px-3 py-3">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            ${g.tipo === 'Fijo'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-orange-100 text-kaja-orange'}`}>
-                                            {g.tipo}
-                                        </span>
-                                    </div>
-                                    <div className="px-3 py-3 text-gray-500">
-                                        {new Date(g.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                                    </div>
-                                    <div className="px-3 py-3 text-right font-semibold text-kaja-blueText">
-                                        {parseFloat(g.importe).toFixed(2)} €
-                                    </div>
-                                    <div className="px-3 py-3 flex justify-center">
-                                        <button
-                                            onClick={() => handleEliminar(g.id)}
-                                            disabled={eliminando === g.id}
-                                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
-                                                        disabled:opacity-40 disabled:cursor-not-allowed"
-                                            title="Eliminar gasto"
-                                        >
-                                            {eliminando === g.id
-                                                ? <Loader2 className="w-4 h-4 animate-spin" />
-                                                : <Trash2 className="w-4 h-4" />}
-                                        </button>
-                                    </div>
+                            {loading ? (
+                                <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
+                                    <Loader2 className="w-5 h-5 animate-spin text-kaja-orange" />
+                                    <span className="text-sm">Cargando gastos…</span>
                                 </div>
-                            ))
-                        )}
+                            ) : error ? (
+                                <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
+                            ) : gastos.length === 0 ? (
+                                <div className="text-center py-16 text-gray-400 text-sm">
+                                    Sin gastos para este período
+                                </div>
+                            ) : (
+                                gastos.map((g) => (
+                                    <div
+                                        key={g.id}
+                                        className="grid grid-cols-[1fr_120px_140px_120px_64px] items-center min-w-140
+                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition"
+                                    >
+                                        <div className="px-5 py-3.5 font-medium text-kaja-blueText">{g.concepto}</div>
+                                        <div className="px-3 py-3.5">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                                ${g.tipo === 'Fijo'
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : 'bg-orange-100 text-kaja-orange'}`}>
+                                                {g.tipo}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5">
+                                            <span className="text-xs font-mono text-kaja-blueText/60">
+                                                {new Date(g.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5 text-right">
+                                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                                                {parseFloat(g.importe).toFixed(2)} €
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5 flex justify-center">
+                                            <button
+                                                onClick={() => handleEliminar(g.id)}
+                                                disabled={eliminando === g.id}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
+                                                            disabled:opacity-40 disabled:cursor-not-allowed"
+                                                title="Eliminar gasto"
+                                            >
+                                                {eliminando === g.id
+                                                    ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                    : <Trash2 className="w-4 h-4" />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

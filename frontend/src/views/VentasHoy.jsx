@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { ShoppingBag, TrendingUp, RefreshCw, ReceiptText, ChevronDown, ChevronUp } from 'lucide-react'
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL        = import.meta.env.VITE_API_URL
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 
 const fmtEur  = v   => Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
 const fmtHora = iso => new Date(iso).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
@@ -118,35 +119,48 @@ export default function VentasHoy() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm min-w-150">
                   <thead>
-                    <tr className="border-b border-gray-100">
-                      <th className="px-5 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Hora</th>
-                      <th className="px-5 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Vendedor</th>
-                      <th className="px-5 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Base</th>
-                      <th className="px-5 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">IVA</th>
-                      <th className="px-5 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Total</th>
-                      <th className="px-5 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Líneas</th>
+                    <tr className="bg-kaja-sidebar">
+                      <th className="px-5 py-4 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Hora</th>
+                      <th className="px-5 py-4 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Vendedor</th>
+                      <th className="px-5 py-4 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">Base</th>
+                      <th className="px-5 py-4 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">IVA</th>
+                      <th className="px-5 py-4 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">Total</th>
+                      <th className="px-5 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Líneas</th>
                     </tr>
                   </thead>
                   <tbody>
                     {ventas.map(venta => (
                       <>
-                        {/* ── Fila resumen (clickable) ─────────────────────── */}
                         <tr
                           key={venta.id}
                           onClick={() => toggleExpandida(venta.id)}
-                          className="border-t border-gray-50 hover:bg-kaja-light/30 cursor-pointer transition-colors"
+                          className="border-t border-gray-100 hover:bg-kaja-orange/5 cursor-pointer transition-colors"
                         >
-                          <td className="px-5 py-3.5 text-kaja-blueText/70 font-medium">
-                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-light/60 text-xs font-mono">
+                          <td className="px-5 py-4">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-light/60 text-xs font-mono text-kaja-blueText/70">
                               {fmtHora(venta.fecha)}
                             </span>
                           </td>
-                          <td className="px-5 py-3.5 text-kaja-blueText/70">{venta.vendedor}</td>
-                          <td className="px-5 py-3.5 text-right text-kaja-blueText/50">{fmtEur(venta.baseImponible)}</td>
-                          <td className="px-5 py-3.5 text-right text-kaja-blueText/50">{fmtEur(venta.totalIva)}</td>
-                          <td className="px-5 py-3.5 text-right font-bold text-kaja-blueText">{fmtEur(venta.totalFinal)}</td>
-                          <td className="px-5 py-3.5 text-center">
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-kaja-orange">
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2.5">
+                              <img
+                                src={venta.imagenVendedor || DEFAULT_AVATAR}
+                                alt={venta.vendedor}
+                                className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                                onError={e => { e.target.src = DEFAULT_AVATAR }}
+                              />
+                              <span className="text-kaja-blueText/80 font-medium">{venta.vendedor}</span>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.baseImponible)}</td>
+                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.totalIva)}</td>
+                          <td className="px-5 py-4 text-right">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                              {fmtEur(venta.totalFinal)}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-center">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-bold text-kaja-blueText/70">
                               {venta.lineas.length} art.
                               {expandida === venta.id
                                 ? <ChevronUp   className="w-3.5 h-3.5" />
@@ -156,31 +170,32 @@ export default function VentasHoy() {
                           </td>
                         </tr>
 
-                        {/* ── Fila detalle (expandible) ────────────────────── */}
                         {expandida === venta.id && (
                           <tr key={`det-${venta.id}`}>
-                            <td colSpan={6} className="px-5 pb-3 pt-0 bg-kaja-light/20">
-                              <div className="rounded-xl overflow-hidden border border-gray-100 mt-1">
+                            <td colSpan={6} className="px-5 pb-4 pt-1 bg-kaja-light/20">
+                              <div className="rounded-xl overflow-hidden border border-kaja-light shadow-sm">
                                 <table className="w-full text-xs">
                                   <thead>
                                     <tr className="bg-gray-50">
-                                      <th className="px-4 py-2.5 text-left   text-[10px] font-bold uppercase tracking-widest text-gray-400">Producto</th>
-                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-gray-400">Cant.</th>
-                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-gray-400">P. Unit.</th>
-                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-gray-400">IVA</th>
-                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-gray-400">Subtotal</th>
+                                      <th className="px-4 py-2.5 text-left   text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Producto</th>
+                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Cant.</th>
+                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">P. Unit.</th>
+                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">IVA</th>
+                                      <th className="px-4 py-2.5 text-right  text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Subtotal</th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     {venta.lineas.map((linea, li) => (
-                                      <tr key={li} className="border-t border-gray-100">
-                                        <td className="px-4 py-2.5 font-medium text-kaja-blueText/70">{linea.producto}</td>
-                                        <td className="px-4 py-2.5 text-right text-gray-500">{linea.cantidad}</td>
-                                        <td className="px-4 py-2.5 text-right text-gray-500">
+                                      <tr key={li} className="border-t border-kaja-light">
+                                        <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{linea.producto}</td>
+                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono">{linea.cantidad}</td>
+                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 tabular-nums">
                                           {fmtEur(parseFloat(linea.subtotal) / parseFloat(linea.cantidad) / (1 + parseFloat(linea.ivaAplicado) / 100))}
                                         </td>
-                                        <td className="px-4 py-2.5 text-right text-gray-500">{parseFloat(linea.ivaAplicado).toFixed(0)}%</td>
-                                        <td className="px-4 py-2.5 text-right font-semibold text-kaja-blueText">{fmtEur(linea.subtotal)}</td>
+                                        <td className="px-4 py-2.5 text-right">
+                                          <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono">{parseFloat(linea.ivaAplicado).toFixed(0)}%</span>
+                                        </td>
+                                        <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText tabular-nums">{fmtEur(linea.subtotal)}</td>
                                       </tr>
                                     ))}
                                   </tbody>

@@ -379,87 +379,92 @@ export default function Usuarios({ usuario }) {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-x-auto mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm">
-                        <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] border-b border-gray-100 min-w-195">
-                            <div className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Nombre</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">NIF</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Rol</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Estado</div>
-                            <div className="px-3 py-3.5 text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Alta</div>
-                            <div className="px-3 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-kaja-blueText/40">Acc.</div>
-                        </div>
-
-                        {loading ? (
-                            <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
-                                <Loader2 className="w-5 h-5 animate-spin text-kaja-orange" />
-                                <span className="text-sm">Cargando usuarios…</span>
+                    <div className="flex-1 min-h-0 mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                        <div className="overflow-auto h-full">
+                            <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] min-w-195 bg-kaja-sidebar">
+                                <div className="px-5 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Nombre</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">NIF</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Rol</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Estado</div>
+                                <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Alta</div>
+                                <div className="px-3 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Acc.</div>
                             </div>
-                        ) : error ? (
-                            <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
-                        ) : usuarios.length === 0 ? (
-                            <div className="text-center py-16 text-gray-400 text-sm">Sin usuarios registrados</div>
-                        ) : (
-                            usuarios.map((u, i) => (
-                                <div
-                                    key={u.id}
-                                    className={`grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-195
-                                        text-sm border-b border-gray-50 hover:bg-gray-50 transition
-                                        ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}
-                                >
-                                    <div className="px-5 py-3 font-medium text-kaja-blueText flex items-center gap-2 min-w-0">
-                                        <img
-                                            src={u.imagen_perfil || DEFAULT_AVATAR}
-                                            alt={u.nombre}
-                                            className="w-7 h-7 rounded-full object-cover shrink-0"
-                                            onError={e => { e.target.src = DEFAULT_AVATAR }}
-                                        />
-                                        {u.nombre}
-                                    </div>
-                                    <div className="px-3 py-3 text-gray-500 font-mono text-xs">{u.nif}</div>
-                                    <div className="px-3 py-3">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            ${u.rol === 'Administrador'
-                                                ? 'bg-blue-100 text-blue-700'
-                                                : 'bg-orange-100 text-kaja-orange'}`}>
-                                            {u.rol}
-                                        </span>
-                                    </div>
-                                    <div className="px-3 py-3">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
-                                            ${u.estado === 'Activo'
-                                                ? 'bg-green-100 text-green-700'
-                                                : 'bg-red-100 text-red-600'}`}>
-                                            {u.estado}
-                                        </span>
-                                    </div>
-                                    <div className="px-3 py-3 text-gray-500 text-xs">
-                                        {new Date(u.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                                    </div>
-                                    <div className="px-3 py-3 flex justify-center gap-1">
-                                        <button
-                                            onClick={() => iniciarEdicion(u)}
-                                            className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
-                                            title="Editar usuario"
-                                        >
-                                            <Pencil className="w-4 h-4" />
-                                        </button>
-                                        {u.estado === 'Activo' && u.id !== usuario?.id && (
-                                            <button
-                                                onClick={() => handleDesactivar(u)}
-                                                disabled={procesando === u.id}
-                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
-                                                            disabled:opacity-40 disabled:cursor-not-allowed"
-                                                title="Desactivar usuario"
-                                            >
-                                                {procesando === u.id
-                                                    ? <Loader2 className="w-4 h-4 animate-spin" />
-                                                    : <UserX className="w-4 h-4" />}
-                                            </button>
-                                        )}
-                                    </div>
+
+                            {loading ? (
+                                <div className="flex items-center justify-center py-16 gap-2 text-gray-400">
+                                    <Loader2 className="w-5 h-5 animate-spin text-kaja-orange" />
+                                    <span className="text-sm">Cargando usuarios…</span>
                                 </div>
-                            ))
-                        )}
+                            ) : error ? (
+                                <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
+                            ) : usuarios.length === 0 ? (
+                                <div className="text-center py-16 text-gray-400 text-sm">Sin usuarios registrados</div>
+                            ) : (
+                                usuarios.map((u) => (
+                                    <div
+                                        key={u.id}
+                                        className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-195
+                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition"
+                                    >
+                                        <div className="px-5 py-3.5 font-medium text-kaja-blueText flex items-center gap-2.5 min-w-0">
+                                            <img
+                                                src={u.imagen_perfil || DEFAULT_AVATAR}
+                                                alt={u.nombre}
+                                                className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                                                onError={e => { e.target.src = DEFAULT_AVATAR }}
+                                            />
+                                            {u.nombre}
+                                        </div>
+                                        <div className="px-3 py-3.5">
+                                            <span className="text-xs font-mono text-kaja-blueText/60 bg-gray-50 px-2 py-1 rounded-md">{u.nif}</span>
+                                        </div>
+                                        <div className="px-3 py-3.5">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                                ${u.rol === 'Administrador'
+                                                    ? 'bg-blue-100 text-blue-700'
+                                                    : 'bg-orange-100 text-kaja-orange'}`}>
+                                                {u.rol}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5">
+                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                                ${u.estado === 'Activo'
+                                                    ? 'bg-emerald-100 text-emerald-700'
+                                                    : 'bg-red-100 text-red-600'}`}>
+                                                {u.estado}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5">
+                                            <span className="text-xs font-mono text-kaja-blueText/60">
+                                                {new Date(u.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                                            </span>
+                                        </div>
+                                        <div className="px-3 py-3.5 flex justify-center gap-1">
+                                            <button
+                                                onClick={() => iniciarEdicion(u)}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
+                                                title="Editar usuario"
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                            </button>
+                                            {u.estado === 'Activo' && u.id !== usuario?.id && (
+                                                <button
+                                                    onClick={() => handleDesactivar(u)}
+                                                    disabled={procesando === u.id}
+                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
+                                                                disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    title="Desactivar usuario"
+                                                >
+                                                    {procesando === u.id
+                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
+                                                        : <UserX className="w-4 h-4" />}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
