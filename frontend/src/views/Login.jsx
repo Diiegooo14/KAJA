@@ -16,12 +16,12 @@ function NavBar({ onLoginClick }) {
                 className="h-8 object-contain brightness-0 invert"
             />
             <div className="flex items-center gap-6">
-                <a
-                    href="#caracteristicas"
+                <button
+                    onClick={() => document.getElementById("caracteristicas").scrollIntoView({ behavior: "smooth" })}
                     className="text-sm text-white/50 hover:text-white transition hidden sm:block"
                 >
                     Características
-                </a>
+                </button>
                 <button
                     onClick={onLoginClick}
                     className="px-4 py-2 bg-kaja-orange text-white text-sm font-semibold rounded-lg hover:opacity-90 active:scale-[0.98] transition"
@@ -217,12 +217,12 @@ export default function Login({ onLogin, onRegistro }) {
                             >
                                 Empezar ahora <ArrowRight className="w-4 h-4" />
                             </button>
-                            <a
-                                href="#caracteristicas"
+                            <button
+                                onClick={() => document.getElementById("caracteristicas").scrollIntoView({ behavior: "smooth" })}
                                 className="px-6 py-3.5 bg-white/5 border border-white/10 text-white/80 font-medium rounded-xl hover:bg-white/10 transition flex items-center justify-center gap-2"
                             >
                                 Ver características <ChevronDown className="w-4 h-4" />
-                            </a>
+                            </button>
                         </div>
 
                         <div className="flex flex-col gap-2.5">
