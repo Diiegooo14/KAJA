@@ -4,10 +4,7 @@ import Register from './views/Register'
 import Dashboard from './views/Dashboard'
 
 export default function App() {
-    const [usuario, setUsuario] = useState(() => {
-        const stored = localStorage.getItem('kaja_user')
-        return stored ? JSON.parse(stored) : null
-    })
+    const [usuario, setUsuario] = useState(null)
     const [vista, setVista] = useState('login')
 
     function handleLogin(user) {
