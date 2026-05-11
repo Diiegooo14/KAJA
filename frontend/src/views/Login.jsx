@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+﻿import { useState, useRef } from 'react'
 import {
     Eye, EyeOff, ShoppingCart, BarChart3, Package,
     Users, TrendingUp, Zap, ChevronDown, ArrowRight,
@@ -172,6 +172,7 @@ export default function Login({ onLogin, onRegistro }) {
             const user = { nombre: data.nombre, rol: data.rol, imagen_perfil: data.imagen_perfil ?? null }
             localStorage.setItem('kaja_token', data.token)
             localStorage.setItem('kaja_user', JSON.stringify(user))
+            sessionStorage.setItem('kaja_user', JSON.stringify(user))
             if (onLogin) onLogin(user)
         } catch {
             setError('No se pudo conectar con el servidor')

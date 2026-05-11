@@ -4,7 +4,10 @@ import Register from './views/Register'
 import Dashboard from './views/Dashboard'
 
 export default function App() {
-    const [usuario, setUsuario] = useState(null)
+    const [usuario, setUsuario] = useState(() => {
+        const stored = sessionStorage.getItem('kaja_user')
+        return stored ? JSON.parse(stored) : null
+    })
     const [vista, setVista] = useState('login')
 
     function handleLogin(user) {
@@ -15,6 +18,7 @@ export default function App() {
     function handleLogout() {
         localStorage.removeItem('kaja_token')
         localStorage.removeItem('kaja_user')
+        sessionStorage.removeItem('kaja_user')
         setUsuario(null)
         setVista('login')
     }
@@ -22,6 +26,7 @@ export default function App() {
     function handleActualizarUsuario(userActualizado) {
         setUsuario(userActualizado)
         localStorage.setItem('kaja_user', JSON.stringify(userActualizado))
+        sessionStorage.setItem('kaja_user', JSON.stringify(userActualizado))
     }
 
     if (usuario) {
