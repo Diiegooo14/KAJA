@@ -264,6 +264,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Error al guardar')
       setMensajeEmpresa({ ok: true, texto: 'Datos de empresa actualizados correctamente' })
+      onActualizarEmpresa?.(formEmpresa)
     } catch (err) {
       setMensajeEmpresa({ ok: false, texto: err.message })
     } finally {
@@ -362,7 +363,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                 publicLabel="Logo"
                 onSubida={url => {
                   setEmpresa(prev => ({ ...prev, logo_empresa: url }))
-                  onActualizarEmpresa?.(url)
+                  onActualizarEmpresa?.({ logo_empresa: url })
                 }}
               />
               <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">

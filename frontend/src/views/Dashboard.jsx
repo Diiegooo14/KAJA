@@ -353,7 +353,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
       <Configuracion
         usuario={usuario}
         onActualizarUsuario={onActualizarUsuario}
-        onActualizarEmpresa={url => setEmpresa(prev => ({ ...prev, logo_empresa: url }))}
+        onActualizarEmpresa={datos => setEmpresa(prev => ({ ...prev, ...datos }))}
       />
     )
 
