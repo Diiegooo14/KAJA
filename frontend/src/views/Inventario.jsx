@@ -267,16 +267,16 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     function badgeStock(stock) {
         if (stock === 0)
-            return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Sin stock</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-700">Sin stock</span>
         if (stock <= 5)
-            return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">{stock} uds</span>
-        return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">{stock} uds</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-yellow-100 text-yellow-700">{stock} uds</span>
+        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700">{stock} uds</span>
     }
 
     function badgeEstado(estado) {
         if (estado === 'Activo')
-            return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Activo</span>
-        return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">Inactivo</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700">Activo</span>
+        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-700">Inactivo</span>
     }
 
     function inputCls(campo) {
@@ -431,14 +431,14 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-150">
                                 <thead>
-                                    <tr className="bg-kaja-sidebar border-b border-white/10">
-                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50 w-12">#</th>
-                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Nombre</th>
-                                        <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Categoría</th>
-                                        <th className="text-right px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">P. Coste</th>
-                                        <th className="text-right px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">P. Venta</th>
-                                        <th className="text-center px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Stock</th>
-                                        <th className="text-center px-4 py-3.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Estado</th>
+                                    <tr className="bg-kaja-sidebar">
+                                        <th className="text-left px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60 w-12">#</th>
+                                        <th className="text-left px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Nombre</th>
+                                        <th className="text-left px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Categoría</th>
+                                        <th className="text-right px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">P. Coste</th>
+                                        <th className="text-right px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">P. Venta</th>
+                                        <th className="text-center px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Stock</th>
+                                        <th className="text-center px-4 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Estado</th>
                                         <th className="w-20 bg-kaja-sidebar"></th>
                                     </tr>
                                 </thead>
@@ -446,19 +446,23 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     {productos.map((p, i) => (
                                         <tr key={p.id}
                                             onClick={() => abrirVisor(p)}
-                                            className={`border-b border-gray-50 hover:bg-kaja-light/30 transition cursor-pointer ${i % 2 !== 0 ? 'bg-gray-50/40' : ''}`}>
-                                            <td className="px-4 py-3 text-gray-400">{p.id}</td>
-                                            <td className="px-4 py-3 font-medium text-gray-800">{p.nombre}</td>
-                                            <td className="px-4 py-3">
-                                                <span className="px-2 py-0.5 rounded-full text-xs bg-kaja-light text-kaja-blue font-medium">
+                                            className="border-b border-gray-100 hover:bg-kaja-orange/5 transition cursor-pointer">
+                                            <td className="px-4 py-3.5 text-kaja-blueText/30 text-xs tabular-nums">{p.id}</td>
+                                            <td className="px-4 py-3.5 font-medium text-kaja-blueText">{p.nombre}</td>
+                                            <td className="px-4 py-3.5">
+                                                <span className="px-2.5 py-1 rounded-lg text-xs bg-kaja-light text-kaja-blueText/70 font-medium">
                                                     {p.categoria}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-right text-gray-600">{parseFloat(p.precioCoste).toFixed(2)} €</td>
-                                            <td className="px-4 py-3 text-right font-semibold text-kaja-blue">{parseFloat(p.precioVenta).toFixed(2)} €</td>
-                                            <td className="px-4 py-3 text-center">{badgeStock(p.stock)}</td>
-                                            <td className="px-4 py-3 text-center">{badgeEstado(p.estado)}</td>
-                                            <td className="px-3 py-3 text-center">
+                                            <td className="px-4 py-3.5 text-right text-kaja-blueText/40 text-xs tabular-nums">{parseFloat(p.precioCoste).toFixed(2)} €</td>
+                                            <td className="px-4 py-3.5 text-right">
+                                                <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                                                    {parseFloat(p.precioVenta).toFixed(2)} €
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-3.5 text-center">{badgeStock(p.stock)}</td>
+                                            <td className="px-4 py-3.5 text-center">{badgeEstado(p.estado)}</td>
+                                            <td className="px-3 py-3.5 text-center">
                                                 <div className="flex items-center justify-center gap-1">
                                                     <button
                                                         onClick={e => { e.stopPropagation(); abrirModal(p) }}
