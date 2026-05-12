@@ -267,10 +267,14 @@ export default function Usuarios({ usuario }) {
                                     value={form.nombre}
                                     onChange={handleChange}
                                     placeholder="Ej: Ana García"
+                                    maxLength={30}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 text-kaja-blueText transition"
                                 />
+                                {form.nombre.length === 30 && (
+                                    <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+                                )}
                             </div>
 
                             <div>
@@ -283,10 +287,14 @@ export default function Usuarios({ usuario }) {
                                     value={form.nif}
                                     onChange={handleChange}
                                     placeholder="Ej: 12345678A"
+                                    maxLength={9}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 text-kaja-blueText transition"
                                 />
+                                {form.nif.length === 9 && (
+                                    <p className="text-xs text-amber-500 mt-1">Límite de 9 caracteres alcanzado</p>
+                                )}
                             </div>
 
                             <div>
@@ -487,10 +495,14 @@ export default function Usuarios({ usuario }) {
                                     name="nombre"
                                     value={form.nombre}
                                     onChange={handleChange}
+                                    maxLength={30}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 text-kaja-blueText transition"
                                 />
+                                {form.nombre.length === 30 && (
+                                    <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">NIF</label>

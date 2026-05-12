@@ -52,7 +52,7 @@ function AvatarUpload({ preview, onSeleccionar, error, label }) {
   )
 }
 
-function Campo({ label, name, value, onChange, placeholder, error, type = 'text', autoComplete }) {
+function Campo({ label, name, value, onChange, placeholder, error, type = 'text', autoComplete, maxLength }) {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={name} className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -66,6 +66,7 @@ function Campo({ label, name, value, onChange, placeholder, error, type = 'text'
         onChange={onChange}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        maxLength={maxLength}
         className={`w-full px-4 py-3 rounded-xl border text-sm bg-gray-50 text-gray-900 placeholder-gray-400
           focus:outline-none focus:bg-white focus:ring-2 transition
           ${error
@@ -73,6 +74,9 @@ function Campo({ label, name, value, onChange, placeholder, error, type = 'text'
             : 'border-gray-200 focus:ring-kaja-orange/20 focus:border-kaja-orange/50'
           }`}
       />
+      {maxLength && value.length === maxLength && (
+        <p className="text-xs text-amber-500">Límite de {maxLength} caracteres alcanzado</p>
+      )}
       {error && <p className="text-xs text-rose-500">{error}</p>}
     </div>
   )
@@ -272,9 +276,9 @@ export default function Register({ onVolver }) {
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Campo label="NIF de la empresa *" name="empresaNif" value={form.empresaNif} onChange={handleChange} placeholder="B12345678" error={errores.empresaNif} />
+                  <Campo label="NIF de la empresa *" name="empresaNif" value={form.empresaNif} onChange={handleChange} placeholder="B12345678" error={errores.empresaNif} maxLength={9} />
                   <Campo label="Razón Social *" name="razonSocial" value={form.razonSocial} onChange={handleChange} placeholder="Empresa S.L." error={errores.razonSocial} />
-                  <Campo label="Nombre Comercial *" name="nombreComercial" value={form.nombreComercial} onChange={handleChange} placeholder="Mi Tienda" error={errores.nombreComercial} />
+                  <Campo label="Nombre Comercial *" name="nombreComercial" value={form.nombreComercial} onChange={handleChange} placeholder="Mi Tienda" error={errores.nombreComercial} maxLength={30} />
                   <Campo label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} placeholder="Calle Mayor 1" error={errores.direccion} />
                   <Campo label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} placeholder="600 000 000" error={errores.telefono} />
                   <Campo label="Email de la empresa" name="empresaEmail" value={form.empresaEmail} onChange={handleChange} placeholder="contacto@empresa.es" error={errores.empresaEmail} type="email" />
@@ -293,8 +297,8 @@ export default function Register({ onVolver }) {
                 />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <Campo label="NIF del administrador *" name="adminNif" value={form.adminNif} onChange={handleChange} placeholder="12345678A" error={errores.adminNif} />
-                  <Campo label="Nombre completo *" name="adminNombre" value={form.adminNombre} onChange={handleChange} placeholder="Ana García" error={errores.adminNombre} />
+                  <Campo label="NIF del administrador *" name="adminNif" value={form.adminNif} onChange={handleChange} placeholder="12345678A" error={errores.adminNif} maxLength={9} />
+                  <Campo label="Nombre completo *" name="adminNombre" value={form.adminNombre} onChange={handleChange} placeholder="Ana García" error={errores.adminNombre} maxLength={30} />
                   <Campo label="Contraseña *" name="adminPassword" value={form.adminPassword} onChange={handleChange} placeholder="Mínimo 8 caracteres" error={errores.adminPassword} type="password" autoComplete="new-password" />
                   <Campo label="Confirmar contraseña *" name="adminPasswordConfirm" value={form.adminPasswordConfirm} onChange={handleChange} placeholder="Repite la contraseña" error={errores.adminPasswordConfirm} type="password" autoComplete="new-password" />
                 </div>

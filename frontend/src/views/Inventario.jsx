@@ -737,8 +737,10 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     <input
                                         name="nombre" value={form.nombre} onChange={handleFormChange}
                                         placeholder="Ej: Coca-Cola 33cl"
+                                        maxLength={30}
                                         className={inputCls('nombre')}
                                     />
+                                    {form.nombre.length === 30 && <p className="mt-1 text-xs text-amber-500">Límite de 30 caracteres alcanzado</p>}
                                     {camposError.nombre && <p className="mt-1 text-xs text-red-500">{camposError.nombre}</p>}
                                 </div>
                                 <div>
