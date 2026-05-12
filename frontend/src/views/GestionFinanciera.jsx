@@ -13,15 +13,15 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-const API_URL        = import.meta.env.VITE_API_URL
+const API_URL = import.meta.env.VITE_API_URL
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
-const MESES     = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-const MESES_C   = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+const MESES_C = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
-const token     = () => localStorage.getItem('kaja_token')
-const authHdr   = () => ({ Authorization: `Bearer ${token()}` })
-const fmtEur    = v  => Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
-const fmtFecha  = iso => {
+const token = () => localStorage.getItem('kaja_token')
+const authHdr = () => ({ Authorization: `Bearer ${token()}` })
+const fmtEur = v => Number(v).toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })
+const fmtFecha = iso => {
   const d = new Date(iso)
   return d.toLocaleDateString('es-ES') + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 }
@@ -74,18 +74,18 @@ function SelectField({ label, value, onChange, options }) {
 
 function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
   const styles = {
-    default:  'bg-white border border-gray-100 text-kaja-blueText',
-    orange:   'bg-linear-to-br from-kaja-orange to-amber-500 text-white',
-    navy:     'bg-linear-to-br from-kaja-sidebar to-slate-700 text-white',
-    green:    'bg-linear-to-br from-emerald-500 to-teal-500 text-white',
-    red:      'bg-linear-to-br from-rose-500 to-red-600 text-white',
+    default: 'bg-white border border-gray-100 text-kaja-blueText',
+    orange: 'bg-linear-to-br from-kaja-orange to-amber-500 text-white',
+    navy: 'bg-linear-to-br from-kaja-sidebar to-slate-700 text-white',
+    green: 'bg-linear-to-br from-emerald-500 to-teal-500 text-white',
+    red: 'bg-linear-to-br from-rose-500 to-red-600 text-white',
   }
   const iconBg = {
     default: 'bg-kaja-light/60',
-    orange:  'bg-white/20',
-    navy:    'bg-white/20',
-    green:   'bg-white/20',
-    red:     'bg-white/20',
+    orange: 'bg-white/20',
+    navy: 'bg-white/20',
+    green: 'bg-white/20',
+    red: 'bg-white/20',
   }
   return (
     <div className={`rounded-2xl p-5 shadow-sm flex items-center gap-4 ${styles[variant]}`}>
@@ -179,11 +179,11 @@ const DATASETS = (ventas, gastos) => ({
 
 function TabVentas() {
   const ahora = new Date()
-  const [mes, setMes]           = useState(ahora.getMonth() + 1)
-  const [anio, setAnio]         = useState(ahora.getFullYear())
-  const [datos, setDatos]       = useState(null)
+  const [mes, setMes] = useState(ahora.getMonth() + 1)
+  const [anio, setAnio] = useState(ahora.getFullYear())
+  const [datos, setDatos] = useState(null)
   const [cargando, setCargando] = useState(false)
-  const [error, setError]       = useState(null)
+  const [error, setError] = useState(null)
   const [expandida, setExpandida] = useState(null)
 
   useEffect(() => {
@@ -197,7 +197,7 @@ function TabVentas() {
       .finally(() => setCargando(false))
   }, [mes, anio])
 
-  const ventas  = datos?.ventas  ?? []
+  const ventas = datos?.ventas ?? []
   const resumen = datos?.resumen ?? {}
 
   return (
@@ -361,11 +361,11 @@ function TabVentas() {
 
 function TabResumenMensual() {
   const ahora = new Date()
-  const [mes, setMes]           = useState(ahora.getMonth() + 1)
-  const [anio, setAnio]         = useState(ahora.getFullYear())
-  const [datos, setDatos]       = useState(null)
+  const [mes, setMes] = useState(ahora.getMonth() + 1)
+  const [anio, setAnio] = useState(ahora.getFullYear())
+  const [datos, setDatos] = useState(null)
   const [cargando, setCargando] = useState(false)
-  const [error, setError]       = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setCargando(true)
@@ -379,12 +379,12 @@ function TabResumenMensual() {
 
   const ventas = datos?.ventas ?? []
   const gastos = datos?.gastos ?? []
-  const dias   = datos?.dias   ?? 0
+  const dias = datos?.dias ?? 0
 
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
-  const beneficio   = totalVentas - totalGastos
-  const positivo    = beneficio >= 0
+  const beneficio = totalVentas - totalGastos
+  const positivo = beneficio >= 0
 
   const chartData = {
     labels: dias > 0 ? Array.from({ length: dias }, (_, i) => String(i + 1)) : [],
@@ -410,9 +410,9 @@ function TabResumenMensual() {
 
       {!cargando && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <KpiCard label={`Ventas ${MESES[mes - 1]}`}  value={fmtEur(totalVentas)} icon={TrendingUp}   variant="orange" />
-          <KpiCard label={`Gastos ${MESES[mes - 1]}`}  value={fmtEur(totalGastos)} icon={TrendingDown}  variant="navy"   />
-          <KpiCard label={`Beneficio ${MESES[mes - 1]}`} value={fmtEur(beneficio)} icon={Wallet}       variant={positivo ? 'green' : 'red'} />
+          <KpiCard label={`Ventas ${MESES[mes - 1]}`} value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" />
+          <KpiCard label={`Gastos ${MESES[mes - 1]}`} value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy" />
+          <KpiCard label={`Beneficio ${MESES[mes - 1]}`} value={fmtEur(beneficio)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
         </div>
       )}
 
@@ -441,10 +441,10 @@ function TabResumenMensual() {
 // ─── Tab Resumen Anual ─────────────────────────────────────────────────────────
 
 function TabResumenAnual() {
-  const [anio, setAnio]         = useState(new Date().getFullYear())
-  const [datos, setDatos]       = useState(null)
+  const [anio, setAnio] = useState(new Date().getFullYear())
+  const [datos, setDatos] = useState(null)
   const [cargando, setCargando] = useState(false)
-  const [error, setError]       = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     setCargando(true)
@@ -461,8 +461,8 @@ function TabResumenAnual() {
 
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
-  const beneficio   = totalVentas - totalGastos
-  const positivo    = beneficio >= 0
+  const beneficio = totalVentas - totalGastos
+  const positivo = beneficio >= 0
 
   const chartData = { labels: MESES_C, ...DATASETS(ventas, gastos) }
 
@@ -475,9 +475,9 @@ function TabResumenAnual() {
 
       {!cargando && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <KpiCard label={`Ventas ${anio}`}    value={fmtEur(totalVentas)} icon={TrendingUp}  variant="orange" />
-          <KpiCard label={`Gastos ${anio}`}    value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy"   />
-          <KpiCard label={`Beneficio ${anio}`} value={fmtEur(beneficio)}   icon={Wallet}      variant={positivo ? 'green' : 'red'} />
+          <KpiCard label={`Ventas ${anio}`} value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" />
+          <KpiCard label={`Gastos ${anio}`} value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy" />
+          <KpiCard label={`Beneficio ${anio}`} value={fmtEur(beneficio)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
         </div>
       )}
 
@@ -503,19 +503,19 @@ function TabResumenAnual() {
 // ─── Componente principal ──────────────────────────────────────────────────────
 
 const TABS = [
-  { id: 'ventas',   label: 'Ventas',           icon: ReceiptText  },
-  { id: 'mensual',  label: 'Resumen mensual',   icon: BarChart3    },
-  { id: 'anual',    label: 'Resumen anual',     icon: CalendarDays },
+  { id: 'ventas', label: 'Ventas', icon: ReceiptText },
+  { id: 'mensual', label: 'Resumen mensual', icon: BarChart3 },
+  { id: 'anual', label: 'Resumen anual', icon: CalendarDays },
 ]
 
 export default function GestionFinanciera() {
   const [tab, setTab] = useState('ventas')
 
   return (
-    <div className="flex flex-col h-full bg-gray-50/50">
+    <div className="flex flex-col h-full overflow-hidden bg-gray-50/50">
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-4 sm:px-8 pt-5 sm:pt-7 pb-0 shrink-0">
+      <div className="bg-white border-b border-gray-100 px-4 sm:px-8 pt-5 sm:pt-7 pb-0 shrink-0" >
         <div className="flex items-end justify-between mb-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Panel</p>
@@ -545,10 +545,10 @@ export default function GestionFinanciera() {
       </div>
 
       {/* Contenido */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 sm:py-6">
-        {tab === 'ventas'  && <TabVentas />}
+      <div className="flex-1 overflow-y-auto scrollbar-none px-4 sm:px-8 py-5 sm:py-6">
+        {tab === 'ventas' && <TabVentas />}
         {tab === 'mensual' && <TabResumenMensual />}
-        {tab === 'anual'   && <TabResumenAnual />}
+        {tab === 'anual' && <TabResumenAnual />}
       </div>
 
     </div>

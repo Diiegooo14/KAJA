@@ -6,3 +6,11 @@
 	--color-kaja-light:    #f0f4ff;
 	--color-kaja-sidebar:  #1a1f36;
 }
+
+* {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+	display: none;
+}

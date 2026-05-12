@@ -501,7 +501,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-kaja-light flex flex-col">
+        <main className={`flex-1 bg-kaja-light flex flex-col ${seccionActiva === 'financiero' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {renderContenido()}
         </main>
 
