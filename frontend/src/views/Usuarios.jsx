@@ -231,11 +231,11 @@ export default function Usuarios({ usuario }) {
                     <h1 className="text-xl font-bold text-kaja-blueText">Gestión de Usuarios</h1>
                 </div>
                 <button
-                    onClick={() => setMostrarForm(v => !v)}
+                    onClick={() => setMostrarForm(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition shrink-0"
                 >
-                    {mostrarForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    {mostrarForm ? 'Cerrar' : editando ? 'Editar usuario' : 'Nuevo usuario'}
+                    <Plus className="w-4 h-4" />
+                    Nuevo usuario
                 </button>
             </div>
 
@@ -244,22 +244,16 @@ export default function Usuarios({ usuario }) {
                 {/* Panel izquierdo — formulario */}
                 <div className={"w-full lg:w-80 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col bg-white" + (mostrarForm ? "" : " hidden")}>
                     <div className="p-5">
-                        <h2 className="text-m font-bold text-kaja-blueText mb-4">
-                            {editando ? 'Editar Usuario' : 'Nuevo Empleado'}
-                        </h2>
-
-                        {editando && (
-                            <FotoUsuario
-                                idUsuario={editando.id}
-                                imagenActual={editando.imagen_perfil}
-                                nombre={editando.nombre}
-                                onSubida={url => {
-                                    setEditando(prev => ({ ...prev, imagen_perfil: url }))
-                                    setUsuarios(prev => prev.map(u => u.id === editando.id ? { ...u, imagen_perfil: url } : u))
-                                    mostrarToast('Foto actualizada correctamente')
-                                }}
-                            />
-                        )}
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-m font-bold text-kaja-blueText">Nuevo Empleado</h2>
+                            <button
+                                type="button"
+                                onClick={() => setMostrarForm(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-kaja-sidebar hover:bg-gray-100 transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
 
@@ -281,27 +275,23 @@ export default function Usuarios({ usuario }) {
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    NIF {!editando && <span className="text-red-400">*</span>}
+                                    NIF <span className="text-red-400">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     name="nif"
                                     value={form.nif}
                                     onChange={handleChange}
-                                    disabled={!!editando}
                                     placeholder="Ej: 12345678A"
-                                    className={`w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm transition
-                                        ${editando
-                                            ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
-                                            : 'focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange text-kaja-blueText'}`}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
+                                                focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
+                                                text-kaja-blueText transition"
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    {editando
-                                        ? 'Nueva contraseña (vacío para no cambiar)'
-                                        : <> Contraseña <span className="text-red-400">*</span></>}
+                                    Contraseña <span className="text-red-400">*</span>
                                 </label>
                                 <input
                                     type="password"
@@ -345,19 +335,8 @@ export default function Usuarios({ usuario }) {
                             >
                                 {guardando
                                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando…</>
-                                    : editando ? 'Guardar Cambios' : 'Crear Usuario'}
+                                    : 'Crear Usuario'}
                             </button>
-
-                            {editando && (
-                                <button
-                                    type="button"
-                                    onClick={cancelarEdicion}
-                                    className="w-full py-2.5 border border-gray-200 text-kaja-blueText font-medium rounded-xl
-                                                hover:bg-gray-50 active:scale-95 transition flex items-center justify-center gap-2"
-                                >
-                                    <X className="w-4 h-4" /> Cancelar
-                                </button>
-                            )}
                         </form>
                     </div>
                 </div>
@@ -443,7 +422,7 @@ export default function Usuarios({ usuario }) {
                                         </div>
                                         <div className="px-3 py-3.5 flex justify-center gap-1">
                                             <button
-                                                onClick={e => { e.stopPropagation(); iniciarEdicion(u); setMostrarForm(true) }}
+                                                onClick={e => { e.stopPropagation(); iniciarEdicion(u) }}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
                                                 title="Editar usuario"
                                             >
@@ -470,6 +449,115 @@ export default function Usuarios({ usuario }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal editar usuario */}
+            {editando && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cancelarEdicion} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold text-kaja-blueText flex items-center gap-2">
+                                <Pencil className="w-5 h-5 text-kaja-orange" />
+                                Editar usuario
+                            </h2>
+                            <button onClick={cancelarEdicion}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <FotoUsuario
+                            idUsuario={editando.id}
+                            imagenActual={editando.imagen_perfil}
+                            nombre={editando.nombre}
+                            onSubida={url => {
+                                setEditando(prev => ({ ...prev, imagen_perfil: url }))
+                                setUsuarios(prev => prev.map(u => u.id === editando.id ? { ...u, imagen_perfil: url } : u))
+                                mostrarToast('Foto actualizada correctamente')
+                            }}
+                        />
+
+                        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                    Nombre completo <span className="text-red-400">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    name="nombre"
+                                    value={form.nombre}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
+                                                focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
+                                                text-kaja-blueText transition"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">NIF</label>
+                                <input
+                                    type="text"
+                                    value={editando.nif}
+                                    disabled
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                    Nueva contraseña <span className="text-gray-400 font-normal">(vacío para no cambiar)</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    value={form.password}
+                                    onChange={handleChange}
+                                    placeholder="Mínimo 8 caracteres"
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
+                                                focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                                    Rol <span className="text-red-400">*</span>
+                                </label>
+                                <select
+                                    name="rol"
+                                    value={form.rol}
+                                    onChange={handleChange}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm cursor-pointer
+                                                focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
+                                                text-kaja-blueText transition"
+                                >
+                                    <option value="Empleado">Empleado</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                            {formError && (
+                                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
+                            )}
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={cancelarEdicion}
+                                    className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={guardando}
+                                    className="flex-1 py-2.5 bg-kaja-orange text-white font-bold rounded-xl
+                                                hover:brightness-90 active:scale-95 transition
+                                                disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {guardando
+                                        ? <><Loader2 className="w-4 h-4 animate-spin" /> Guardando…</>
+                                        : 'Guardar cambios'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Modal detalle usuario */}
             {usuarioVisor && (
@@ -534,7 +622,7 @@ export default function Usuarios({ usuario }) {
                                 Cerrar
                             </button>
                             <button
-                                onClick={() => { setUsuarioVisor(null); iniciarEdicion(usuarioVisor); setMostrarForm(true) }}
+                                onClick={() => { setUsuarioVisor(null); iniciarEdicion(usuarioVisor) }}
                                 className="flex-1 py-2.5 bg-kaja-orange text-white rounded-lg text-sm font-semibold
                                            hover:brightness-90 active:scale-95 transition flex items-center justify-center gap-2">
                                 <Pencil className="w-4 h-4" /> Editar
