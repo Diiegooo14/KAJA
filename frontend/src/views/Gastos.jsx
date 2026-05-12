@@ -1,5 +1,5 @@
 ﻿import { useEffect, useState } from 'react'
-import { Trash2, Loader2, Plus, X } from 'lucide-react'
+import { Trash2, Loader2, Plus, X, Receipt } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -46,6 +46,7 @@ export default function Gastos() {
     const [eliminando, setEliminando] = useState(null)
     const [toast, setToast] = useState('')
     const [mostrarForm, setMostrarForm] = useState(false)
+    const [gastoVisor, setGastoVisor] = useState(null)
 
     function mostrarToast(msg) {
         setToast(msg)
@@ -310,8 +311,9 @@ export default function Gastos() {
                                 gastos.map((g) => (
                                     <div
                                         key={g.id}
+                                        onClick={() => setGastoVisor(g)}
                                         className="grid grid-cols-[1fr_120px_140px_120px_64px] items-center min-w-140
-                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition"
+                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition cursor-pointer"
                                     >
                                         <div className="px-5 py-3.5 font-medium text-kaja-blueText">{g.concepto}</div>
                                         <div className="px-3 py-3.5">
@@ -334,7 +336,7 @@ export default function Gastos() {
                                         </div>
                                         <div className="px-3 py-3.5 flex justify-center">
                                             <button
-                                                onClick={() => handleEliminar(g.id)}
+                                                onClick={e => { e.stopPropagation(); handleEliminar(g.id) }}
                                                 disabled={eliminando === g.id}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
                                                             disabled:opacity-40 disabled:cursor-not-allowed"
@@ -352,6 +354,72 @@ export default function Gastos() {
                     </div>
                 </div>
             </div>
+            {/* Modal detalle gasto */}
+            {gastoVisor && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setGastoVisor(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold text-kaja-blueText flex items-center gap-2">
+                                <Receipt className="w-5 h-5 text-kaja-orange" />
+                                Detalle del gasto
+                            </h2>
+                            <button onClick={() => setGastoVisor(null)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Concepto</p>
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">{gastoVisor.concepto}</p>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tipo</p>
+                                    <div className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg">
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                            ${gastoVisor.tipo === 'Fijo'
+                                                ? 'bg-blue-100 text-blue-700'
+                                                : 'bg-orange-100 text-kaja-orange'}`}>
+                                            {gastoVisor.tipo}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Importe</p>
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold text-kaja-orange">
+                                        {parseFloat(gastoVisor.importe).toFixed(2)} €
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Fecha</p>
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-mono text-kaja-blueText/70">
+                                    {new Date(gastoVisor.fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setGastoVisor(null)}
+                                className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                                Cerrar
+                            </button>
+                            <button
+                                onClick={() => { setGastoVisor(null); handleEliminar(gastoVisor.id) }}
+                                disabled={eliminando === gastoVisor.id}
+                                className="flex-1 py-2.5 bg-red-500 text-white rounded-lg text-sm font-semibold
+                                           hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                                {eliminando === gastoVisor.id
+                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
+                                    : <><Trash2 className="w-4 h-4" /> Eliminar</>}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

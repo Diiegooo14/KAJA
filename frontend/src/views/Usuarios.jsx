@@ -121,6 +121,7 @@ export default function Usuarios({ usuario }) {
     const [procesando, setProcesando] = useState(null)
     const [toast, setToast] = useState('')
     const [mostrarForm, setMostrarForm] = useState(false)
+    const [usuarioVisor, setUsuarioVisor] = useState(null)
 
     function mostrarToast(msg) {
         setToast(msg)
@@ -403,8 +404,9 @@ export default function Usuarios({ usuario }) {
                                 usuarios.map((u) => (
                                     <div
                                         key={u.id}
+                                        onClick={() => setUsuarioVisor(u)}
                                         className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-195
-                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition"
+                                            text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition cursor-pointer"
                                     >
                                         <div className="px-5 py-3.5 font-medium text-kaja-blueText flex items-center gap-2.5 min-w-0">
                                             <img
@@ -441,7 +443,7 @@ export default function Usuarios({ usuario }) {
                                         </div>
                                         <div className="px-3 py-3.5 flex justify-center gap-1">
                                             <button
-                                                onClick={() => iniciarEdicion(u)}
+                                                onClick={e => { e.stopPropagation(); iniciarEdicion(u); setMostrarForm(true) }}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
                                                 title="Editar usuario"
                                             >
@@ -449,7 +451,7 @@ export default function Usuarios({ usuario }) {
                                             </button>
                                             {u.estado === 'Activo' && u.id !== usuario?.id && (
                                                 <button
-                                                    onClick={() => handleDesactivar(u)}
+                                                    onClick={e => { e.stopPropagation(); handleDesactivar(u) }}
                                                     disabled={procesando === u.id}
                                                     className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
                                                                 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -468,6 +470,79 @@ export default function Usuarios({ usuario }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal detalle usuario */}
+            {usuarioVisor && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setUsuarioVisor(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-lg font-bold text-kaja-blueText">Detalle del usuario</h2>
+                            <button onClick={() => setUsuarioVisor(null)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-4 mb-5 pb-5 border-b border-gray-100">
+                            <img
+                                src={usuarioVisor.imagen_perfil || DEFAULT_AVATAR}
+                                alt={usuarioVisor.nombre}
+                                className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0"
+                                onError={e => { e.target.src = DEFAULT_AVATAR }}
+                            />
+                            <div>
+                                <p className="font-bold text-kaja-blueText">{usuarioVisor.nombre}</p>
+                                <span className={`inline-flex items-center mt-1 px-2.5 py-0.5 rounded-lg text-xs font-semibold
+                                    ${usuarioVisor.rol === 'Administrador'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-orange-100 text-kaja-orange'}`}>
+                                    {usuarioVisor.rol}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">NIF</p>
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-mono text-gray-800">{usuarioVisor.nif}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Estado</p>
+                                    <div className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg">
+                                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
+                                            ${usuarioVisor.estado === 'Activo'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-red-100 text-red-600'}`}>
+                                            {usuarioVisor.estado}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Fecha de alta</p>
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-mono text-kaja-blueText/70">
+                                    {new Date(usuarioVisor.fechaCreacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button onClick={() => setUsuarioVisor(null)}
+                                className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                                Cerrar
+                            </button>
+                            <button
+                                onClick={() => { setUsuarioVisor(null); iniciarEdicion(usuarioVisor); setMostrarForm(true) }}
+                                className="flex-1 py-2.5 bg-kaja-orange text-white rounded-lg text-sm font-semibold
+                                           hover:brightness-90 active:scale-95 transition flex items-center justify-center gap-2">
+                                <Pencil className="w-4 h-4" /> Editar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
