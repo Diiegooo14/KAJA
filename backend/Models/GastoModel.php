@@ -36,6 +36,24 @@ class GastoModel
         return (int) $pdo->lastInsertId();
     }
 
+    public static function actualizar(int $id, int $idEmpresa, array $datos): bool
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare(
+            'UPDATE GASTO SET idTipoGasto = :idTipoGasto, concepto = :concepto, importe = :importe, fechaRegistro = :fechaRegistro
+             WHERE id = :id AND idEmpresa = :idEmpresa'
+        );
+        $stmt->execute([
+            ':idTipoGasto'   => $datos['idTipoGasto'],
+            ':concepto'      => $datos['concepto'],
+            ':importe'       => $datos['importe'],
+            ':fechaRegistro' => $datos['fecha'],
+            ':id'            => $id,
+            ':idEmpresa'     => $idEmpresa,
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
     public static function eliminar(int $id, int $idEmpresa): bool
     {
         $pdo  = Database::connect();

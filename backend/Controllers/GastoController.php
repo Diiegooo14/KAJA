@@ -80,6 +80,65 @@ class GastoController
         }
     }
 
+    public static function actualizar(): void
+    {
+        $carga     = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
+
+        $datos    = json_decode(file_get_contents('php://input'), true) ?? [];
+        $id       = (int) ($datos['id'] ?? 0);
+        $tipo     = $datos['tipo'] ?? '';
+        $concepto = trim($datos['concepto'] ?? '');
+        $importe  = (float) ($datos['importe'] ?? 0);
+        $fecha    = $datos['fecha'] ?? '';
+
+        if ($id <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID de gasto no válido']);
+            return;
+        }
+        if (!in_array($tipo, ['Fijo', 'Variable'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'El tipo debe ser Fijo o Variable']);
+            return;
+        }
+        if ($concepto === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'El concepto es obligatorio']);
+            return;
+        }
+        if ($importe <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'El importe debe ser mayor que 0']);
+            return;
+        }
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $fecha)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'La fecha no es válida']);
+            return;
+        }
+
+        try {
+            $idTipoGasto = GastoModel::idTipoGasto($tipo);
+            if (!$idTipoGasto) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Tipo de gasto no encontrado en la base de datos']);
+                return;
+            }
+
+            $actualizado = GastoModel::actualizar($id, $idEmpresa, compact('idTipoGasto', 'concepto', 'importe', 'fecha'));
+            if (!$actualizado) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Gasto no encontrado']);
+                return;
+            }
+            echo json_encode(['mensaje' => 'Gasto actualizado']);
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function eliminar(): void
     {
         $carga     = Jwt::requerirAdministrador();
