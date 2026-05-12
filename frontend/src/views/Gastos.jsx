@@ -228,11 +228,11 @@ export default function Gastos() {
                     </select>
                 </div>
                 <button
-                    onClick={() => setMostrarForm(v => !v)}
+                    onClick={() => setMostrarForm(true)}
                     className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold rounded-xl hover:opacity-90 active:scale-[0.98] transition shrink-0"
                 >
-                    {mostrarForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                    {mostrarForm ? 'Cerrar' : 'Registrar gasto'}
+                    <Plus className="w-4 h-4" />
+                    Registrar gasto
                 </button>
             </div>
 
@@ -242,9 +242,16 @@ export default function Gastos() {
                 {/* Panel izquierdo — formulario */}
                 <div className={"w-full lg:w-80 lg:shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 flex flex-col bg-white" + (mostrarForm ? "" : " hidden")}>
                     <div className="p-5">
-                        <h2 className="text-m font-bold text-kaja-blueText flex items-center gap-2 mb-5">
-                            Registrar Gasto
-                        </h2>
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className="text-m font-bold text-kaja-blueText">Registrar Gasto</h2>
+                            <button
+                                type="button"
+                                onClick={() => setMostrarForm(false)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-kaja-sidebar hover:bg-gray-100 transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
 
                         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
 
