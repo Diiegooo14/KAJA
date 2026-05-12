@@ -97,6 +97,22 @@ class UsuarioModel
             ->execute([':id' => $id]);
     }
 
+    public static function tieneVentas(int $id): bool
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM VENTA WHERE idUsuario = :id');
+        $stmt->execute([':id' => $id]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function eliminar(int $id, int $idEmpresa): bool
+    {
+        $pdo  = Database::connect();
+        $stmt = $pdo->prepare('DELETE FROM USUARIO WHERE id = :id AND idEmpresa = :idEmpresa');
+        $stmt->execute([':id' => $id, ':idEmpresa' => $idEmpresa]);
+        return $stmt->rowCount() > 0;
+    }
+
     public static function listarPorEmpresa(int $idEmpresa): array
     {
         $pdo      = Database::connect();

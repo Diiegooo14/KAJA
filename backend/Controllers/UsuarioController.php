@@ -20,7 +20,7 @@ class UsuarioController
                     'inactivos' => $total - $activos,
                 ],
             ]);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }
@@ -46,7 +46,7 @@ class UsuarioController
                 return;
             }
             echo json_encode(['usuario' => $usuario]);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }
@@ -108,7 +108,7 @@ class UsuarioController
 
             http_response_code(201);
             echo json_encode(['id' => $id, 'mensaje' => 'Usuario creado correctamente']);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }
@@ -174,6 +174,21 @@ class UsuarioController
                 $parametros[':password'] = password_hash($datos['password'], PASSWORD_DEFAULT);
             }
 
+            if (isset($datos['estado'])) {
+                if (!in_array($datos['estado'], ['Activo', 'Inactivo'])) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'Estado no válido']);
+                    return;
+                }
+                if ($id === (int) $carga['id']) {
+                    http_response_code(400);
+                    echo json_encode(['error' => 'No puedes cambiar tu propio estado']);
+                    return;
+                }
+                $campos[]              = 'estado = :estado';
+                $parametros[':estado'] = $datos['estado'];
+            }
+
             if (empty($campos)) {
                 http_response_code(400);
                 echo json_encode(['error' => 'No se proporcionaron campos para actualizar']);
@@ -182,7 +197,7 @@ class UsuarioController
 
             UsuarioModel::actualizar($id, $campos, $parametros);
             echo json_encode(['mensaje' => 'Usuario actualizado correctamente']);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }
@@ -227,7 +242,7 @@ class UsuarioController
         } catch (\RuntimeException $e) {
             http_response_code(502);
             echo json_encode(['error' => $e->getMessage()]);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }
@@ -261,7 +276,7 @@ class UsuarioController
 
             UsuarioModel::desactivar($id);
             echo json_encode(['mensaje' => 'Usuario desactivado correctamente']);
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);
         }

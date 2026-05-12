@@ -1,10 +1,10 @@
 ﻿import { useEffect, useRef, useState } from 'react'
-import { Camera, Pencil, UserX, Loader2, X, Plus } from 'lucide-react'
+import { Camera, Pencil, Loader2, X, Plus } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 
-const FORM_VACIO = { nombre: '', nif: '', password: '', rol: 'Empleado' }
+const FORM_VACIO = { nombre: '', nif: '', password: '', rol: 'Empleado', estado: '' }
 
 function headers() {
     return {
@@ -152,7 +152,7 @@ export default function Usuarios({ usuario }) {
 
     function iniciarEdicion(u) {
         setEditando(u)
-        setForm({ nombre: u.nombre, nif: u.nif, password: '', rol: u.rol })
+        setForm({ nombre: u.nombre, nif: u.nif, password: '', rol: u.rol, estado: u.estado })
         setFormError('')
     }
 
@@ -175,6 +175,7 @@ export default function Usuarios({ usuario }) {
             if (editando) {
                 const body = { nombre: form.nombre.trim(), rol: form.rol }
                 if (form.password) body.password = form.password
+                if (form.estado) body.estado = form.estado
                 await fetchJSON(`${API_URL}/usuarios?id=${editando.id}`, {
                     method: 'PUT',
                     body: JSON.stringify(body),
@@ -202,19 +203,6 @@ export default function Usuarios({ usuario }) {
         }
     }
 
-    async function handleDesactivar(u) {
-        setProcesando(u.id)
-        try {
-            await fetchJSON(`${API_URL}/usuarios?id=${u.id}`, { method: 'DELETE' })
-            mostrarToast(`${u.nombre} desactivado`)
-            if (editando?.id === u.id) cancelarEdicion()
-            await cargar()
-        } catch (e) {
-            mostrarToast('Error: ' + e.message)
-        } finally {
-            setProcesando(null)
-        }
-    }
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
@@ -436,19 +424,6 @@ export default function Usuarios({ usuario }) {
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
-                                            {u.estado === 'Activo' && u.id !== usuario?.id && (
-                                                <button
-                                                    onClick={e => { e.stopPropagation(); handleDesactivar(u) }}
-                                                    disabled={procesando === u.id}
-                                                    className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
-                                                                disabled:opacity-40 disabled:cursor-not-allowed"
-                                                    title="Desactivar usuario"
-                                                >
-                                                    {procesando === u.id
-                                                        ? <Loader2 className="w-4 h-4 animate-spin" />
-                                                        : <UserX className="w-4 h-4" />}
-                                                </button>
-                                            )}
                                         </div>
                                     </div>
                                 ))
@@ -543,6 +518,22 @@ export default function Usuarios({ usuario }) {
                                     <option value="Administrador">Administrador</option>
                                 </select>
                             </div>
+                            {editando.id !== usuario?.id && (
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-600 mb-1">Estado</label>
+                                    <select
+                                        name="estado"
+                                        value={form.estado}
+                                        onChange={handleChange}
+                                        className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm cursor-pointer
+                                                    focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
+                                                    text-kaja-blueText transition"
+                                    >
+                                        <option value="Activo">Activo</option>
+                                        <option value="Inactivo">Inactivo</option>
+                                    </select>
+                                </div>
+                            )}
                             {formError && (
                                 <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
                             )}
@@ -567,6 +558,7 @@ export default function Usuarios({ usuario }) {
                                 </button>
                             </div>
                         </form>
+
                     </div>
                 </div>
             )}
