@@ -188,7 +188,6 @@ export default function Gastos() {
         }
     }
 
-    const anios = Array.from({ length: 5 }, (_, i) => hoy.getFullYear() - 2 + i)
 
     return (
         <div className="flex flex-col h-full overflow-hidden">
@@ -218,14 +217,15 @@ export default function Gastos() {
                             <option key={i + 1} value={i + 1}>{m}</option>
                         ))}
                     </select>
-                    <select
+                    <input
+                        type="text"
+                        inputMode="numeric"
                         value={anio}
-                        onChange={e => setAnio(Number(e.target.value))}
+                        onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); setAnio(v ? Number(v) : '') }}
+                        maxLength={4}
                         className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-kaja-blueText
-                                    focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 cursor-pointer"
-                    >
-                        {anios.map(a => <option key={a} value={a}>{a}</option>)}
-                    </select>
+                                    focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 w-24"
+                    />
                 </div>
                 <button
                     onClick={() => setMostrarForm(true)}

@@ -25,10 +25,6 @@ const fmtFecha  = iso => {
   const d = new Date(iso)
   return d.toLocaleDateString('es-ES') + ' · ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
 }
-const anios = () => {
-  const y = new Date().getFullYear()
-  return Array.from({ length: y - 2023 }, (_, i) => 2024 + i)
-}
 
 // ─── Shared UI ────────────────────────────────────────────────────────────────
 
@@ -36,6 +32,22 @@ function Filtros({ children }) {
   return (
     <div className="flex flex-wrap gap-3 items-end mb-6">
       {children}
+    </div>
+  )
+}
+
+function NumberField({ label, value, onChange }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[11px] font-bold text-kaja-blueText/50 uppercase tracking-widest">{label}</label>
+      <input
+        type="text"
+        inputMode="numeric"
+        value={value}
+        onChange={e => { const v = e.target.value.replace(/\D/g, '').slice(0, 4); onChange(v ? Number(v) : '') }}
+        maxLength={4}
+        className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-medium text-kaja-blueText shadow-sm focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 w-24"
+      />
     </div>
   )
 }
@@ -198,12 +210,7 @@ function TabVentas() {
           onChange={setMes}
           options={MESES.map((m, i) => ({ value: i + 1, label: m }))}
         />
-        <SelectField
-          label="Año"
-          value={anio}
-          onChange={setAnio}
-          options={anios().map(a => ({ value: a, label: String(a) }))}
-        />
+        <NumberField label="Año" value={anio} onChange={setAnio} />
         <div className="ml-auto self-end flex items-center gap-2 text-sm text-kaja-blueText/50 font-medium pb-0.5">
           <Calendar className="w-4 h-4" />
           {MESES[mes - 1]} {anio}
@@ -394,12 +401,7 @@ function TabResumenMensual() {
           onChange={setMes}
           options={MESES.map((m, i) => ({ value: i + 1, label: m }))}
         />
-        <SelectField
-          label="Año"
-          value={anio}
-          onChange={setAnio}
-          options={anios().map(a => ({ value: a, label: String(a) }))}
-        />
+        <NumberField label="Año" value={anio} onChange={setAnio} />
         <div className="ml-auto self-end flex items-center gap-2 text-sm text-kaja-blueText/50 font-medium pb-0.5">
           <Calendar className="w-4 h-4" />
           {MESES[mes - 1]} {anio}
@@ -468,12 +470,7 @@ function TabResumenAnual() {
     <div className="flex flex-col gap-5 animate-fade-in">
 
       <Filtros>
-        <SelectField
-          label="Año"
-          value={anio}
-          onChange={setAnio}
-          options={anios().map(a => ({ value: a, label: String(a) }))}
-        />
+        <NumberField label="Año" value={anio} onChange={setAnio} />
       </Filtros>
 
       {!cargando && !error && (
