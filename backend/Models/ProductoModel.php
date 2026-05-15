@@ -24,8 +24,8 @@ class ProductoModel
         $parametros = [':idEmpresa' => $idEmpresa];
 
         if ($busqueda !== '') {
-            $sql .= ' AND p.nombre LIKE :busqueda';
-            $parametros[':busqueda'] = "%$busqueda%";
+            $sql .= ' AND LOWER(p.nombre) LIKE :busqueda';
+            $parametros[':busqueda'] = '%' . strtolower($busqueda) . '%';
         }
         if ($idCategoria) {
             $sql .= ' AND p.idCategoria = :categoria';
@@ -55,8 +55,8 @@ class ProductoModel
         $parametros = [':idEmpresa' => $idEmpresa];
 
         if ($busqueda !== '') {
-            $sql .= ' AND p.nombre LIKE :busqueda';
-            $parametros[':busqueda'] = "%$busqueda%";
+            $sql .= ' AND LOWER(p.nombre) LIKE :busqueda';
+            $parametros[':busqueda'] = '%' . strtolower($busqueda) . '%';
         }
         if ($idCategoria) {
             $sql .= ' AND p.idCategoria = :categoria';
