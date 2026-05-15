@@ -108,7 +108,7 @@ function FeatureCard({ icon: Icon, title, description, accent }) {
     )
 }
 
-function InputField({ id, label, type = 'text', value, onChange, error, placeholder, autoComplete, extra }) {
+function InputField({ id, label, type = 'text', value, onChange, error, placeholder, autoComplete, extra, maxLength }) {
     return (
         <div className="flex flex-col gap-1.5">
             <label htmlFor={id} className="text-sm font-medium text-gray-700">{label}</label>
@@ -120,6 +120,7 @@ function InputField({ id, label, type = 'text', value, onChange, error, placehol
                     onChange={onChange}
                     placeholder={placeholder}
                     autoComplete={autoComplete}
+                    maxLength={maxLength}
                     className={`w-full px-4 py-3 rounded-xl border text-sm bg-gray-50 text-gray-900 placeholder-gray-400
             focus:outline-none focus:bg-white focus:ring-2 transition
             ${error
@@ -129,6 +130,9 @@ function InputField({ id, label, type = 'text', value, onChange, error, placehol
                 />
                 {extra}
             </div>
+            {maxLength && value.length === maxLength && (
+                <p className="text-xs text-amber-500">Límite de {maxLength} caracteres alcanzado</p>
+            )}
             {error && <p className="text-xs text-rose-500">{error}</p>}
         </div>
     )
@@ -372,6 +376,7 @@ export default function Login({ onLogin, onRegistro }) {
                                 error={camposError.nif}
                                 placeholder="12345678A"
                                 autoComplete="username"
+                                maxLength={9}
                             />
 
                             <InputField
@@ -383,6 +388,7 @@ export default function Login({ onLogin, onRegistro }) {
                                 error={camposError.password}
                                 placeholder="••••••••"
                                 autoComplete="current-password"
+                                maxLength={15}
                                 extra={
                                     <button
                                         type="button"
