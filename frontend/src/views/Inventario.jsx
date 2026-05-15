@@ -196,7 +196,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         const { name, value } = e.target
         setForm(prev => {
             const updated = { ...prev, [name]: value }
-            if (name === 'stock' && parseInt(value, 10) === 0) updated.estado = 'Inactivo'
+            if (name === 'stock') updated.estado = parseInt(value, 10) > 0 ? 'Activo' : 'Inactivo'
             return updated
         })
         setCamposError(prev => ({ ...prev, [name]: '' }))

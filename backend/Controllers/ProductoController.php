@@ -115,9 +115,7 @@ class ProductoController
             exit;
         }
 
-        if ($stock === 0) {
-            $estado = 'Inactivo';
-        }
+        $estado = $stock > 0 ? 'Activo' : 'Inactivo';
 
         try {
             ProductoModel::actualizar($id, compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'stock', 'estado'));
