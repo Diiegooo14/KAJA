@@ -17,7 +17,7 @@ function validarArchivo(file) {
   return null
 }
 
-function Campo({ label, value, onChange, type = 'text', readOnly = false, autoComplete }) {
+function Campo({ label, value, onChange, type = 'text', readOnly = false, autoComplete, maxLength, inputMode, pattern }) {
   return (
     <div>
       <label className="block text-sm font-medium text-gray-600 mb-1">
@@ -29,6 +29,9 @@ function Campo({ label, value, onChange, type = 'text', readOnly = false, autoCo
         onChange={onChange}
         readOnly={readOnly}
         autoComplete={autoComplete}
+        maxLength={maxLength}
+        inputMode={inputMode}
+        pattern={pattern}
         className={`w-full px-3 py-2 border rounded-lg text-sm transition
           focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-transparent
           ${readOnly
@@ -36,6 +39,9 @@ function Campo({ label, value, onChange, type = 'text', readOnly = false, autoCo
             : 'bg-white border-gray-200 text-gray-800'
           }`}
       />
+      {maxLength && (value ?? '').length === maxLength && (
+        <p className="text-xs text-amber-500 mt-1">Límite de {maxLength} caracteres alcanzado</p>
+      )}
     </div>
   )
 }
@@ -248,6 +254,11 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
     return e => setFormEmpresa(prev => ({ ...prev, [field]: e.target.value }))
   }
 
+  function handleTelefono(e) {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 9)
+    setFormEmpresa(prev => ({ ...prev, telefono: value }))
+  }
+
   async function guardarEmpresa(e) {
     e.preventDefault()
     setCargandoEmpresa(true)
@@ -372,29 +383,36 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                   label="Razón social"
                   value={formEmpresa.razonSocial}
                   onChange={campoEmpresa('razonSocial')}
+                  maxLength={30}
                 />
                 <Campo
                   label="Nombre comercial"
                   value={formEmpresa.nombreComercial}
                   onChange={campoEmpresa('nombreComercial')}
+                  maxLength={30}
                 />
                 <Campo
                   label="Dirección"
                   value={formEmpresa.direccion}
                   onChange={campoEmpresa('direccion')}
+                  maxLength={40}
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <Campo
                     label="Teléfono"
                     value={formEmpresa.telefono}
-                    onChange={campoEmpresa('telefono')}
+                    onChange={handleTelefono}
                     type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    maxLength={9}
                   />
                   <Campo
                     label="Email"
                     value={formEmpresa.email}
                     onChange={campoEmpresa('email')}
                     type="email"
+                    maxLength={30}
                   />
                 </div>
                 <Aviso msg={mensajeEmpresa} />
@@ -433,6 +451,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               type="text"
               value={nombre}
               onChange={e => setNombre(e.target.value)}
+              maxLength={30}
               className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm
                         bg-white text-gray-800
                         focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-transparent transition"
@@ -446,6 +465,9 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               {cargandoNombre ? 'Guardando...' : 'Guardar'}
             </button>
           </div>
+          {nombre.length === 30 && (
+            <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+          )}
           <Aviso msg={mensajeNombre} />
         </form>
 
@@ -461,6 +483,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               value={passActual}
               onChange={e => setPassActual(e.target.value)}
               autoComplete="current-password"
+              maxLength={15}
             />
             <Campo
               label="Nueva contraseña"
@@ -468,6 +491,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               value={passNueva}
               onChange={e => setPassNueva(e.target.value)}
               autoComplete="new-password"
+              maxLength={15}
             />
             <Campo
               label="Confirmar nueva contraseña"
@@ -475,6 +499,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               value={passConfirm}
               onChange={e => setPassConfirm(e.target.value)}
               autoComplete="new-password"
+              maxLength={15}
             />
             <Aviso msg={mensajePass} />
             <BtnGuardar

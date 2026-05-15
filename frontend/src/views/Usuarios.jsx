@@ -295,10 +295,14 @@ export default function Usuarios({ usuario }) {
                                     value={form.password}
                                     onChange={handleChange}
                                     placeholder="Mínimo 8 caracteres"
+                                    maxLength={15}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 transition"
                                 />
+                                {form.password.length === 15 && (
+                                    <p className="text-xs text-amber-500 mt-1">Límite de 15 caracteres alcanzado</p>
+                                )}
                             </div>
 
                             <div>
@@ -498,9 +502,13 @@ export default function Usuarios({ usuario }) {
                                     value={form.password}
                                     onChange={handleChange}
                                     placeholder="Mínimo 8 caracteres"
+                                    maxLength={15}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                 />
+                                {form.password.length === 15 && (
+                                    <p className="text-xs text-amber-500 mt-1">Límite de 15 caracteres alcanzado</p>
+                                )}
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">

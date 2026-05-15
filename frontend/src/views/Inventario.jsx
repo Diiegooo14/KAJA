@@ -194,12 +194,24 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     function handleFormChange(e) {
         const { name, value } = e.target
+        let finalValue = value
+        let warning = ''
+
+        if ((name === 'precioCoste' || name === 'precioVenta') && value !== '' && parseFloat(value) > 9999.99) {
+            finalValue = '9999.99'
+            warning = 'El precio máximo es 9.999,99 €.'
+        }
+        if (name === 'stock' && value !== '' && parseInt(value, 10) > 9999) {
+            finalValue = '9999'
+            warning = 'El stock no puede superar 9.999 unidades.'
+        }
+
         setForm(prev => {
-            const updated = { ...prev, [name]: value }
-            if (name === 'stock') updated.estado = parseInt(value, 10) > 0 ? 'Activo' : 'Inactivo'
+            const updated = { ...prev, [name]: finalValue }
+            if (name === 'stock') updated.estado = parseInt(finalValue, 10) > 0 ? 'Activo' : 'Inactivo'
             return updated
         })
-        setCamposError(prev => ({ ...prev, [name]: '' }))
+        setCamposError(prev => ({ ...prev, [name]: warning }))
     }
 
     async function handleGuardar(e) {
@@ -769,9 +781,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <input
                                             name="nuevaCategoria" value={form.nuevaCategoria} onChange={handleFormChange}
                                             placeholder="Ej: Bebidas"
+                                            maxLength={30}
                                             className={inputCls('nuevaCategoria')}
                                             autoFocus
                                         />
+                                        {form.nuevaCategoria.length === 30 && <p className="mt-1 text-xs text-amber-500">Límite de 30 caracteres alcanzado</p>}
                                         {camposError.nuevaCategoria && <p className="mt-1 text-xs text-red-500">{camposError.nuevaCategoria}</p>}
                                     </div>
                                 )}
@@ -781,7 +795,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             Precio de coste (€)
                                         </label>
                                         <input
-                                            name="precioCoste" type="number" min="0" step="0.01"
+                                            name="precioCoste" type="number" min="0" max="9999.99" step="0.01"
                                             value={form.precioCoste} onChange={handleFormChange}
                                             placeholder="0.00"
                                             className={inputCls('precioCoste')}
@@ -793,7 +807,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             Precio de venta (€)
                                         </label>
                                         <input
-                                            name="precioVenta" type="number" min="0" step="0.01"
+                                            name="precioVenta" type="number" min="0" max="9999.99" step="0.01"
                                             value={form.precioVenta} onChange={handleFormChange}
                                             placeholder="0.00"
                                             className={inputCls('precioVenta')}
@@ -806,7 +820,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         Stock (unidades)
                                     </label>
                                     <input
-                                        name="stock" type="number" min="0" step="1"
+                                        name="stock" type="number" min="0" max="9999" step="1"
                                         value={form.stock} onChange={handleFormChange}
                                         placeholder="0"
                                         className={inputCls('stock')}

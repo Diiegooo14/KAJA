@@ -41,6 +41,7 @@ export default function Gastos() {
 
     const [form, setForm] = useState(FORM_VACIO)
     const [formError, setFormError] = useState('')
+    const [camposError, setCamposError] = useState({})
     const [guardando, setGuardando] = useState(false)
 
     const [eliminando, setEliminando] = useState(null)
@@ -48,6 +49,7 @@ export default function Gastos() {
     const [mostrarForm, setMostrarForm] = useState(false)
     const [gastoVisor, setGastoVisor] = useState(null)
     const [modoEdicion, setModoEdicion] = useState(false)
+    const [camposErrorEdit, setCamposErrorEdit] = useState({})
     const [editForm, setEditForm] = useState(FORM_VACIO)
     const [editError, setEditError] = useState('')
     const [guardandoEdit, setGuardandoEdit] = useState(false)
@@ -75,7 +77,14 @@ export default function Gastos() {
 
     function handleChange(e) {
         const { name, value } = e.target
-        setForm(prev => ({ ...prev, [name]: value }))
+        let finalValue = value
+        let warning = ''
+        if (name === 'importe' && value !== '' && parseFloat(value) > 9999.99) {
+            finalValue = '9999.99'
+            warning = 'El importe máximo es 9.999,99 €.'
+        }
+        setForm(prev => ({ ...prev, [name]: finalValue }))
+        setCamposError(prev => ({ ...prev, [name]: warning }))
         setFormError('')
     }
 
@@ -139,7 +148,14 @@ export default function Gastos() {
 
     function handleEditChange(e) {
         const { name, value } = e.target
-        setEditForm(prev => ({ ...prev, [name]: value }))
+        let finalValue = value
+        let warning = ''
+        if (name === 'importe' && value !== '' && parseFloat(value) > 9999.99) {
+            finalValue = '9999.99'
+            warning = 'El importe máximo es 9.999,99 €.'
+        }
+        setEditForm(prev => ({ ...prev, [name]: finalValue }))
+        setCamposErrorEdit(prev => ({ ...prev, [name]: warning }))
         setEditError('')
     }
 
@@ -283,10 +299,12 @@ export default function Gastos() {
                                     value={form.concepto}
                                     onChange={handleChange}
                                     placeholder="Ej: Alquiler local"
+                                    maxLength={30}
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 transition"
                                 />
+                                {form.concepto.length === 30 && <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>}
                             </div>
 
                             <div>
@@ -300,11 +318,13 @@ export default function Gastos() {
                                     onChange={handleChange}
                                     placeholder="0.00"
                                     min="0.01"
+                                    max="9999.99"
                                     step="0.01"
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 transition"
                                 />
+                                {camposError.importe && <p className="text-xs text-red-500 mt-1">{camposError.importe}</p>}
                             </div>
 
                             <div>
@@ -481,9 +501,11 @@ export default function Gastos() {
                                         name="concepto"
                                         value={editForm.concepto}
                                         onChange={handleEditChange}
+                                        maxLength={30}
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                     focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                     />
+                                    {editForm.concepto.length === 30 && <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
@@ -496,10 +518,12 @@ export default function Gastos() {
                                             value={editForm.importe}
                                             onChange={handleEditChange}
                                             min="0.01"
+                                            max="9999.99"
                                             step="0.01"
                                             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                         focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                         />
+                                        {camposErrorEdit.importe && <p className="text-xs text-red-500 mt-1">{camposErrorEdit.importe}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
