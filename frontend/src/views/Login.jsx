@@ -11,7 +11,7 @@ function NavBar({ onLoginClick }) {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 lg:px-12 py-4 border-b border-white/10 backdrop-blur-md bg-kaja-sidebar/80">
             <img
-                src="/img/kaja-transparente.png"
+                src="/img/kaja-transparente.webp"
                 alt="KAJA"
                 className="h-8 object-contain brightness-0 invert"
             />
@@ -357,7 +357,7 @@ export default function Login({ onLogin, onRegistro }) {
                     <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100 shadow-sm">
 
                         <img
-                            src="/img/kaja-transparente.png"
+                            src="/img/kaja-transparente.webp"
                             alt="KAJA"
                             className="h-8 object-contain mb-7"
                         />
@@ -438,7 +438,7 @@ export default function Login({ onLogin, onRegistro }) {
             <footer className="bg-kaja-sidebar border-t border-white/10 py-8">
                 <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <img
-                        src="/img/kaja-transparente.png"
+                        src="/img/kaja-transparente.webp"
                         alt="KAJA"
                         className="h-7 object-contain brightness-0 invert opacity-30"
                     />

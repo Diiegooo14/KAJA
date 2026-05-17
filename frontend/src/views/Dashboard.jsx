@@ -392,7 +392,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
         <div className="h-16 flex items-center justify-between px-5 shrink-0 border-b border-white/10">
           <button onClick={() => navegarA('dashboard')} className="focus:outline-none cursor-pointer">
             <img
-              src="/img/kaja-transparente.png"
+              src="/img/kaja-transparente.webp"
               alt="KAJA"
               className="h-9 object-contain brightness-0 invert"
             />

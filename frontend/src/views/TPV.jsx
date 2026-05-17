@@ -32,7 +32,7 @@ async function generarTicketPDF(venta, empresa) {
                 resolve({ data: canvas.toDataURL('image/png'), aspect: img.height / img.width })
             }
             img.onerror = reject
-            img.src = '/img/kaja-transparente.png'
+            img.src = '/img/kaja-transparente.webp'
         })
     } catch { /* sin logo, usará texto */ }
 
@@ -532,7 +532,7 @@ export default function TPV({ usuario }) {
                         {/* Vista previa del ticket */}
                         <div className="bg-gray-50 rounded-xl p-4 font-mono text-xs space-y-1 max-h-72 overflow-y-auto">
                             {/* Cabecera negocio */}
-                            <img src="/img/kaja-transparente.png" alt="KAJA" className="h-10 object-contain mx-auto mb-1" />
+                            <img src="/img/kaja-transparente.webp" alt="KAJA" className="h-10 object-contain mx-auto mb-1" />
                             {empresa && (
                                 <div className="text-center space-y-0.5 mb-1 mt-1">
                                     {empresa.nombreComercial && <p className="font-bold">{empresa.nombreComercial}</p>}

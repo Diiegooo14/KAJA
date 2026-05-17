@@ -118,7 +118,7 @@ function PantallaExito({ onVolver }) {
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-white/5" />
         <div className="relative z-10">
-          <img src="/img/kaja-transparente.png" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
+          <img src="/img/kaja-transparente.webp" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
         </div>
         <div className="relative z-10">
           <h2 className="text-3xl font-bold text-white mb-3">¡Todo listo!</h2>
@@ -222,7 +222,7 @@ export default function Register({ onVolver }) {
         <div className="absolute top-1/2 right-8 w-48 h-48 rounded-full bg-kaja-orange/8" />
 
         <div className="relative z-10 flex flex-col gap-6">
-          <img src="/img/kaja-transparente.png" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
+          <img src="/img/kaja-transparente.webp" alt="KAJA" className="h-10 brightness-0 invert object-contain" />
           <button
             onClick={onVolver}
             className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition w-fit"
