@@ -24,6 +24,7 @@ function Avatar({ nombre, imagenPerfil, size = 'md' }) {
   useEffect(() => { setSrc(imagenPerfil || DEFAULT_AVATAR) }, [imagenPerfil])
 
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
+  const sizePx = size === 'sm' ? 32 : 40
 
   if (src) {
     return (
@@ -31,6 +32,8 @@ function Avatar({ nombre, imagenPerfil, size = 'md' }) {
         src={src}
         alt={nombre}
         onError={handleError}
+        width={sizePx}
+        height={sizePx}
         className={`${cls} rounded-full object-cover ring-2 ring-white/20 shrink-0`}
       />
     )
@@ -48,6 +51,7 @@ function EmpresaAvatar({ nombre, logo, size = 'md' }) {
   useEffect(() => { setSrc(logo || DEFAULT_EMPRESA_LOGO) }, [logo])
 
   const cls = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-12 h-12 text-base' : 'w-10 h-10 text-sm'
+  const sizePx = size === 'sm' ? 32 : size === 'lg' ? 48 : 40
 
   if (src) {
     return (
@@ -55,6 +59,8 @@ function EmpresaAvatar({ nombre, logo, size = 'md' }) {
         src={src}
         alt={nombre}
         onError={handleError}
+        width={sizePx}
+        height={sizePx}
         className={`${cls} rounded-full object-cover ring-2 ring-white/20 shrink-0`}
       />
     )
@@ -394,6 +400,8 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
             <img
               src="/img/kaja-transparente.webp"
               alt="KAJA"
+              width="180"
+              height="36"
               className="h-9 object-contain brightness-0 invert"
             />
           </button>

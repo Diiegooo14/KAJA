@@ -290,6 +290,8 @@ function TabVentas() {
                           <img
                             src={venta.imagenVendedor || DEFAULT_AVATAR}
                             alt={venta.vendedor}
+                            width="28"
+                            height="28"
                             className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                             onError={e => { e.target.src = DEFAULT_AVATAR }}
                           />

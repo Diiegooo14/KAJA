@@ -72,6 +72,8 @@ function FotoUsuario({ idUsuario, imagenActual, nombre, onSubida }) {
                     <img
                         src={preview}
                         alt={nombre}
+                        width="56"
+                        height="56"
                         className="w-full h-full object-cover"
                         onError={e => { e.target.src = DEFAULT_AVATAR }}
                     />
@@ -391,6 +393,8 @@ export default function Usuarios({ usuario }) {
                                             <img
                                                 src={u.imagen_perfil || DEFAULT_AVATAR}
                                                 alt={u.nombre}
+                                                width="32"
+                                                height="32"
                                                 className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                                 onError={e => { e.target.src = DEFAULT_AVATAR }}
                                             />
@@ -588,6 +592,8 @@ export default function Usuarios({ usuario }) {
                             <img
                                 src={usuarioVisor.imagen_perfil || DEFAULT_AVATAR}
                                 alt={usuarioVisor.nombre}
+                                width="64"
+                                height="64"
                                 className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0"
                                 onError={e => { e.target.src = DEFAULT_AVATAR }}
                             />

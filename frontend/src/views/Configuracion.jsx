@@ -145,7 +145,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
       <div className="relative shrink-0">
         <div className="w-20 h-20 rounded-full overflow-hidden bg-kaja-light flex items-center justify-center border-2 border-gray-100">
           {preview
-            ? <img src={preview} alt={publicLabel} className="w-full h-full object-cover" />
+            ? <img src={preview} alt={publicLabel} width="80" height="80" className="w-full h-full object-cover" />
             : <span className="text-2xl font-bold text-kaja-blueText">{placeholder}</span>
           }
         </div>

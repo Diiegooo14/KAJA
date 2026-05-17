@@ -13,6 +13,8 @@ function NavBar({ onLoginClick }) {
             <img
                 src="/img/kaja-transparente.webp"
                 alt="KAJA"
+                width="160"
+                height="32"
                 className="h-8 object-contain brightness-0 invert"
             />
             <div className="flex items-center gap-6">
@@ -359,6 +361,8 @@ export default function Login({ onLogin, onRegistro }) {
                         <img
                             src="/img/kaja-transparente.webp"
                             alt="KAJA"
+                            width="160"
+                            height="32"
                             className="h-8 object-contain mb-7"
                         />
 
@@ -440,6 +444,8 @@ export default function Login({ onLogin, onRegistro }) {
                     <img
                         src="/img/kaja-transparente.webp"
                         alt="KAJA"
+                        width="140"
+                        height="28"
                         className="h-7 object-contain brightness-0 invert opacity-30"
                     />
                     <p className="text-white/20 text-xs">© 2026 Sistema KAJA. Todos los derechos reservados.</p>
