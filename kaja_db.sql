@@ -43,10 +43,11 @@ CREATE TABLE CATEGORIA (
 CREATE TABLE PRODUCTO (
     id INT AUTO_INCREMENT PRIMARY KEY,
     idCategoria INT NOT NULL,
-    idEmpresa INT NOT NULL, 
+    idEmpresa INT NOT NULL,
     nombre VARCHAR(150) NOT NULL,
     precioCoste DECIMAL(10,2) NOT NULL,
     precioVenta DECIMAL(10,2) NOT NULL,
+    iva DECIMAL(5,2) NOT NULL DEFAULT 21.00,
     stock INT NOT NULL DEFAULT 0,
     estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
     FOREIGN KEY (idCategoria) REFERENCES CATEGORIA(id) ON DELETE RESTRICT,
@@ -145,7 +146,7 @@ INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, 
 (4, 1, 'Chaqueta de Trabajo Talla L', 18.00, 32.00, 10),
 (4, 1, 'Rodilleras Profesionales', 6.00, 11.50, 14);
 
-INSERT INTO TIPO_GASTO (nombreTipo) VALUES ('Fijo'), ('Variable');
+INSERT INTO TIPO_GASTO (nombreTipo) VALUES ('Fijo'), ('Variable'), ('Nómina');
 
 INSERT INTO GASTO (idUsuario, idEmpresa, idTipoGasto, concepto, importe, fechaRegistro) VALUES
 (1, 1, 1, 'Alquiler local', 800.00, DATE_FORMAT(NOW(), '%Y-%m-01')),

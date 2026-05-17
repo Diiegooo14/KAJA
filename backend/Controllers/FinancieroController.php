@@ -18,8 +18,13 @@ class FinancieroController
                 $gastosDia = GastoModel::resumenDiario($idEmpresa, $mes, $anio);
 
                 $ventasPorDia = array_fill(0, $diasEnMes, 0.0);
+                $basesPorDia  = array_fill(0, $diasEnMes, 0.0);
+                $ivasPorDia   = array_fill(0, $diasEnMes, 0.0);
                 foreach ($ventasDia as $v) {
-                    $ventasPorDia[(int)$v['dia'] - 1] = (float) $v['totalVentas'];
+                    $i = (int)$v['dia'] - 1;
+                    $ventasPorDia[$i] = (float) $v['totalVentas'];
+                    $basesPorDia[$i]  = (float) $v['totalBase'];
+                    $ivasPorDia[$i]   = (float) $v['totalIva'];
                 }
 
                 $gastosPorDia = array_fill(0, $diasEnMes, 0.0);
@@ -28,12 +33,14 @@ class FinancieroController
                 }
 
                 echo json_encode([
-                    'modo'   => 'diario',
-                    'mes'    => $mes,
-                    'anio'   => $anio,
-                    'dias'   => $diasEnMes,
-                    'ventas' => $ventasPorDia,
-                    'gastos' => $gastosPorDia,
+                    'modo'       => 'diario',
+                    'mes'        => $mes,
+                    'anio'       => $anio,
+                    'dias'       => $diasEnMes,
+                    'ventas'     => $ventasPorDia,
+                    'ventasBase' => $basesPorDia,
+                    'ventasIva'  => $ivasPorDia,
+                    'gastos'     => $gastosPorDia,
                 ]);
             } else {
                 // Resumen mensual del año
@@ -41,8 +48,13 @@ class FinancieroController
                 $gastosMes = GastoModel::resumenMensual($idEmpresa, $anio);
 
                 $ventasPorMes = array_fill(0, 12, 0.0);
+                $basesPorMes  = array_fill(0, 12, 0.0);
+                $ivasPorMes   = array_fill(0, 12, 0.0);
                 foreach ($ventasMes as $v) {
-                    $ventasPorMes[(int)$v['mes'] - 1] = (float) $v['totalVentas'];
+                    $i = (int)$v['mes'] - 1;
+                    $ventasPorMes[$i] = (float) $v['totalVentas'];
+                    $basesPorMes[$i]  = (float) $v['totalBase'];
+                    $ivasPorMes[$i]   = (float) $v['totalIva'];
                 }
 
                 $gastosPorMes = array_fill(0, 12, 0.0);
@@ -51,10 +63,12 @@ class FinancieroController
                 }
 
                 echo json_encode([
-                    'modo'   => 'mensual',
-                    'anio'   => $anio,
-                    'ventas' => $ventasPorMes,
-                    'gastos' => $gastosPorMes,
+                    'modo'       => 'mensual',
+                    'anio'       => $anio,
+                    'ventas'     => $ventasPorMes,
+                    'ventasBase' => $basesPorMes,
+                    'ventasIva'  => $ivasPorMes,
+                    'gastos'     => $gastosPorMes,
                 ]);
             }
         } catch (PDOException) {

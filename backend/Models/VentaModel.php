@@ -96,7 +96,9 @@ class VentaModel
         $pdo  = Database::connect();
         $stmt = $pdo->prepare(
             'SELECT DAY(v.fecha) AS dia,
-                    ROUND(SUM(v.totalFinal), 2) AS totalVentas
+                    ROUND(SUM(v.totalFinal), 2)     AS totalVentas,
+                    ROUND(SUM(v.baseImponible), 2)  AS totalBase,
+                    ROUND(SUM(v.totalIva), 2)        AS totalIva
                 FROM VENTA v
                 JOIN USUARIO u ON v.idUsuario = u.id
                 WHERE MONTH(v.fecha) = :mes
@@ -114,7 +116,9 @@ class VentaModel
         $pdo  = Database::connect();
         $stmt = $pdo->prepare(
             'SELECT MONTH(v.fecha) AS mes,
-                    ROUND(SUM(v.totalFinal), 2) AS totalVentas,
+                    ROUND(SUM(v.totalFinal), 2)    AS totalVentas,
+                    ROUND(SUM(v.baseImponible), 2) AS totalBase,
+                    ROUND(SUM(v.totalIva), 2)       AS totalIva,
                     COUNT(*) AS numVentas
                     FROM VENTA v
                     JOIN USUARIO u ON v.idUsuario = u.id
@@ -133,13 +137,18 @@ class VentaModel
         $pdo->beginTransaction();
 
         try {
-            $totalFinal = 0.0;
+            $totalFinal    = 0.0;
+            $baseImponible = 0.0;
             foreach ($lineas as $linea) {
-                $totalFinal += (float) $linea['precioVenta'] * (int) $linea['cantidad'];
+                $subtotal  = (float) $linea['precioVenta'] * (int) $linea['cantidad'];
+                $ivaLinea  = isset($linea['iva']) ? (float) $linea['iva'] : 21.0;
+                $baseLinea = $subtotal / (1 + $ivaLinea / 100);
+                $totalFinal    += $subtotal;
+                $baseImponible += $baseLinea;
             }
-            $baseImponible = round($totalFinal / 1.21, 2);
-            $totalIva      = round($totalFinal - $baseImponible, 2);
             $totalFinal    = round($totalFinal, 2);
+            $baseImponible = round($baseImponible, 2);
+            $totalIva      = round($totalFinal - $baseImponible, 2);
 
             $pdo->prepare(
                 'INSERT INTO VENTA (idUsuario, fecha, baseImponible, totalIva, totalFinal)
@@ -167,12 +176,13 @@ class VentaModel
 
             foreach ($lineas as $linea) {
                 $subtotal = round((float) $linea['precioVenta'] * (int) $linea['cantidad'], 2);
+                $ivaLinea = isset($linea['iva']) ? (float) $linea['iva'] : 21.0;
                 $stmtLinea->execute([
                     ':idVenta'   => $idVenta,
                     ':idProducto'=> (int) $linea['id'],
                     ':cantidad'  => (int) $linea['cantidad'],
                     ':precio'    => (float) $linea['precioVenta'],
-                    ':iva'       => 21,
+                    ':iva'       => $ivaLinea,
                     ':subtotal'  => $subtotal,
                 ]);
                 $stmtStock->execute([

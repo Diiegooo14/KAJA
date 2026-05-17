@@ -101,7 +101,8 @@ async function generarTicketPDF(venta, empresa) {
     // Líneas con desglose de IVA
     for (const item of venta.lineas) {
         const precioConIva = parseFloat(item.precioVenta)
-        const precioSinIva = precioConIva / 1.21
+        const ivaRate = (item.iva ?? 21) / 100
+        const precioSinIva = ivaRate > 0 ? precioConIva / (1 + ivaRate) : precioConIva
         const ivaUnit = precioConIva - precioSinIva
         const subtotal = precioConIva * item.cantidad
 
@@ -123,7 +124,7 @@ async function generarTicketPDF(venta, empresa) {
         doc.setFontSize(7)
         doc.setFont('helvetica', 'normal')
         doc.setTextColor(110, 110, 110)
-        doc.text(`P.unit s/IVA: ${precioSinIva.toFixed(2)}€   IVA(21%): ${ivaUnit.toFixed(2)}€`, 7, y)
+        doc.text(`P.unit s/IVA: ${precioSinIva.toFixed(2)}€   IVA(${item.iva ?? 21}%): ${ivaUnit.toFixed(2)}€`, 7, y)
         doc.setTextColor(0, 0, 0)
         y += 5
     }
@@ -131,7 +132,7 @@ async function generarTicketPDF(venta, empresa) {
 
     // Resumen fiscal
     par('Base imponible:', parseFloat(venta.baseImponible).toFixed(2) + ' €')
-    par('IVA (21%):', parseFloat(venta.totalIva).toFixed(2) + ' €')
+    par('IVA total:', parseFloat(venta.totalIva).toFixed(2) + ' €')
     y += 2
     doc.setFontSize(11)
     doc.setFont('helvetica', 'bold')
@@ -221,6 +222,7 @@ export default function TPV({ usuario }) {
                 nombre: item.nombre,
                 cantidad: item.cantidad,
                 precioVenta: item.precioVenta,
+                iva: item.iva ?? 21,
             }))
             const res = await fetch(`${API_URL}/ventas`, {
                 method: 'POST',
@@ -564,7 +566,8 @@ export default function TPV({ usuario }) {
                             {/* Líneas con desglose */}
                             {ventaCobrada.lineas.map(item => {
                                 const precioConIva = parseFloat(item.precioVenta)
-                                const precioSinIva = precioConIva / 1.21
+                                const ivaRate = (item.iva ?? 21) / 100
+                                const precioSinIva = ivaRate > 0 ? precioConIva / (1 + ivaRate) : precioConIva
                                 const ivaUnit = precioConIva - precioSinIva
                                 const subtotal = precioConIva * item.cantidad
                                 return (
@@ -575,7 +578,7 @@ export default function TPV({ usuario }) {
                                         </div>
                                         <div className="flex justify-between text-gray-400 pl-2">
                                             <span>P.unit s/IVA: {precioSinIva.toFixed(2)} €</span>
-                                            <span>IVA(21%): {ivaUnit.toFixed(2)} €</span>
+                                            <span>IVA({item.iva ?? 21}%): {ivaUnit.toFixed(2)} €</span>
                                         </div>
                                     </div>
                                 )
@@ -588,7 +591,7 @@ export default function TPV({ usuario }) {
                                 <span>{parseFloat(ventaCobrada.baseImponible).toFixed(2)} €</span>
                             </div>
                             <div className="flex justify-between text-gray-500">
-                                <span>IVA (21%)</span>
+                                <span>IVA total</span>
                                 <span>{parseFloat(ventaCobrada.totalIva).toFixed(2)} €</span>
                             </div>
                             <div className="border-t border-dashed border-gray-300 my-1" />

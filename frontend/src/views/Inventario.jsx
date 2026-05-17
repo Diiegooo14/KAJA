@@ -10,6 +10,7 @@ const FORM_VACIO = {
     nuevaCategoria: '',
     precioCoste: '',
     precioVenta: '',
+    iva: '21',
     stock: '',
     estado: 'Activo',
 }
@@ -117,6 +118,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             nuevaCategoria: '',
             precioCoste: producto.precioCoste,
             precioVenta: producto.precioVenta,
+            iva: String(producto.iva ?? 21),
             stock: producto.stock,
             estado: producto.estado ?? 'Activo',
         } : FORM_VACIO)
@@ -221,6 +223,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         const nombre = form.nombre.trim()
         const precioCoste = parseFloat(form.precioCoste)
         const precioVenta = parseFloat(form.precioVenta)
+        const iva = parseInt(form.iva, 10)
         const stock = parseInt(form.stock, 10)
         const esNueva = form.idCategoria === '__nueva__'
         const nombreCat = form.nuevaCategoria.trim()
@@ -231,6 +234,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         if (esNueva && !nombreCat) errores.nuevaCategoria = 'Escribe el nombre de la nueva categoría.'
         if (isNaN(precioCoste) || precioCoste <= 0) errores.precioCoste = 'Debe ser mayor que 0.'
         if (isNaN(precioVenta) || precioVenta <= 0) errores.precioVenta = 'Debe ser mayor que 0.'
+        if (isNaN(iva) || ![0, 4, 10, 21].includes(iva)) errores.iva = 'Selecciona un tipo de IVA válido.'
         if (isNaN(stock) || stock < 0) errores.stock = 'No puede ser negativo.'
 
         if (Object.keys(errores).length > 0) {
@@ -256,13 +260,13 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 await fetchJSON(`${API_URL}/productos?id=${productoEditando.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock, estado: form.estado }),
+                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, iva, stock, estado: form.estado }),
                 })
             } else {
                 await fetchJSON(`${API_URL}/productos`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, stock }),
+                    body: JSON.stringify({ nombre, idCategoria, precioCoste, precioVenta, iva, stock }),
                 })
             }
 
@@ -695,6 +699,12 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     </p>
                                 </div>
                             </div>
+                            <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tipo de IVA</p>
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">
+                                    {productoVisor.iva ?? 21}%
+                                </p>
+                            </div>
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Stock</p>
@@ -814,6 +824,21 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         />
                                         {camposError.precioVenta && <p className="mt-1 text-xs text-red-500">{camposError.precioVenta}</p>}
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                                        Tipo de IVA
+                                    </label>
+                                    <select
+                                        name="iva" value={form.iva} onChange={handleFormChange}
+                                        className={inputCls('iva')}
+                                    >
+                                        <option value="21">21% — General</option>
+                                        <option value="10">10% — Reducido</option>
+                                        <option value="4">4% — Superreducido</option>
+                                        <option value="0">0% — Exento</option>
+                                    </select>
+                                    {camposError.iva && <p className="mt-1 text-xs text-red-500">{camposError.iva}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">

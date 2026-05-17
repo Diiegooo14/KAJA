@@ -8,7 +8,7 @@ import { Bar } from 'react-chartjs-2'
 import {
   TrendingUp, TrendingDown, Wallet,
   ChevronDown, ChevronUp, Calendar,
-  ReceiptText, BarChart3, CalendarDays,
+  ReceiptText, BarChart3, CalendarDays, BadgePercent,
 } from 'lucide-react'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -152,10 +152,10 @@ const CHART_OPTS = (tooltipTitle) => ({
   },
 })
 
-const DATASETS = (ventas, gastos) => ({
+const DATASETS = (ventas, gastos, labelVentas = 'Ingresos reales') => ({
   datasets: [
     {
-      label: 'Ventas',
+      label: labelVentas,
       data: ventas,
       backgroundColor: 'rgba(217,119,6,0.85)',
       borderColor: 'rgba(217,119,6,1)',
@@ -377,11 +377,13 @@ function TabResumenMensual() {
       .finally(() => setCargando(false))
   }, [mes, anio])
 
-  const ventas = datos?.ventas ?? []
+  const ventas = datos?.ventasBase ?? []
+  const ivaRep = datos?.ventasIva ?? []
   const gastos = datos?.gastos ?? []
   const dias = datos?.dias ?? 0
 
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
+  const totalIvaRep = ivaRep.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
   const beneficio = totalVentas - totalGastos
   const positivo = beneficio >= 0
@@ -409,8 +411,9 @@ function TabResumenMensual() {
       </Filtros>
 
       {!cargando && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <KpiCard label={`Ventas ${MESES[mes - 1]}`} value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <KpiCard label="Ingresos reales" value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" sub={`Base imponible · ${MESES[mes - 1]}`} />
+          <KpiCard label="IVA repercutido" value={fmtEur(totalIvaRep)} icon={BadgePercent} variant="default" sub="A liquidar con Hacienda" />
           <KpiCard label={`Gastos ${MESES[mes - 1]}`} value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy" />
           <KpiCard label={`Beneficio ${MESES[mes - 1]}`} value={fmtEur(beneficio)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
         </div>
@@ -425,7 +428,7 @@ function TabResumenMensual() {
       {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
 
       {!cargando && !error && (
-        <ChartCard title={`Ventas vs Gastos · ${MESES[mes - 1]} ${anio} · por día`}>
+        <ChartCard title={`Ingresos reales vs Gastos · ${MESES[mes - 1]} ${anio} · por día`}>
           <div style={{ height: 360 }}>
             <Bar
               data={chartData}
@@ -456,10 +459,12 @@ function TabResumenAnual() {
       .finally(() => setCargando(false))
   }, [anio])
 
-  const ventas = datos?.ventas ?? Array(12).fill(0)
+  const ventas = datos?.ventasBase ?? Array(12).fill(0)
+  const ivaRep = datos?.ventasIva ?? Array(12).fill(0)
   const gastos = datos?.gastos ?? Array(12).fill(0)
 
   const totalVentas = ventas.reduce((a, b) => a + b, 0)
+  const totalIvaRep = ivaRep.reduce((a, b) => a + b, 0)
   const totalGastos = gastos.reduce((a, b) => a + b, 0)
   const beneficio = totalVentas - totalGastos
   const positivo = beneficio >= 0
@@ -474,8 +479,9 @@ function TabResumenAnual() {
       </Filtros>
 
       {!cargando && !error && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <KpiCard label={`Ventas ${anio}`} value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <KpiCard label="Ingresos reales" value={fmtEur(totalVentas)} icon={TrendingUp} variant="orange" sub={`Base imponible · ${anio}`} />
+          <KpiCard label="IVA repercutido" value={fmtEur(totalIvaRep)} icon={BadgePercent} variant="default" sub="A liquidar con Hacienda" />
           <KpiCard label={`Gastos ${anio}`} value={fmtEur(totalGastos)} icon={TrendingDown} variant="navy" />
           <KpiCard label={`Beneficio ${anio}`} value={fmtEur(beneficio)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
         </div>
@@ -490,7 +496,7 @@ function TabResumenAnual() {
       {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
 
       {!cargando && !error && (
-        <ChartCard title={`Ventas vs Gastos · ${anio} · por mes`}>
+        <ChartCard title={`Ingresos reales vs Gastos · ${anio} · por mes`}>
           <div style={{ height: 360 }}>
             <Bar data={chartData} options={CHART_OPTS()} />
           </div>

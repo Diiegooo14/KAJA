@@ -6,7 +6,7 @@ class ProductoModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.stock, p.estado,
+            'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.iva, p.stock, p.estado,
                     c.id AS idCategoria, c.nombre AS categoria
                     FROM PRODUCTO p
                     JOIN CATEGORIA c ON p.idCategoria = c.id
@@ -47,7 +47,7 @@ class ProductoModel
     public static function listarTodos(int $idEmpresa, string $busqueda = '', ?int $idCategoria = null, int $pagina = 1, int $porPagina = 15, bool $stockBajo = false, ?string $estado = null): array
     {
         $pdo = Database::connect();
-        $sql = 'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.stock, p.estado,
+        $sql = 'SELECT p.id, p.nombre, p.precioCoste, p.precioVenta, p.iva, p.stock, p.estado,
                         c.id AS idCategoria, c.nombre AS categoria
                         FROM PRODUCTO p
                         JOIN CATEGORIA c ON p.idCategoria = c.id
@@ -87,16 +87,17 @@ class ProductoModel
     {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
-            'INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, stock)
-            VALUES (:categoria, :idEmpresa, :nombre, :coste, :venta, :stock)'
+            'INSERT INTO PRODUCTO (idCategoria, idEmpresa, nombre, precioCoste, precioVenta, iva, stock)
+            VALUES (:categoria, :idEmpresa, :nombre, :coste, :venta, :iva, :stock)'
         );
         $consulta->execute([
             ':categoria' => $datos['idCategoria'],
             ':idEmpresa' => $datos['idEmpresa'],
-            ':nombre' => $datos['nombre'],
-            ':coste' => $datos['precioCoste'],
-            ':venta' => $datos['precioVenta'],
-            ':stock' => $datos['stock'],
+            ':nombre'    => $datos['nombre'],
+            ':coste'     => $datos['precioCoste'],
+            ':venta'     => $datos['precioVenta'],
+            ':iva'       => $datos['iva'] ?? 21.00,
+            ':stock'     => $datos['stock'],
         ]);
         return (int) $pdo->lastInsertId();
     }
@@ -110,18 +111,20 @@ class ProductoModel
                     nombre      = :nombre,
                     precioCoste = :coste,
                     precioVenta = :venta,
+                    iva         = :iva,
                     stock       = :stock,
                     estado      = :estado
                 WHERE id = :id'
         )->execute([
-                    ':categoria' => $datos['idCategoria'],
-                    ':nombre' => $datos['nombre'],
-                    ':coste' => $datos['precioCoste'],
-                    ':venta' => $datos['precioVenta'],
-                    ':stock' => $datos['stock'],
-                    ':estado' => $datos['estado'],
-                    ':id' => $id,
-                ]);
+            ':categoria' => $datos['idCategoria'],
+            ':nombre'    => $datos['nombre'],
+            ':coste'     => $datos['precioCoste'],
+            ':venta'     => $datos['precioVenta'],
+            ':iva'       => $datos['iva'] ?? 21.00,
+            ':stock'     => $datos['stock'],
+            ':estado'    => $datos['estado'],
+            ':id'        => $id,
+        ]);
     }
 
     public static function tieneVentas(int $id): bool
