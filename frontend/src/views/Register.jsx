@@ -105,7 +105,7 @@ function Feature({ icon: Icon, text }) {
       <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
         <Icon className="w-4 h-4 text-white/70" />
       </div>
-      <span className="text-sm text-white/60">{text}</span>
+      <span className="text-sm text-white/85">{text}</span>
     </div>
   )
 }
@@ -123,7 +123,7 @@ function PantallaExito({ onVolver }) {
         </div>
         <div className="relative z-10">
           <h2 className="text-3xl font-bold text-white mb-3">¡Todo listo!</h2>
-          <p className="text-white/50 text-sm leading-relaxed">Tu empresa ya está registrada en el sistema KAJA. Ahora puedes empezar a gestionar tus ventas.</p>
+          <p className="text-white/75 text-sm leading-relaxed">Tu empresa ya está registrada en el sistema KAJA. Ahora puedes empezar a gestionar tus ventas.</p>
         </div>
         <p className="relative z-10 text-white/25 text-xs">© 2026 Sistema KAJA</p>
       </div>
@@ -226,7 +226,7 @@ export default function Register({ onVolver }) {
           <img src="/img/kaja-transparente.webp" alt="KAJA" width="200" height="40" className="h-10 brightness-0 invert object-contain" />
           <button
             onClick={onVolver}
-            className="flex items-center gap-2 text-sm text-white/40 hover:text-white/70 transition w-fit"
+            className="flex items-center gap-2 text-sm text-white/70 hover:text-white transition w-fit"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesión
@@ -240,7 +240,7 @@ export default function Register({ onVolver }) {
               Empieza a gestionar<br />
               <span className="text-kaja-orange">tu negocio hoy</span>
             </h1>
-            <p className="text-white/50 text-m leading-relaxed max-w-xs">
+            <p className="text-white/75 text-m leading-relaxed max-w-xs">
               Crea tu cuenta empresarial y accede a todas las herramientas del sistema KAJA en minutos.
             </p>
           </div>

@@ -93,11 +93,11 @@ function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
         <Icon className="w-5 h-5" />
       </div>
       <div className="min-w-0">
-        <p className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${variant === 'default' ? 'text-kaja-blueText/50' : 'text-white/70'}`}>
+        <p className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${variant === 'default' ? 'text-kaja-blueText/80' : 'text-white/70'}`}>
           {label}
         </p>
         <p className="text-2xl font-bold leading-tight truncate">{value}</p>
-        {sub && <p className={`text-xs mt-0.5 ${variant === 'default' ? 'text-kaja-blueText/40' : 'text-white/60'}`}>{sub}</p>}
+        {sub && <p className={`text-xs mt-0.5 ${variant === 'default' ? 'text-kaja-blueText/70' : 'text-white/75'}`}>{sub}</p>}
       </div>
     </div>
   )

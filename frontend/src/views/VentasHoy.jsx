@@ -67,7 +67,7 @@ export default function VentasHoy() {
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Hoy</p>
           <h1 className="text-2xl font-bold text-kaja-blueText">Ventas del día</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-600 mt-0.5">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>

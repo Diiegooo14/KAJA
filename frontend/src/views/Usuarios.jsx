@@ -353,11 +353,11 @@ export default function Usuarios({ usuario }) {
                             <p className="text-2xl font-bold text-white">{resumen.total}</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Activos</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Activos</p>
                             <p className="text-2xl font-bold text-emerald-600">{resumen.activos}</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Inactivos</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Inactivos</p>
                             <p className="text-2xl font-bold text-kaja-orange">{resumen.inactivos}</p>
                         </div>
                     </div>

@@ -372,11 +372,11 @@ export default function Gastos() {
                             <p className="text-2xl font-bold text-white">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Gastos fijos</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Gastos fijos</p>
                             <p className="text-2xl font-bold text-kaja-blueText">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-1">Gastos variables</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Gastos variables</p>
                             <p className="text-2xl font-bold text-kaja-orange">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
                         </div>
                     </div>

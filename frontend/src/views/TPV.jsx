@@ -317,7 +317,7 @@ export default function TPV({ usuario }) {
                                                     ? 'border-kaja-orange bg-orange-50'
                                                     : 'border-gray-100 bg-white hover:border-kaja-orange/50 hover:bg-orange-50/40 shadow-sm'}`}
                                         >
-                                            <span className="text-xs text-gray-400 mb-1 truncate w-full">{p.categoria}</span>
+                                            <span className="text-xs text-gray-600 mb-1 truncate w-full">{p.categoria}</span>
                                             <span className="text-sm font-semibold text-gray-800 leading-tight mb-3 line-clamp-2">{p.nombre}</span>
                                             <div className="flex items-end justify-between w-full mt-auto">
                                                 <span className="text-base font-bold text-kaja-orange">
@@ -484,7 +484,7 @@ export default function TPV({ usuario }) {
                         <div className="bg-gray-50 rounded-xl p-4 space-y-1.5 max-h-52 overflow-y-auto">
                             {carrito.map(item => (
                                 <div key={item.id} className="flex justify-between text-sm text-gray-700">
-                                    <span className="flex-1 truncate pr-2">{item.nombre} <span className="text-gray-400">×{item.cantidad}</span></span>
+                                    <span className="flex-1 truncate pr-2">{item.nombre} <span className="text-gray-600">×{item.cantidad}</span></span>
                                     <span className="font-semibold shrink-0">{(parseFloat(item.precioVenta) * item.cantidad).toFixed(2)} €</span>
                                 </div>
                             ))}

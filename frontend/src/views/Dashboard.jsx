@@ -101,7 +101,7 @@ function KpiStat({ icon: Icon, label, value, sub, gradient, onClick, clickable }
       </div>
       <div>
         <p className="text-2xl font-bold leading-none">{value}</p>
-        <p className="text-xs text-white/50 mt-1.5 capitalize">{sub}</p>
+        <p className="text-xs text-white/75 mt-1.5 capitalize">{sub}</p>
       </div>
     </div>
   )
@@ -120,7 +120,7 @@ function QuickAction({ icon: Icon, color, label, sub, onClick }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-kaja-blueText">{label}</p>
-        <p className="text-xs text-gray-400">{sub}</p>
+        <p className="text-xs text-gray-600">{sub}</p>
       </div>
       <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-kaja-orange group-hover:translate-x-0.5 transition-all shrink-0" />
     </button>
@@ -183,7 +183,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
         <div className="relative z-10">
           <p className="text-kaja-orange text-xs font-bold uppercase tracking-widest mb-1">{saludo}</p>
           <h1 className="text-3xl font-bold text-white mb-1">{usuario.nombre}</h1>
-          <p className="text-white/40 text-sm capitalize">
+          <p className="text-white/70 text-sm capitalize">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -192,7 +192,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
           <div className="relative z-10 hidden sm:flex items-center gap-3 shrink-0">
             <div className="text-right">
               <p className="text-white font-semibold text-sm">{empresa.nombreComercial}</p>
-              <p className="text-white/40 text-xs mt-0.5">{empresa.razonSocial ?? 'Empresa'}</p>
+              <p className="text-white/70 text-xs mt-0.5">{empresa.razonSocial ?? 'Empresa'}</p>
             </div>
             <EmpresaAvatar nombre={empresa.nombreComercial} logo={empresa.logo_empresa} size="lg" />
           </div>
@@ -242,7 +242,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
 
         {/* Quick actions */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-3 flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-kaja-orange" />
             Acceso rápido
           </p>
@@ -259,7 +259,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
         {/* Últimas ventas */}
         <div className="lg:col-span-3 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 flex items-center gap-2">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-kaja-orange" />
               Últimas ventas
             </p>
@@ -289,11 +289,11 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-kaja-blueText truncate">{v.vendedor}</p>
-                    <p className="text-xs text-gray-400">{v.lineas.length} producto{v.lineas.length !== 1 ? 's' : ''}</p>
+                    <p className="text-xs text-gray-600">{v.lineas.length} producto{v.lineas.length !== 1 ? 's' : ''}</p>
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold text-kaja-blueText">{fmtEur(v.totalFinal)}</p>
-                    <p className="text-xs text-gray-400 font-mono">{fmtHora(v.fecha)}</p>
+                    <p className="text-xs text-gray-600 font-mono">{fmtHora(v.fecha)}</p>
                   </div>
                 </div>
               ))}
@@ -425,7 +425,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
                 className={`relative w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-medium transition-all text-left
                   ${activo
                     ? 'bg-kaja-orange/15 text-kaja-orange'
-                    : 'text-white/50 hover:bg-white/8 hover:text-white/80'
+                    : 'text-white/70 hover:bg-white/8 hover:text-white/90'
                   }`}
               >
                 {activo && (
@@ -447,12 +447,12 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
             <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} size="sm" />
             <div className="min-w-0 flex-1">
               <p className="text-white text-sm font-semibold leading-tight truncate group-hover:text-white/90">{usuario.nombre}</p>
-              <p className="text-white/40 text-xs capitalize mt-0.5">{usuario.rol}</p>
+              <p className="text-white/70 text-xs capitalize mt-0.5">{usuario.rol}</p>
             </div>
           </button>
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/40 hover:bg-white/8 hover:text-white/70 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-white/70 hover:bg-white/8 hover:text-white/90 transition-all"
           >
             <LogOut className="w-4 h-4 shrink-0" />
             Cerrar sesión
@@ -477,13 +477,13 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           {/* Search */}
           <div className="flex-1 max-w-sm">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
               <input
                 type="text"
                 value={busquedaGlobal}
                 onChange={handleBusquedaGlobal}
                 placeholder="Buscar producto..."
-                className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/35
+                className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/55
                   focus:outline-none focus:ring-2 focus:ring-kaja-orange/60 focus:border-kaja-orange/50 transition"
               />
             </div>
@@ -496,7 +496,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
                 <EmpresaAvatar nombre={empresa.nombreComercial} logo={empresa.logo_empresa} size="sm" />
                 <div className="leading-tight">
                   <p className="text-sm font-semibold text-white">{empresa.nombreComercial}</p>
-                  <p className="text-xs text-white/45">Empresa</p>
+                  <p className="text-xs text-white/70">Empresa</p>
                 </div>
               </div>
             )}
@@ -504,7 +504,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
               <Avatar nombre={usuario.nombre} imagenPerfil={usuario.imagen_perfil} size="sm" />
               <div className="hidden sm:block leading-tight">
                 <p className="text-sm font-semibold text-white">{usuario.nombre}</p>
-                <p className="text-xs text-white/45 capitalize">{usuario.rol}</p>
+                <p className="text-xs text-white/70 capitalize">{usuario.rol}</p>
               </div>
             </div>
           </div>

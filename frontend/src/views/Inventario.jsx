@@ -312,7 +312,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                     <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-400">{total} productos</span>
+                    <span className="text-sm text-gray-600">{total} productos</span>
                     <button
                         onClick={abrirModalCategorias}
                         className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-kaja-blue text-sm font-semibold
@@ -372,7 +372,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
                 {!loading && !error && (
                     <div className="flex items-center gap-2 ml-auto shrink-0">
-                        <span className="text-sm text-gray-400 mr-1">
+                        <span className="text-sm text-gray-600 mr-1">
                             {total === 0
                                 ? 'Sin resultados'
                                 : `${(pagina - 1) * POR_PAGINA + 1}–${Math.min(pagina * POR_PAGINA, total)} de ${total}`}
@@ -446,7 +446,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             {!loading && !error && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     {productos.length === 0 ? (
-                        <div className="text-center py-16 text-gray-400 text-sm">No se encontraron productos</div>
+                        <div className="text-center py-16 text-gray-500 text-sm">No se encontraron productos</div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm min-w-150">
@@ -545,7 +545,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 <span className="text-sm">Cargando...</span>
                             </div>
                         ) : categoriasLista.length === 0 ? (
-                            <p className="text-sm text-gray-400 text-center py-8">No hay categorías registradas</p>
+                            <p className="text-sm text-gray-600 text-center py-8">No hay categorías registradas</p>
                         ) : (
                             <ul className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
                                 {categoriasLista.map(c => (
@@ -554,7 +554,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             {c.nombre.charAt(0).toUpperCase()}
                                         </span>
                                         <span className="text-sm text-gray-800 flex-1">{c.nombre}</span>
-                                        <span className="text-xs text-gray-400 shrink-0">
+                                        <span className="text-xs text-gray-600 shrink-0">
                                             {c.totalProductos} producto{c.totalProductos !== 1 ? 's' : ''}
                                         </span>
                                         <button

@@ -20,7 +20,7 @@ function NavBar({ onLoginClick }) {
             <div className="flex items-center gap-6">
                 <button
                     onClick={() => document.getElementById("caracteristicas").scrollIntoView({ behavior: "smooth" })}
-                    className="text-sm text-white/50 hover:text-white transition hidden sm:block"
+                    className="text-sm text-white/75 hover:text-white transition hidden sm:block"
                 >
                     Características
                 </button>
@@ -211,7 +211,7 @@ export default function Login({ onLogin, onRegistro }) {
                             <span className="text-kaja-orange">inteligente</span>
                         </h1>
 
-                        <p className="text-lg text-white/50 leading-relaxed mb-10 max-w-md">
+                        <p className="text-lg text-white/80 leading-relaxed mb-10 max-w-md">
                             Gestiona ventas, inventario y finanzas de tu negocio desde un único lugar.
                             Diseñado para ser rápido, claro y sin complicaciones.
                         </p>
@@ -237,7 +237,7 @@ export default function Login({ onLogin, onRegistro }) {
                                 'Control de accesos por roles',
                                 'Informes financieros en tiempo real',
                             ].map(item => (
-                                <div key={item} className="flex items-center gap-2.5 text-sm text-white/40">
+                                <div key={item} className="flex items-center gap-2.5 text-sm text-white/75">
                                     <Check className="w-4 h-4 text-kaja-orange shrink-0" />
                                     {item}
                                 </div>
@@ -265,7 +265,7 @@ export default function Login({ onLogin, onRegistro }) {
                     ].map(({ value, label }) => (
                         <div key={label} className="text-center px-4 first:pl-0 last:pr-0">
                             <div className="text-2xl font-bold text-white mb-1">{value}</div>
-                            <div className="text-xs text-white/40 uppercase tracking-wider">{label}</div>
+                            <div className="text-xs text-white/70 uppercase tracking-wider">{label}</div>
                         </div>
                     ))}
                 </div>
@@ -278,7 +278,7 @@ export default function Login({ onLogin, onRegistro }) {
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">
                             Todo lo que necesita tu negocio
                         </h2>
-                        <p className="text-gray-400 max-w-md mx-auto text-sm leading-relaxed">
+                        <p className="text-gray-600 max-w-md mx-auto text-sm leading-relaxed">
                             Desde el cobro hasta el análisis financiero, KAJA cubre cada aspecto de tu operación diaria.
                         </p>
                     </div>
@@ -320,7 +320,7 @@ export default function Login({ onLogin, onRegistro }) {
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">
                             Accede a tu panel de control
                         </h2>
-                        <p className="text-gray-400 mb-10 leading-relaxed text-sm max-w-md">
+                        <p className="text-gray-600 mb-10 leading-relaxed text-sm max-w-md">
                             Inicia sesión con tus credenciales para acceder a todas las funcionalidades
                             de KAJA adaptadas a tu rol en el negocio.
                         </p>
@@ -349,7 +349,7 @@ export default function Login({ onLogin, onRegistro }) {
                                     </div>
                                     <div>
                                         <p className="font-semibold text-gray-900 text-sm mb-0.5">{title}</p>
-                                        <p className="text-sm text-gray-400">{desc}</p>
+                                        <p className="text-sm text-gray-600">{desc}</p>
                                     </div>
                                 </div>
                             ))}
@@ -368,7 +368,7 @@ export default function Login({ onLogin, onRegistro }) {
 
                         <div className="mb-6">
                             <h3 className="text-xl font-bold text-gray-900 mb-1">Iniciar sesión</h3>
-                            <p className="text-sm text-gray-400">Introduce tus credenciales para continuar</p>
+                            <p className="text-sm text-gray-600">Introduce tus credenciales para continuar</p>
                         </div>
 
                         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -427,7 +427,7 @@ export default function Login({ onLogin, onRegistro }) {
                         </form>
 
                         <div className="mt-6 pt-5 border-t border-gray-200 text-center">
-                            <p className="text-sm text-gray-400 mb-2">¿Aún no tienes cuenta?</p>
+                            <p className="text-sm text-gray-600 mb-2">¿Aún no tienes cuenta?</p>
                             <button
                                 type="button"
                                 onClick={onRegistro}
