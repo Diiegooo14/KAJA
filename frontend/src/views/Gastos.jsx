@@ -263,6 +263,7 @@ export default function Gastos() {
                             <button
                                 type="button"
                                 onClick={() => setMostrarForm(false)}
+                                aria-label="Cerrar panel"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-kaja-sidebar hover:bg-gray-100 transition"
                             >
                                 <X className="w-5 h-5" />
@@ -434,6 +435,7 @@ export default function Gastos() {
                                                 onClick={e => { e.stopPropagation(); abrirEdicionDirecta(g) }}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
                                                 title="Editar gasto"
+                                                aria-label="Editar gasto"
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
@@ -443,6 +445,7 @@ export default function Gastos() {
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
                                                             disabled:opacity-40 disabled:cursor-not-allowed"
                                                 title="Eliminar gasto"
+                                                aria-label="Eliminar gasto"
                                             >
                                                 {eliminando === g.id
                                                     ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -468,6 +471,7 @@ export default function Gastos() {
                                     : <><Receipt className="w-5 h-5 text-kaja-orange" /> Detalle del gasto</>}
                             </h2>
                             <button onClick={cerrarModal}
+                                aria-label="Cerrar"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <X className="w-5 h-5" />
                             </button>

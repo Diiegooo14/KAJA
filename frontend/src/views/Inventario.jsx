@@ -383,10 +383,12 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 disabled={pagina === 1}
                                 className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                                 title="Primera página"
+                                aria-label="Primera página"
                             >«</button>
                             <button
                                 onClick={() => irAPagina(pagina - 1)}
                                 disabled={pagina === 1}
+                                aria-label="Página anterior"
                                 className="px-2.5 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                             >‹</button>
 
@@ -414,6 +416,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                             <button
                                 onClick={() => irAPagina(pagina + 1)}
                                 disabled={pagina === totalPaginas}
+                                aria-label="Página siguiente"
                                 className="px-2.5 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                             >›</button>
                             <button
@@ -421,6 +424,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 disabled={pagina === totalPaginas}
                                 className="px-2 py-1.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition"
                                 title="Última página"
+                                aria-label="Última página"
                             >»</button>
                         </>)}
                     </div>
@@ -484,6 +488,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                                         onClick={e => { e.stopPropagation(); abrirModal(p) }}
                                                         className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blue hover:bg-kaja-light transition"
                                                         title="Editar producto"
+                                                        aria-label="Editar producto"
                                                     >
                                                         <Pencil className="w-4 h-4" />
                                                     </button>
@@ -491,6 +496,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                                         onClick={e => { e.stopPropagation(); setProductoParaEliminar(p) }}
                                                         className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
                                                         title="Eliminar producto"
+                                                        aria-label="Eliminar producto"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
@@ -527,6 +533,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                 Categorías
                             </h2>
                             <button onClick={() => setModalCategoriasAbierto(false)}
+                                aria-label="Cerrar"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <X className="w-5 h-5" />
                             </button>
@@ -554,6 +561,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             onClick={() => setCategoriaParaEliminar(c)}
                                             className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition shrink-0"
                                             title="Eliminar categoría"
+                                            aria-label="Eliminar categoría"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
@@ -675,6 +683,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blue">Detalle del producto</h2>
                             <button onClick={cerrarVisor}
+                                aria-label="Cerrar"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <X className="w-5 h-5" />
                             </button>

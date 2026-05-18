@@ -239,6 +239,7 @@ export default function Usuarios({ usuario }) {
                             <button
                                 type="button"
                                 onClick={() => setMostrarForm(false)}
+                                aria-label="Cerrar panel"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-kaja-sidebar hover:bg-gray-100 transition"
                             >
                                 <X className="w-5 h-5" />
@@ -429,6 +430,7 @@ export default function Usuarios({ usuario }) {
                                                 onClick={e => { e.stopPropagation(); iniciarEdicion(u) }}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-blueText hover:bg-gray-100 transition"
                                                 title="Editar usuario"
+                                                aria-label="Editar usuario"
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
@@ -452,6 +454,7 @@ export default function Usuarios({ usuario }) {
                                 Editar usuario
                             </h2>
                             <button onClick={cancelarEdicion}
+                                aria-label="Cerrar"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <X className="w-5 h-5" />
                             </button>
@@ -583,6 +586,7 @@ export default function Usuarios({ usuario }) {
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blueText">Detalle del usuario</h2>
                             <button onClick={() => setUsuarioVisor(null)}
+                                aria-label="Cerrar"
                                 className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
                                 <X className="w-5 h-5" />
                             </button>

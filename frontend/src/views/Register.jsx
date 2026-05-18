@@ -23,6 +23,7 @@ function AvatarUpload({ preview, onSeleccionar, error, label }) {
       <button
         type="button"
         onClick={() => inputRef.current.click()}
+        aria-label={preview ? `Cambiar ${label}` : `Subir ${label}`}
         className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 group transition
           ${error ? 'ring-2 ring-rose-400' : 'ring-2 ring-gray-200 hover:ring-kaja-orange'}`}
       >

@@ -380,6 +380,7 @@ export default function TPV({ usuario }) {
                                 <span className="text-sm font-medium text-gray-800 leading-tight flex-1">{item.nombre}</span>
                                 <button
                                     onClick={() => eliminarDelCarrito(item.id)}
+                                    aria-label={`Eliminar ${item.nombre} del carrito`}
                                     className="text-gray-300 hover:text-red-400 transition shrink-0 mt-0.5"
                                 >
                                     <X className="w-3.5 h-3.5" />
@@ -389,6 +390,7 @@ export default function TPV({ usuario }) {
                                 <div className="flex items-center gap-1.5">
                                     <button
                                         onClick={() => cambiarCantidad(item.id, -1)}
+                                        aria-label={`Reducir cantidad de ${item.nombre}`}
                                         className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition"
                                     >
                                         <Minus className="w-3 h-3" />
@@ -397,6 +399,7 @@ export default function TPV({ usuario }) {
                                     <button
                                         onClick={() => cambiarCantidad(item.id, 1)}
                                         disabled={item.cantidad >= item.stock}
+                                        aria-label={`Aumentar cantidad de ${item.nombre}`}
                                         className="w-6 h-6 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center hover:bg-gray-200 transition disabled:opacity-30 disabled:cursor-not-allowed"
                                     >
                                         <Plus className="w-3 h-3" />

@@ -408,6 +408,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           <button
             className="md:hidden text-white/50 hover:text-white transition"
             onClick={() => setSidebarAbierto(false)}
+            aria-label="Cerrar menú"
           >
             <X className="w-5 h-5" />
           </button>
@@ -468,6 +469,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           <button
             className="md:hidden p-2 rounded-lg text-white/60 hover:bg-white/10 transition"
             onClick={() => setSidebarAbierto(true)}
+            aria-label="Abrir menú"
           >
             <Menu className="w-5 h-5" />
           </button>
