@@ -292,6 +292,7 @@ function TabVentas() {
                             alt={venta.vendedor}
                             width="28"
                             height="28"
+                            loading="lazy"
                             className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                             onError={e => { e.target.src = DEFAULT_AVATAR }}
                           />

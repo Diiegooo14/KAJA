@@ -396,6 +396,7 @@ export default function Usuarios({ usuario }) {
                                                 alt={u.nombre}
                                                 width="32"
                                                 height="32"
+                                                loading="lazy"
                                                 className="w-8 h-8 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
                                                 onError={e => { e.target.src = DEFAULT_AVATAR }}
                                             />
@@ -598,6 +599,7 @@ export default function Usuarios({ usuario }) {
                                 alt={usuarioVisor.nombre}
                                 width="64"
                                 height="64"
+                                loading="lazy"
                                 className="w-16 h-16 rounded-full object-cover ring-2 ring-gray-100 shadow-sm shrink-0"
                                 onError={e => { e.target.src = DEFAULT_AVATAR }}
                             />

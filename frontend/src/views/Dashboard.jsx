@@ -1,16 +1,17 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
 import {
   Search, Menu, X, LogOut,
   Home, ShoppingCart, Package, Receipt, Users, BarChart3, Settings,
   ShoppingBag, AlertTriangle, ArrowRight, TrendingUp, Clock, Zap,
 } from 'lucide-react'
-import Inventario from './Inventario'
-import VentasHoy from './VentasHoy'
-import TPV from './TPV'
-import Gastos from './Gastos'
-import Usuarios from './Usuarios'
-import Configuracion from './Configuracion'
-import GestionFinanciera from './GestionFinanciera'
+
+const Inventario      = lazy(() => import('./Inventario'))
+const VentasHoy       = lazy(() => import('./VentasHoy'))
+const TPV             = lazy(() => import('./TPV'))
+const Gastos          = lazy(() => import('./Gastos'))
+const Usuarios        = lazy(() => import('./Usuarios'))
+const Configuracion   = lazy(() => import('./Configuracion'))
+const GestionFinanciera = lazy(() => import('./GestionFinanciera'))
 
 const DEFAULT_AVATAR        = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 const DEFAULT_EMPRESA_LOGO  = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778342336/empresa-basico_ykh1p1.png'
@@ -18,7 +19,7 @@ const API_URL               = import.meta.env.VITE_API_URL
 
 // ─── Avatares ─────────────────────────────────────────────────────────────────
 
-function Avatar({ nombre, imagenPerfil, size = 'md' }) {
+function Avatar({ nombre, imagenPerfil, size = 'md', lazy = false }) {
   const [src, setSrc] = useState(imagenPerfil || DEFAULT_AVATAR)
   const handleError   = useCallback(() => setSrc(null), [])
   useEffect(() => { setSrc(imagenPerfil || DEFAULT_AVATAR) }, [imagenPerfil])
@@ -34,6 +35,7 @@ function Avatar({ nombre, imagenPerfil, size = 'md' }) {
         onError={handleError}
         width={sizePx}
         height={sizePx}
+        loading={lazy ? 'lazy' : 'eager'}
         className={`${cls} rounded-full object-cover ring-2 ring-white/20 shrink-0`}
       />
     )
@@ -512,7 +514,13 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
 
         {/* Content */}
         <main className={`flex-1 bg-kaja-light flex flex-col ${seccionActiva === 'financiero' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-          {renderContenido()}
+          <Suspense fallback={
+            <div className="flex items-center justify-center flex-1 py-24">
+              <div className="w-8 h-8 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+            </div>
+          }>
+            {renderContenido()}
+          </Suspense>
         </main>
 
       </div>
