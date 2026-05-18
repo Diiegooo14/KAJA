@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, X, CheckCircle, Download } from 'lucide-react'
-import { jsPDF } from 'jspdf'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -18,6 +17,8 @@ async function fetchJSON(url) {
 }
 
 async function generarTicketPDF(venta, empresa) {
+    const { jsPDF } = await import('jspdf')
+
     // Carga el logo como base64
     let logoInfo = null
     try {

@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import Login from './views/Login'
-import Register from './views/Register'
-import Dashboard from './views/Dashboard'
+import { useState, lazy, Suspense } from 'react'
+
+const Login = lazy(() => import('./views/Login'))
+const Register = lazy(() => import('./views/Register'))
+const Dashboard = lazy(() => import('./views/Dashboard'))
 
 export default function App() {
     const [usuario, setUsuario] = useState(() => {
@@ -31,17 +32,27 @@ export default function App() {
 
     if (usuario) {
         return (
-            <Dashboard
-                usuario={usuario}
-                onLogout={handleLogout}
-                onActualizarUsuario={handleActualizarUsuario}
-            />
+            <Suspense fallback={null}>
+                <Dashboard
+                    usuario={usuario}
+                    onLogout={handleLogout}
+                    onActualizarUsuario={handleActualizarUsuario}
+                />
+            </Suspense>
         )
     }
 
     if (vista === 'registro') {
-        return <Register onVolver={() => setVista('login')} />
+        return (
+            <Suspense fallback={null}>
+                <Register onVolver={() => setVista('login')} />
+            </Suspense>
+        )
     }
 
-    return <Login onLogin={handleLogin} onRegistro={() => setVista('registro')} />
+    return (
+        <Suspense fallback={null}>
+            <Login onLogin={handleLogin} onRegistro={() => setVista('registro')} />
+        </Suspense>
+    )
 }
