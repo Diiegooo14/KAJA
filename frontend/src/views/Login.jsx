@@ -192,6 +192,8 @@ export default function Login({ onLogin, onRegistro }) {
 
             <NavBar onLoginClick={scrollToLogin} />
 
+            <main>
+
             <section className="relative min-h-screen bg-kaja-sidebar flex items-center overflow-hidden pt-16">
 
                 <div className="absolute -top-32 -right-32 w-175 h-175 rounded-full bg-kaja-orange/5 blur-3xl pointer-events-none" />
@@ -439,6 +441,8 @@ export default function Login({ onLogin, onRegistro }) {
                     </div>
                 </div>
             </section>
+
+            </main>
 
             <footer className="bg-kaja-sidebar border-t border-white/10 py-8">
                 <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col sm:flex-row items-center justify-between gap-4">

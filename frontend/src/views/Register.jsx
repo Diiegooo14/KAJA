@@ -114,7 +114,7 @@ function Feature({ icon: Icon, text }) {
 
 function PantallaExito({ onVolver }) {
   return (
-    <div className="min-h-screen flex">
+    <main className="min-h-screen flex">
       <div className="hidden lg:flex lg:w-2/5 bg-kaja-sidebar flex-col justify-between p-12 relative overflow-hidden">
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/5" />
         <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-white/5" />
@@ -146,11 +146,11 @@ function PantallaExito({ onVolver }) {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
 
-// Formulario principal 
+// Formulario principal
 
 export default function Register({ onVolver }) {
   const [form, setForm] = useState(campoVacio)
@@ -213,7 +213,7 @@ export default function Register({ onVolver }) {
   if (exito) return <PantallaExito onVolver={onVolver} />
 
   return (
-    <div className="min-h-screen flex">
+    <main className="min-h-screen flex">
 
       {/* Panel izquierdo */}
       <div className="hidden lg:flex lg:w-[38%] bg-kaja-sidebar flex-col gap-10 p-12 relative overflow-hidden shrink-0">
@@ -346,6 +346,6 @@ export default function Register({ onVolver }) {
         </div>
       </div>
 
-    </div>
+    </main>
   )
 }
