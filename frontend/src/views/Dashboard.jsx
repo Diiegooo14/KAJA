@@ -355,7 +355,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
     if (seccionActiva === 'ventashoy')   return <VentasHoy />
     if (seccionActiva === 'tpv')         return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos')      return <Gastos />
-    if (seccionActiva === 'usuarios')    return <Usuarios usuario={usuario} />
+    if (seccionActiva === 'usuarios')    return <Usuarios usuario={usuario} onActualizarUsuario={onActualizarUsuario} />
     if (seccionActiva === 'financiero')  return <GestionFinanciera />
     if (seccionActiva === 'config')      return (
       <Configuracion

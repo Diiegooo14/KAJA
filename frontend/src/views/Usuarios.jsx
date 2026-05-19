@@ -109,7 +109,7 @@ function FotoUsuario({ idUsuario, imagenActual, nombre, onSubida }) {
     )
 }
 
-export default function Usuarios({ usuario }) {
+export default function Usuarios({ usuario, onActualizarUsuario }) {
     const [usuarios, setUsuarios] = useState([])
     const [resumen, setResumen] = useState({ total: 0, activos: 0, inactivos: 0 })
     const [loading, setLoading] = useState(true)
@@ -182,6 +182,9 @@ export default function Usuarios({ usuario }) {
                     method: 'PUT',
                     body: JSON.stringify(body),
                 })
+                if (editando.id === usuario.id) {
+                    onActualizarUsuario({ ...usuario, nombre: form.nombre.trim(), rol: form.rol })
+                }
                 mostrarToast('Usuario actualizado correctamente')
                 cancelarEdicion()
             } else {
