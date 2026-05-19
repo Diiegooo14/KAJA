@@ -177,7 +177,7 @@ export default function Usuarios({ usuario }) {
             if (editando) {
                 const body = { nombre: form.nombre.trim(), rol: form.rol }
                 if (form.password) body.password = form.password
-                if (form.estado) body.estado = form.estado
+                if (form.estado !== editando.estado) body.estado = form.estado
                 await fetchJSON(`${API_URL}/usuarios?id=${editando.id}`, {
                     method: 'PUT',
                     body: JSON.stringify(body),

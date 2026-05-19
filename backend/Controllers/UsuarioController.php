@@ -180,11 +180,6 @@ class UsuarioController
                     echo json_encode(['error' => 'Estado no válido']);
                     return;
                 }
-                if ($id === (int) $carga['id']) {
-                    http_response_code(400);
-                    echo json_encode(['error' => 'No puedes cambiar tu propio estado']);
-                    return;
-                }
                 $campos[]              = 'estado = :estado';
                 $parametros[':estado'] = $datos['estado'];
             }
