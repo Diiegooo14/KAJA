@@ -104,8 +104,8 @@ INSERT INTO EMPRESA (nif, razonSocial, nombreComercial, direccion, email)
 VALUES ('B12345678', 'Ferreterías Prieto S.L.', 'KAJA Demo', 'Calle Mayor 1', 'contacto@kajademo.es');
 
 INSERT INTO USUARIO (idRol, idEmpresa, nif, nombre, password) VALUES
-(1, 1, '11111111A', 'Diego Prieto (Admin)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
-(2, 1, '22222222B', 'Carlos López (Vendedor)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+(1, 1, '70914786J', 'Diego Prieto (Admin)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+(2, 1, '12803561J', 'Carlos López (Vendedor)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
 
 INSERT INTO CATEGORIA (idEmpresa, nombre, descripcion) VALUES
 (1, 'Herramienta Eléctrica', 'Taladros, sierras, radiales'),
