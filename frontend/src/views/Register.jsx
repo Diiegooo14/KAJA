@@ -6,6 +6,12 @@ import {
 
 const API_URL = import.meta.env.VITE_API_URL
 const TIPOS_VALIDOS = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+const LETRAS_DNI = 'TRWAGMYFPDXBNJZSQVHLCKE'
+
+function validarDNI(nif) {
+  const m = nif.trim().toUpperCase().match(/^(\d{8})([A-Z])$/)
+  return m ? LETRAS_DNI[parseInt(m[1]) % 23] === m[2] : false
+}
 
 const campoVacio = () => ({
   empresaNif: '', razonSocial: '', nombreComercial: '',
@@ -170,7 +176,14 @@ export default function Register({ onVolver }) {
     const { name, value } = e.target
     const finalValue = name === 'telefono' ? value.replace(/\D/g, '').slice(0, 9) : value
     setForm(prev => ({ ...prev, [name]: finalValue }))
-    setErrores(prev => ({ ...prev, [name]: '' }))
+    if (name === 'adminNif' && finalValue.length === 9) {
+      setErrores(prev => ({
+        ...prev,
+        adminNif: validarDNI(finalValue) ? '' : 'DNI no válido. Comprueba la letra.',
+      }))
+    } else {
+      setErrores(prev => ({ ...prev, [name]: '' }))
+    }
   }
 
   function seleccionar(setter, setPreview, setErr) {
@@ -189,6 +202,10 @@ export default function Register({ onVolver }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    if (form.adminNif && !validarDNI(form.adminNif)) {
+      setErrores(prev => ({ ...prev, adminNif: 'DNI no válido. Comprueba la letra.' }))
+      return
+    }
     setLoading(true)
     try {
       const fd = new FormData()
