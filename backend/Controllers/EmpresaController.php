@@ -74,6 +74,25 @@ class EmpresaController
         }
     }
 
+    public static function eliminarEmpresa(): void
+    {
+        $carga     = Jwt::requerirAdministrador();
+        $idEmpresa = (int) $carga['idEmpresa'];
+
+        try {
+            if (!EmpresaModel::buscarPorId($idEmpresa)) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Empresa no encontrada']);
+                return;
+            }
+            EmpresaModel::eliminar($idEmpresa);
+            echo json_encode(['mensaje' => 'Empresa eliminada correctamente']);
+        } catch (PDOException) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function subirLogo(): void
     {
         $carga     = Jwt::requerirAdministrador();

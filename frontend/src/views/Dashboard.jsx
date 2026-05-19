@@ -362,6 +362,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
         usuario={usuario}
         onActualizarUsuario={onActualizarUsuario}
         onActualizarEmpresa={datos => setEmpresa(prev => ({ ...prev, ...datos }))}
+        onLogout={onLogout}
       />
     )
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { User, Lock, Building2, Camera, Loader2, Trash2 } from 'lucide-react'
+import { User, Lock, Building2, Camera, Loader2, Trash2, AlertTriangle, X } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -199,7 +199,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
   )
 }
 
-export default function Configuracion({ usuario, onActualizarUsuario, onActualizarEmpresa }) {
+export default function Configuracion({ usuario, onActualizarUsuario, onActualizarEmpresa, onLogout }) {
   const esAdmin = usuario.rol === 'Administrador'
 
   // Empresa
@@ -222,6 +222,11 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   const [passConfirm, setPassConfirm] = useState('')
   const [mensajePass, setMensajePass] = useState(null)
   const [cargandoPass, setCargandoPass] = useState(false)
+
+  // Eliminar empresa
+  const [modalBorrar, setModalBorrar] = useState(false)
+  const [borrandoEmpresa, setBorrandoEmpresa] = useState(false)
+  const [errorBorrar, setErrorBorrar] = useState('')
 
   function cargarEmpresa() {
     setErrorCargaEmpresa(false)
@@ -339,6 +344,23 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
     }
   }
 
+  async function eliminarEmpresa() {
+    setBorrandoEmpresa(true)
+    setErrorBorrar('')
+    try {
+      const res = await fetch(`${API_URL}/empresa?todo=1`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Error al eliminar la empresa')
+      onLogout()
+    } catch (err) {
+      setErrorBorrar(err.message)
+      setBorrandoEmpresa(false)
+    }
+  }
+
   return (
     <div className="p-6 md:p-8 max-w-2xl mx-auto w-full">
       <h2 className="text-2xl font-bold text-kaja-blueText mb-6 uppercase tracking-wide">
@@ -428,7 +450,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
       )}
 
       {/* Mi perfil */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
         <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
           <User className="w-5 h-5" />
           Mi perfil
@@ -511,6 +533,97 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
           </form>
         </div>
       </section>
+
+      {/* Zona de peligro (solo admin) */}
+      {esAdmin && (
+        <section className="bg-white rounded-xl shadow-sm border border-red-100 p-6 mt-6">
+          <h3 className="text-base font-semibold text-red-600 mb-1 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Zona de peligro
+          </h3>
+          <p className="text-sm text-gray-500 mb-4">
+            Las acciones de esta sección son permanentes e irreversibles.
+          </p>
+          <div className="flex items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
+            <div>
+              <p className="text-sm font-semibold text-gray-800">Eliminar empresa</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Borra la empresa y todos sus datos: usuarios, productos, ventas y gastos.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setModalBorrar(true); setErrorBorrar('') }}
+              className="shrink-0 flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
+                         rounded-lg hover:bg-red-700 active:scale-95 transition"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* Modal confirmación borrar empresa */}
+      {modalBorrar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <button
+                onClick={() => setModalBorrar(false)}
+                disabled={borrandoEmpresa}
+                className="text-gray-400 hover:text-gray-600 transition disabled:opacity-40"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <h3 className="text-lg font-bold text-gray-900 mb-2">¿Eliminar la empresa?</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Esta acción es <span className="font-semibold text-gray-700">permanente e irreversible</span>.
+              Se eliminarán todos los datos asociados:
+            </p>
+            <ul className="text-sm text-gray-600 space-y-1 mb-6 pl-4 list-disc">
+              <li>Todos los usuarios de la empresa</li>
+              <li>Productos y categorías</li>
+              <li>Historial de ventas</li>
+              <li>Registro de gastos</li>
+            </ul>
+
+            {errorBorrar && (
+              <p className="text-sm text-red-600 mb-4 px-3 py-2 bg-red-50 rounded-lg">{errorBorrar}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setModalBorrar(false)}
+                disabled={borrandoEmpresa}
+                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600
+                           hover:bg-gray-50 transition disabled:opacity-40"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={eliminarEmpresa}
+                disabled={borrandoEmpresa}
+                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold
+                           hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed
+                           flex items-center justify-center gap-2"
+              >
+                {borrandoEmpresa
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando...</>
+                  : 'Sí, eliminar todo'
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -46,6 +46,37 @@ class EmpresaModel
         return (bool) $stmt->fetch();
     }
 
+    public static function eliminar(int $id): void
+    {
+        $pdo = Database::connect();
+        $pdo->beginTransaction();
+        try {
+            $pdo->prepare(
+                'DELETE dv FROM DETALLE_VENTA dv
+                 INNER JOIN VENTA v ON dv.idVenta = v.id
+                 INNER JOIN USUARIO u ON v.idUsuario = u.id
+                 WHERE u.idEmpresa = :id'
+            )->execute([':id' => $id]);
+
+            $pdo->prepare(
+                'DELETE v FROM VENTA v
+                 INNER JOIN USUARIO u ON v.idUsuario = u.id
+                 WHERE u.idEmpresa = :id'
+            )->execute([':id' => $id]);
+
+            $pdo->prepare('DELETE FROM GASTO    WHERE idEmpresa = :id')->execute([':id' => $id]);
+            $pdo->prepare('DELETE FROM PRODUCTO WHERE idEmpresa = :id')->execute([':id' => $id]);
+            $pdo->prepare('DELETE FROM CATEGORIA WHERE idEmpresa = :id')->execute([':id' => $id]);
+            $pdo->prepare('DELETE FROM USUARIO  WHERE idEmpresa = :id')->execute([':id' => $id]);
+            $pdo->prepare('DELETE FROM EMPRESA  WHERE id = :id')->execute([':id' => $id]);
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
     public static function crear(array $datos): int
     {
         $pdo = Database::connect();
