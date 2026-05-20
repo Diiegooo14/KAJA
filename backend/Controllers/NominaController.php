@@ -124,7 +124,33 @@ class NominaController
                 return;
             }
 
-            echo json_encode(['url' => CloudinaryService::urlFirmada($nomina['url'])]);
+            $urlFirmada = CloudinaryService::urlFirmada($nomina['url']);
+
+            $ch = curl_init($urlFirmada);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT        => 30,
+            ]);
+            $contenido = curl_exec($ch);
+            $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($curlError || $httpCode !== 200) {
+                http_response_code(502);
+                echo json_encode(['error' => 'No se pudo obtener el archivo']);
+                return;
+            }
+
+            $mes      = (int) $nomina['mes'];
+            $anio     = (int) $nomina['anio'];
+            $filename = "nomina_{$mes}_{$anio}.pdf";
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . strlen($contenido));
+            echo $contenido;
         } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);

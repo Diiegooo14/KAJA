@@ -251,13 +251,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
         setAvisoNomina({ ok: false, texto: `Error al descargar: ${detalle}` })
         return
       }
-      const { url } = await res.json()
-      const fileRes = await fetch(url)
-      if (!fileRes.ok) {
-        setAvisoNomina({ ok: false, texto: 'No se pudo obtener el archivo.' })
-        return
-      }
-      const blob = await fileRes.blob()
+      const blob = await res.blob()
       const blobUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = blobUrl
