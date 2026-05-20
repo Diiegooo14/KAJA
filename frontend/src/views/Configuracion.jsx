@@ -237,19 +237,23 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
   async function descargarNomina(id, nombreMes, anio) {
-    const res = await fetch(`${API_URL}/nominas?action=descargar&id=${id}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
-    })
-    if (!res.ok) return
-    const blob = await res.blob()
-    const blobUrl = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = blobUrl
-    a.download = `nomina_${nombreMes}_${anio}.pdf`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(blobUrl)
+    try {
+      const res = await fetch(`${API_URL}/nominas?action=descargar&id=${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+      })
+      if (!res.ok) return
+      const blob = await res.blob()
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = `nomina_${nombreMes}_${anio}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    } catch {
+      // silencioso: la descarga falla sin romper la UI
+    }
   }
 
   function cargarEmpresa() {
