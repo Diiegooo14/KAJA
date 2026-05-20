@@ -232,16 +232,23 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   const [nominas, setNominas] = useState([])
   const [loadingNominas, setLoadingNominas] = useState(true)
   const [aniosAbiertos, setAniosAbiertos] = useState([])
+  const [descargandoId, setDescargandoId] = useState(null)
+  const [avisoNomina, setAvisoNomina] = useState(null)
 
   const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
                 'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
 
   async function descargarNomina(id, nombreMes, anio) {
+    setDescargandoId(id)
+    setAvisoNomina(null)
     try {
       const res = await fetch(`${API_URL}/nominas?action=descargar&id=${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
       })
-      if (!res.ok) return
+      if (!res.ok) {
+        setAvisoNomina({ ok: false, texto: 'No se pudo descargar la nómina. Inténtalo de nuevo.' })
+        return
+      }
       const blob = await res.blob()
       const blobUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -252,7 +259,9 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
       document.body.removeChild(a)
       URL.revokeObjectURL(blobUrl)
     } catch {
-      // silencioso: la descarga falla sin romper la UI
+      setAvisoNomina({ ok: false, texto: 'Error de conexión al descargar la nómina.' })
+    } finally {
+      setDescargandoId(null)
     }
   }
 
@@ -584,6 +593,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
           <FileText className="w-5 h-5" />
           Mis nóminas
         </h3>
+        <Aviso msg={avisoNomina} />
 
         {loadingNominas ? (
           <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
@@ -628,11 +638,16 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                               key={i}
                               type="button"
                               onClick={() => descargarNomina(nomina.id, mes.toLowerCase(), anio)}
+                              disabled={descargandoId === nomina.id}
                               title={`Descargar nómina de ${mes} ${anio}`}
                               className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-kaja-orange/10
-                                         border border-kaja-orange/20 hover:bg-kaja-orange/20 transition group"
+                                         border border-kaja-orange/20 hover:bg-kaja-orange/20 transition group
+                                         disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <Download className="w-4 h-4 text-kaja-orange group-hover:scale-110 transition-transform" />
+                              {descargandoId === nomina.id
+                                ? <Loader2 className="w-4 h-4 text-kaja-orange animate-spin" />
+                                : <Download className="w-4 h-4 text-kaja-orange group-hover:scale-110 transition-transform" />
+                              }
                               <span className="text-xs font-semibold text-kaja-orange text-center leading-tight">{mes}</span>
                             </button>
                           ) : (
