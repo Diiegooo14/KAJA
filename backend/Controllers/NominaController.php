@@ -124,29 +124,7 @@ class NominaController
                 return;
             }
 
-            $ch = curl_init($nomina['url']);
-            curl_setopt_array($ch, [
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_TIMEOUT        => 30,
-            ]);
-            $contenido  = curl_exec($ch);
-            $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $errorCurl  = curl_error($ch);
-            curl_close($ch);
-
-            if ($errorCurl || $httpStatus !== 200 || $contenido === false) {
-                http_response_code(502);
-                echo json_encode(['error' => 'No se pudo obtener el archivo']);
-                return;
-            }
-
-            $nombreArchivo = "nomina_{$nomina['anio']}_{$nomina['mes']}.pdf";
-            header('Content-Type: application/pdf');
-            header("Content-Disposition: attachment; filename=\"{$nombreArchivo}\"");
-            header('Content-Length: ' . strlen($contenido));
-            header('Cache-Control: private, no-cache');
-            echo $contenido;
+            echo json_encode(['url' => $nomina['url']]);
         } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);

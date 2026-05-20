@@ -246,10 +246,18 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
         headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
       })
       if (!res.ok) {
-        setAvisoNomina({ ok: false, texto: 'No se pudo descargar la nómina. Inténtalo de nuevo.' })
+        let detalle = `Error ${res.status}`
+        try { const json = await res.json(); detalle = json.error || detalle } catch { /* no era json */ }
+        setAvisoNomina({ ok: false, texto: `Error al descargar: ${detalle}` })
         return
       }
-      const blob = await res.blob()
+      const { url } = await res.json()
+      const fileRes = await fetch(url)
+      if (!fileRes.ok) {
+        setAvisoNomina({ ok: false, texto: 'No se pudo obtener el archivo.' })
+        return
+      }
+      const blob = await fileRes.blob()
       const blobUrl = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = blobUrl
