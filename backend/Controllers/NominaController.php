@@ -124,7 +124,7 @@ class NominaController
                 return;
             }
 
-            echo json_encode(['url' => $nomina['url']]);
+            echo json_encode(['url' => CloudinaryService::urlFirmada($nomina['url'])]);
         } catch (PDOException) {
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);

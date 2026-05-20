@@ -2,6 +2,26 @@
 
 class CloudinaryService
 {
+    // Genera una URL firmada para que Cloudinary sirva el archivo incluso con Strict Mode activo
+    public static function urlFirmada(string $url): string
+    {
+        $secret = Config::$CLOUDINARY_SECRET;
+
+        // Eliminar query string y firma existente si la hubiera
+        $limpia = preg_replace('/\?.*$/', '', $url);
+        $limpia = preg_replace('#/s--[^/]+--/#', '/', $limpia);
+
+        // Extraer la parte a firmar: desde v{version}/...
+        if (!preg_match('#/(v\d+/.+)$#', urldecode($limpia), $m)) {
+            return $url;
+        }
+
+        $toSign = $m[1]; // e.g. "v1779278064/nominas KAJA/nomina_1_2026_5.pdf"
+        $sig    = substr(rtrim(strtr(base64_encode(sha1($toSign . $secret, true)), '+/', '-_'), '='), 0, 8);
+
+        return preg_replace('#(/upload/)#', "/upload/s--{$sig}--/", $limpia);
+    }
+
     private static array $TIPOS_PERMITIDOS = [
         'image/jpeg',
         'image/png',
