@@ -67,6 +67,7 @@ class EmpresaModel
             $pdo->prepare('DELETE FROM GASTO    WHERE idEmpresa = :id')->execute([':id' => $id]);
             $pdo->prepare('DELETE FROM PRODUCTO WHERE idEmpresa = :id')->execute([':id' => $id]);
             $pdo->prepare('DELETE FROM CATEGORIA WHERE idEmpresa = :id')->execute([':id' => $id]);
+            $pdo->prepare('DELETE FROM NOMINA   WHERE idEmpresa = :id')->execute([':id' => $id]);
             $pdo->prepare('DELETE FROM USUARIO  WHERE idEmpresa = :id')->execute([':id' => $id]);
             $pdo->prepare('DELETE FROM EMPRESA  WHERE id = :id')->execute([':id' => $id]);
 

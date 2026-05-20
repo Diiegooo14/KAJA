@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { User, Lock, Building2, Camera, Loader2, Trash2, AlertTriangle, X } from 'lucide-react'
+import { User, Lock, Building2, Camera, Loader2, Trash2, AlertTriangle, X, FileText, Download, ChevronDown, ChevronUp } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -228,6 +228,30 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   const [borrandoEmpresa, setBorrandoEmpresa] = useState(false)
   const [errorBorrar, setErrorBorrar] = useState('')
 
+  // Nóminas
+  const [nominas, setNominas] = useState([])
+  const [loadingNominas, setLoadingNominas] = useState(true)
+  const [aniosAbiertos, setAniosAbiertos] = useState([])
+
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+  async function descargarNomina(id, nombreMes, anio) {
+    const res = await fetch(`${API_URL}/nominas?action=descargar&id=${id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+    })
+    if (!res.ok) return
+    const blob = await res.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = blobUrl
+    a.download = `nomina_${nombreMes}_${anio}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(blobUrl)
+  }
+
   function cargarEmpresa() {
     setErrorCargaEmpresa(false)
     setEmpresa(null)
@@ -254,6 +278,22 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   useEffect(() => {
     if (esAdmin) cargarEmpresa()
   }, [esAdmin])
+
+  useEffect(() => {
+    setLoadingNominas(true)
+    fetch(`${API_URL}/nominas`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+    })
+      .then(r => r.ok ? r.json() : { nominas: [] })
+      .then(data => {
+        const lista = data.nominas ?? []
+        setNominas(lista)
+        const aniosUnicos = [...new Set(lista.map(n => Number(n.anio)))].sort((a, b) => b - a)
+        setAniosAbiertos(aniosUnicos.slice(0, 1))
+      })
+      .catch(() => {})
+      .finally(() => setLoadingNominas(false))
+  }, [])
 
   function campoEmpresa(field) {
     return e => setFormEmpresa(prev => ({ ...prev, [field]: e.target.value }))
@@ -532,6 +572,83 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
             />
           </form>
         </div>
+      </section>
+
+      {/* Mis nóminas */}
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
+        <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
+          <FileText className="w-5 h-5" />
+          Mis nóminas
+        </h3>
+
+        {loadingNominas ? (
+          <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
+            <Loader2 className="w-4 h-4 animate-spin text-kaja-orange" />
+            <span className="text-sm">Cargando nóminas…</span>
+          </div>
+        ) : nominas.length === 0 ? (
+          <div className="text-center py-10 text-gray-400">
+            <FileText className="w-10 h-10 mx-auto mb-2 opacity-20" />
+            <p className="text-sm font-medium">Aún no tienes nóminas disponibles</p>
+            <p className="text-xs mt-1">Tu administrador las irá subiendo cada mes</p>
+          </div>
+        ) : (() => {
+          const aniosUnicos = [...new Set(nominas.map(n => Number(n.anio)))].sort((a, b) => b - a)
+          return (
+            <div className="flex flex-col gap-3">
+              {aniosUnicos.map(anio => {
+                const nominasAnio = nominas.filter(n => Number(n.anio) === anio)
+                const abierto = aniosAbiertos.includes(anio)
+                return (
+                  <div key={anio} className="border border-gray-100 rounded-xl overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setAniosAbiertos(prev =>
+                        prev.includes(anio) ? prev.filter(a => a !== anio) : [...prev, anio]
+                      )}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
+                    >
+                      <span className="text-sm font-bold text-kaja-blueText">{anio}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{nominasAnio.length} nómina{nominasAnio.length !== 1 ? 's' : ''}</span>
+                        {abierto ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                      </div>
+                    </button>
+
+                    {abierto && (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-3">
+                        {MESES.map((mes, i) => {
+                          const nomina = nominasAnio.find(n => Number(n.mes) === i + 1)
+                          return nomina ? (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => descargarNomina(nomina.id, mes.toLowerCase(), anio)}
+                              title={`Descargar nómina de ${mes} ${anio}`}
+                              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-kaja-orange/10
+                                         border border-kaja-orange/20 hover:bg-kaja-orange/20 transition group"
+                            >
+                              <Download className="w-4 h-4 text-kaja-orange group-hover:scale-110 transition-transform" />
+                              <span className="text-xs font-semibold text-kaja-orange text-center leading-tight">{mes}</span>
+                            </button>
+                          ) : (
+                            <div
+                              key={i}
+                              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gray-50 border border-gray-100 opacity-40"
+                            >
+                              <FileText className="w-4 h-4 text-gray-300" />
+                              <span className="text-xs text-gray-400 text-center leading-tight">{mes}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })()}
       </section>
 
       {/* Zona de peligro (solo admin) */}

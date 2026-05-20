@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react'
-import { Camera, Pencil, Loader2, X, Plus } from 'lucide-react'
+import { Camera, Pencil, Loader2, X, Plus, FileText, Upload, Trash2, Download } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
@@ -124,6 +124,81 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
     const [toast, setToast] = useState('')
     const [mostrarForm, setMostrarForm] = useState(false)
     const [usuarioVisor, setUsuarioVisor] = useState(null)
+
+    // Nóminas
+    const [modalNominas, setModalNominas] = useState(null)
+    const [nominasUsuario, setNominasUsuario] = useState([])
+    const [loadingNominas, setLoadingNominas] = useState(false)
+    const [subiendoNomina, setSubiendoNomina] = useState(false)
+    const [errorNomina, setErrorNomina] = useState('')
+    const [exitoNomina, setExitoNomina] = useState('')
+    const [mesNomina, setMesNomina] = useState(new Date().getMonth() + 1)
+    const [anioNomina, setAnioNomina] = useState(new Date().getFullYear())
+    const inputNominaRef = useRef(null)
+
+    const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                   'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+
+    async function abrirNominas(u) {
+        setModalNominas(u)
+        setNominasUsuario([])
+        setErrorNomina('')
+        setExitoNomina('')
+        setLoadingNominas(true)
+        try {
+            const data = await fetchJSON(`${API_URL}/nominas?idUsuario=${u.id}`)
+            setNominasUsuario(data.nominas ?? [])
+        } catch (e) {
+            setErrorNomina(e.message)
+        } finally {
+            setLoadingNominas(false)
+        }
+    }
+
+    async function subirNomina(e) {
+        const file = e.target.files[0]
+        if (!file) return
+        if (file.type !== 'application/pdf') {
+            setErrorNomina('Solo se permiten archivos PDF')
+            e.target.value = ''
+            return
+        }
+        setSubiendoNomina(true)
+        setErrorNomina('')
+        setExitoNomina('')
+        const fd = new FormData()
+        fd.append('nomina', file)
+        fd.append('idUsuario', modalNominas.id)
+        fd.append('mes', mesNomina)
+        fd.append('anio', anioNomina)
+        try {
+            const res = await fetch(`${API_URL}/nominas`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` },
+                body: fd,
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Error al subir')
+            const data2 = await fetchJSON(`${API_URL}/nominas?idUsuario=${modalNominas.id}`)
+            setNominasUsuario(data2.nominas ?? [])
+            setExitoNomina(data.mensaje ?? 'Nómina subida correctamente')
+        } catch (err) {
+            setErrorNomina(err.message)
+        } finally {
+            setSubiendoNomina(false)
+            e.target.value = ''
+        }
+    }
+
+    async function eliminarNomina(id) {
+        try {
+            await fetchJSON(`${API_URL}/nominas?id=${id}`, { method: 'DELETE' })
+            setNominasUsuario(prev => prev.filter(n => n.id !== id))
+            mostrarToast('Nómina eliminada')
+        } catch (err) {
+            setErrorNomina(err.message)
+        }
+    }
 
     function mostrarToast(msg) {
         setToast(msg)
@@ -367,7 +442,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
 
                     <div className="flex-1 min-h-0 mx-4 sm:mx-6 mb-4 sm:mb-6 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                         <div className="overflow-auto h-full">
-                            <div className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] min-w-195 bg-kaja-sidebar">
+                            <div className="grid grid-cols-[1fr_130px_130px_100px_140px_120px] min-w-195 bg-kaja-sidebar">
                                 <div className="px-5 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Nombre</div>
                                 <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">NIF</div>
                                 <div className="px-3 py-4 text-[11px] font-bold uppercase tracking-widest text-white/60">Rol</div>
@@ -390,7 +465,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                     <div
                                         key={u.id}
                                         onClick={() => setUsuarioVisor(u)}
-                                        className="grid grid-cols-[1fr_130px_130px_100px_140px_88px] items-center min-w-195
+                                        className="grid grid-cols-[1fr_130px_130px_100px_140px_120px] items-center min-w-195
                                             text-sm border-b border-gray-50 hover:bg-kaja-orange/5 transition cursor-pointer"
                                     >
                                         <div className="px-5 py-3.5 font-medium text-kaja-blueText flex items-center gap-2.5 min-w-0">
@@ -437,6 +512,14 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 aria-label="Editar usuario"
                                             >
                                                 <Pencil className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={e => { e.stopPropagation(); abrirNominas(u) }}
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-orange hover:bg-orange-50 transition"
+                                                title="Gestionar nóminas"
+                                                aria-label="Gestionar nóminas"
+                                            >
+                                                <FileText className="w-4 h-4" />
                                             </button>
                                         </div>
                                     </div>
@@ -578,6 +661,127 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                             </div>
                         </form>
 
+                    </div>
+                </div>
+            )}
+
+            {/* Modal nóminas */}
+            {modalNominas && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalNominas(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[90vh]">
+
+                        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+                            <div>
+                                <h2 className="text-base font-bold text-kaja-blueText flex items-center gap-2">
+                                    <FileText className="w-4 h-4 text-kaja-orange" />
+                                    Nóminas — {modalNominas.nombre}
+                                </h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Sube o elimina nóminas de este empleado</p>
+                            </div>
+                            <button onClick={() => setModalNominas(null)}
+                                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        {/* Formulario de subida */}
+                        <div className="px-6 py-4 border-b border-gray-100 shrink-0">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Subir nueva nómina</p>
+                            <div className="flex gap-2 mb-3">
+                                <select
+                                    value={mesNomina}
+                                    onChange={e => setMesNomina(Number(e.target.value))}
+                                    className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-kaja-orange/30"
+                                >
+                                    {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                                </select>
+                                <select
+                                    value={anioNomina}
+                                    onChange={e => setAnioNomina(Number(e.target.value))}
+                                    className="w-24 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-kaja-orange/30"
+                                >
+                                    {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i).map(y =>
+                                        <option key={y} value={y}>{y}</option>
+                                    )}
+                                </select>
+                            </div>
+                            <input
+                                ref={inputNominaRef}
+                                type="file"
+                                accept="application/pdf"
+                                onChange={subirNomina}
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => inputNominaRef.current.click()}
+                                disabled={subiendoNomina}
+                                className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-kaja-orange/40
+                                           rounded-xl text-sm font-medium text-kaja-orange hover:bg-orange-50 transition
+                                           disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {subiendoNomina
+                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo…</>
+                                    : <><Upload className="w-4 h-4" /> Seleccionar PDF</>
+                                }
+                            </button>
+                            {errorNomina && (
+                                <p className="text-xs text-red-500 mt-2 bg-red-50 px-3 py-2 rounded-lg">{errorNomina}</p>
+                            )}
+                            {exitoNomina && (
+                                <p className="text-xs text-green-600 mt-2 bg-green-50 px-3 py-2 rounded-lg">{exitoNomina}</p>
+                            )}
+                        </div>
+
+                        {/* Lista de nóminas existentes */}
+                        <div className="flex-1 overflow-y-auto px-6 py-4">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Nóminas subidas</p>
+                            {loadingNominas ? (
+                                <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
+                                    <Loader2 className="w-4 h-4 animate-spin text-kaja-orange" />
+                                    <span className="text-sm">Cargando…</span>
+                                </div>
+                            ) : nominasUsuario.length === 0 ? (
+                                <div className="text-center py-8 text-gray-400">
+                                    <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                                    <p className="text-sm">Sin nóminas subidas</p>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    {nominasUsuario.map(n => (
+                                        <div key={n.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-100">
+                                            <div>
+                                                <p className="text-sm font-semibold text-kaja-blueText">
+                                                    {MESES[n.mes - 1]} {n.anio}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-0.5">
+                                                    Subida el {new Date(n.fechaSubida).toLocaleDateString('es-ES')}
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-1.5 shrink-0">
+                                                <a
+                                                    href={n.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 rounded-lg text-kaja-orange hover:bg-orange-50 transition"
+                                                    title="Ver / descargar"
+                                                >
+                                                    <Download className="w-4 h-4" />
+                                                </a>
+                                                <button
+                                                    onClick={() => eliminarNomina(n.id)}
+                                                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                                    title="Eliminar nómina"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
