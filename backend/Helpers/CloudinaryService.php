@@ -2,24 +2,48 @@
 
 class CloudinaryService
 {
-    // Genera una URL firmada para que Cloudinary sirva el archivo incluso con Strict Mode activo
-    public static function urlFirmada(string $url): string
+    // Genera una URL de descarga autenticada usando la API Admin de Cloudinary.
+    // Usa el mismo formato de firma que la subida (SHA1 hex), evitando los problemas
+    // del firmado de URLs de entrega con Strict Mode.
+    public static function urlDescargaApi(string $urlAlmacenada): string
     {
-        $secret = Config::$CLOUDINARY_SECRET;
+        $cloud     = Config::$CLOUDINARY_CLOUD;
+        $key       = Config::$CLOUDINARY_KEY;
+        $secret    = Config::$CLOUDINARY_SECRET;
+        $timestamp = time();
 
-        // Eliminar query string y firma existente si la hubiera
-        $limpia = preg_replace('/\?.*$/', '', $url);
+        // Limpiar URL: quitar query string y firma de entrega existente
+        $limpia = urldecode(preg_replace('/\?.*$/', '', $urlAlmacenada));
         $limpia = preg_replace('#/s--[^/]+--/#', '/', $limpia);
 
-        // Extraer la parte a firmar: desde v{version}/...
-        if (!preg_match('#/(v\d+/.+)$#', urldecode($limpia), $m)) {
-            return $url;
+        // Extraer public_id completo (con carpeta), ignorando la versión
+        if (!preg_match('#/upload/(?:v\d+/)?(.+)$#', $limpia, $m)) {
+            throw new \RuntimeException('No se pudo extraer el public_id de la URL');
         }
 
-        $toSign = $m[1]; // e.g. "v1779278064/nominas KAJA/nomina_1_2026_5.pdf"
-        $sig    = substr(rtrim(strtr(base64_encode(sha1($toSign . $secret, true)), '+/', '-_'), '='), 0, 8);
+        $publicId = $m[1]; // "nominas KAJA/nomina_1_2026_5.pdf"
 
-        return preg_replace('#(/upload/)#', "/upload/s--{$sig}--/", $limpia);
+        // Firma con el mismo algoritmo que la subida (SHA1 hex de params ordenados + secret)
+        $params = [
+            'public_id' => $publicId,
+            'timestamp' => $timestamp,
+            'type'      => 'upload',
+        ];
+        ksort($params);
+
+        $partes = [];
+        foreach ($params as $k => $v) {
+            $partes[] = "{$k}={$v}";
+        }
+        $signature = sha1(implode('&', $partes) . $secret);
+
+        return 'https://api.cloudinary.com/v1_1/' . $cloud . '/raw/download?' . http_build_query([
+            'public_id' => $publicId,
+            'api_key'   => $key,
+            'timestamp' => $timestamp,
+            'signature' => $signature,
+            'type'      => 'upload',
+        ]);
     }
 
     private static array $TIPOS_PERMITIDOS = [
