@@ -416,290 +416,311 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
     }
   }
 
+  // Bloque reutilizable: Mis nóminas
+  const SeccionNominas = (
+    <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-fit">
+      <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
+        <FileText className="w-5 h-5" />
+        Mis nóminas
+      </h3>
+      <Aviso msg={avisoNomina} />
+
+      {loadingNominas ? (
+        <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
+          <Loader2 className="w-4 h-4 animate-spin text-kaja-orange" />
+          <span className="text-sm">Cargando nóminas…</span>
+        </div>
+      ) : nominas.length === 0 ? (
+        <div className="text-center py-10 text-gray-400">
+          <FileText className="w-10 h-10 mx-auto mb-2 opacity-20" />
+          <p className="text-sm font-medium">Aún no tienes nóminas disponibles</p>
+          <p className="text-xs mt-1">Tu administrador las irá subiendo cada mes</p>
+        </div>
+      ) : (() => {
+        const aniosUnicos = [...new Set(nominas.map(n => Number(n.anio)))].sort((a, b) => b - a)
+        return (
+          <div className="flex flex-col gap-3">
+            {aniosUnicos.map(anio => {
+              const nominasAnio = nominas.filter(n => Number(n.anio) === anio)
+              const abierto = aniosAbiertos.includes(anio)
+              return (
+                <div key={anio} className="border border-gray-100 rounded-xl overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setAniosAbiertos(prev =>
+                      prev.includes(anio) ? prev.filter(a => a !== anio) : [...prev, anio]
+                    )}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
+                  >
+                    <span className="text-sm font-bold text-kaja-blueText">{anio}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-gray-400">{nominasAnio.length} nómina{nominasAnio.length !== 1 ? 's' : ''}</span>
+                      {abierto ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                    </div>
+                  </button>
+
+                  {abierto && (
+                    <div className="grid grid-cols-3 gap-2 p-3">
+                      {MESES.map((mes, i) => {
+                        const nomina = nominasAnio.find(n => Number(n.mes) === i + 1)
+                        return nomina ? (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => descargarNomina(nomina.id, mes.toLowerCase(), anio)}
+                            disabled={descargandoId === nomina.id}
+                            title={`Descargar nómina de ${mes} ${anio}`}
+                            className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-kaja-orange/10
+                                       border border-kaja-orange/20 hover:bg-kaja-orange/20 transition group
+                                       disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {descargandoId === nomina.id
+                              ? <Loader2 className="w-4 h-4 text-kaja-orange animate-spin" />
+                              : <Download className="w-4 h-4 text-kaja-orange group-hover:scale-110 transition-transform" />
+                            }
+                            <span className="text-xs font-semibold text-kaja-orange text-center leading-tight">{mes}</span>
+                          </button>
+                        ) : (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gray-50 border border-gray-100 opacity-40"
+                          >
+                            <FileText className="w-4 h-4 text-gray-300" />
+                            <span className="text-xs text-gray-400 text-center leading-tight">{mes}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
+    </section>
+  )
+
+  // Bloque reutilizable: Mi perfil
+  const SeccionPerfil = (
+    <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-full">
+      <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
+        <User className="w-5 h-5" />
+        Mi perfil
+      </h3>
+
+      <SubidaImagen
+        urlActual={usuario.imagen_perfil ?? null}
+        placeholder={usuario.nombre.charAt(0).toUpperCase()}
+        endpoint={`${API_URL}/perfil`}
+        publicLabel="Foto de perfil"
+        onSubida={url => onActualizarUsuario({ ...usuario, imagen_perfil: url })}
+      />
+
+      <form onSubmit={guardarNombre} className="mb-6">
+        <label className="block text-sm font-medium text-gray-600 mb-1">
+          Nombre
+        </label>
+        <div className="flex gap-3">
+          <input
+            type="text"
+            value={nombre}
+            onChange={e => setNombre(e.target.value)}
+            maxLength={30}
+            className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm
+                      bg-white text-gray-800
+                      focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-transparent transition"
+          />
+          <button
+            type="submit"
+            disabled={cargandoNombre || nombre.trim() === usuario.nombre}
+            className="px-4 py-2 bg-kaja-orange text-white rounded-lg text-sm font-medium
+                      hover:brightness-95 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {cargandoNombre ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
+        {nombre.length === 30 && (
+          <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+        )}
+        <Aviso msg={mensajeNombre} />
+      </form>
+
+      <div className="border-t border-gray-100 pt-5">
+        <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
+          <Lock className="w-4 h-4" />
+          Cambiar contraseña
+        </h4>
+        <form onSubmit={guardarPassword} className="flex flex-col gap-3">
+          <Campo
+            label="Contraseña actual"
+            type="password"
+            value={passActual}
+            onChange={e => setPassActual(e.target.value)}
+            autoComplete="current-password"
+            maxLength={15}
+          />
+          <Campo
+            label="Nueva contraseña"
+            type="password"
+            value={passNueva}
+            onChange={e => setPassNueva(e.target.value)}
+            autoComplete="new-password"
+            maxLength={15}
+          />
+          <Campo
+            label="Confirmar nueva contraseña"
+            type="password"
+            value={passConfirm}
+            onChange={e => setPassConfirm(e.target.value)}
+            autoComplete="new-password"
+            maxLength={15}
+          />
+          <Aviso msg={mensajePass} />
+          <BtnGuardar
+            cargando={cargandoPass}
+            disabled={!passActual || !passNueva || !passConfirm}
+            label="Actualizar contraseña"
+            labelCargando="Actualizando..."
+          />
+        </form>
+      </div>
+    </section>
+  )
+
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto w-full">
+    <div className="p-6 md:p-8 max-w-6xl mx-auto w-full">
       <h2 className="text-2xl font-bold text-kaja-blueText mb-6 uppercase tracking-wide">
         Configuración
       </h2>
 
-      {/* Datos de empresa (solo admin) */}
-      {esAdmin && (
-        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
-            <Building2 className="w-5 h-5" />
-            Datos de la empresa
-          </h3>
+      {esAdmin ? (
+        <>
+          {/* Fila 1: Datos empresa + Mi perfil */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6 items-stretch">
+            {/* Datos de empresa */}
+            <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
+                <Building2 className="w-5 h-5" />
+                Datos de la empresa
+              </h3>
 
-          {errorCargaEmpresa ? (
-            <div className="flex items-center gap-3">
-              <p className="text-sm text-red-500">No se pudieron cargar los datos de la empresa.</p>
-              <button
-                onClick={cargarEmpresa}
-                className="text-sm text-kaja-blueText underline hover:no-underline"
-              >
-                Reintentar
-              </button>
-            </div>
-          ) : empresa === null ? (
-            <p className="text-sm text-gray-400">Cargando...</p>
-          ) : (
-            <>
-              <SubidaImagen
-                urlActual={empresa.logo_empresa}
-                placeholder={empresa.nombreComercial?.charAt(0)?.toUpperCase() ?? 'E'}
-                endpoint={`${API_URL}/empresa`}
-                publicLabel="Logo"
-                onSubida={url => {
-                  setEmpresa(prev => ({ ...prev, logo_empresa: url }))
-                  onActualizarEmpresa?.({ logo_empresa: url })
-                }}
-              />
-              <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
-                <Campo label="NIF / CIF" value={empresa.nif} readOnly />
-                <Campo
-                  label="Razón social"
-                  value={formEmpresa.razonSocial}
-                  onChange={campoEmpresa('razonSocial')}
-                  maxLength={30}
-                />
-                <Campo
-                  label="Nombre comercial"
-                  value={formEmpresa.nombreComercial}
-                  onChange={campoEmpresa('nombreComercial')}
-                  maxLength={30}
-                />
-                <Campo
-                  label="Dirección"
-                  value={formEmpresa.direccion}
-                  onChange={campoEmpresa('direccion')}
-                  maxLength={40}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <Campo
-                    label="Teléfono"
-                    value={formEmpresa.telefono}
-                    onChange={handleTelefono}
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    maxLength={9}
-                  />
-                  <Campo
-                    label="Email"
-                    value={formEmpresa.email}
-                    onChange={campoEmpresa('email')}
-                    type="email"
-                    maxLength={30}
-                  />
+              {errorCargaEmpresa ? (
+                <div className="flex items-center gap-3">
+                  <p className="text-sm text-red-500">No se pudieron cargar los datos de la empresa.</p>
+                  <button
+                    onClick={cargarEmpresa}
+                    className="text-sm text-kaja-blueText underline hover:no-underline"
+                  >
+                    Reintentar
+                  </button>
                 </div>
-                <Aviso msg={mensajeEmpresa} />
-                <BtnGuardar
-                  cargando={cargandoEmpresa}
-                  label="Guardar empresa"
-                  labelCargando="Guardando..."
-                />
-              </form>
-            </>
-          )}
-        </section>
-      )}
+              ) : empresa === null ? (
+                <p className="text-sm text-gray-400">Cargando...</p>
+              ) : (
+                <>
+                  <SubidaImagen
+                    urlActual={empresa.logo_empresa}
+                    placeholder={empresa.nombreComercial?.charAt(0)?.toUpperCase() ?? 'E'}
+                    endpoint={`${API_URL}/empresa`}
+                    publicLabel="Logo"
+                    onSubida={url => {
+                      setEmpresa(prev => ({ ...prev, logo_empresa: url }))
+                      onActualizarEmpresa?.({ logo_empresa: url })
+                    }}
+                  />
+                  <form onSubmit={guardarEmpresa} className="flex flex-col gap-4">
+                    <Campo label="NIF / CIF" value={empresa.nif} readOnly />
+                    <Campo
+                      label="Razón social"
+                      value={formEmpresa.razonSocial}
+                      onChange={campoEmpresa('razonSocial')}
+                      maxLength={30}
+                    />
+                    <Campo
+                      label="Nombre comercial"
+                      value={formEmpresa.nombreComercial}
+                      onChange={campoEmpresa('nombreComercial')}
+                      maxLength={30}
+                    />
+                    <Campo
+                      label="Dirección"
+                      value={formEmpresa.direccion}
+                      onChange={campoEmpresa('direccion')}
+                      maxLength={40}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Campo
+                        label="Teléfono"
+                        value={formEmpresa.telefono}
+                        onChange={handleTelefono}
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={9}
+                      />
+                      <Campo
+                        label="Email"
+                        value={formEmpresa.email}
+                        onChange={campoEmpresa('email')}
+                        type="email"
+                        maxLength={30}
+                      />
+                    </div>
+                    <Aviso msg={mensajeEmpresa} />
+                    <BtnGuardar
+                      cargando={cargandoEmpresa}
+                      label="Guardar empresa"
+                      labelCargando="Guardando..."
+                    />
+                  </form>
+                </>
+              )}
+            </section>
 
-      {/* Mi perfil */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-        <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
-          <User className="w-5 h-5" />
-          Mi perfil
-        </h3>
-
-        <SubidaImagen
-          urlActual={usuario.imagen_perfil ?? null}
-          placeholder={usuario.nombre.charAt(0).toUpperCase()}
-          endpoint={`${API_URL}/perfil`}
-          publicLabel="Foto de perfil"
-          onSubida={url => onActualizarUsuario({ ...usuario, imagen_perfil: url })}
-        />
-
-        <form onSubmit={guardarNombre} className="mb-6">
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            Nombre
-          </label>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
-              maxLength={30}
-              className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm
-                        bg-white text-gray-800
-                        focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-transparent transition"
-            />
-            <button
-              type="submit"
-              disabled={cargandoNombre || nombre.trim() === usuario.nombre}
-              className="px-4 py-2 bg-kaja-orange text-white rounded-lg text-sm font-medium
-                        hover:brightness-95 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {cargandoNombre ? 'Guardando...' : 'Guardar'}
-            </button>
+            {/* Mi perfil */}
+            {SeccionPerfil}
           </div>
-          {nombre.length === 30 && (
-            <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
-          )}
-          <Aviso msg={mensajeNombre} />
-        </form>
 
-        <div className="border-t border-gray-100 pt-5">
-          <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4 flex items-center gap-2">
-            <Lock className="w-4 h-4" />
-            Cambiar contraseña
-          </h4>
-          <form onSubmit={guardarPassword} className="flex flex-col gap-3">
-            <Campo
-              label="Contraseña actual"
-              type="password"
-              value={passActual}
-              onChange={e => setPassActual(e.target.value)}
-              autoComplete="current-password"
-              maxLength={15}
-            />
-            <Campo
-              label="Nueva contraseña"
-              type="password"
-              value={passNueva}
-              onChange={e => setPassNueva(e.target.value)}
-              autoComplete="new-password"
-              maxLength={15}
-            />
-            <Campo
-              label="Confirmar nueva contraseña"
-              type="password"
-              value={passConfirm}
-              onChange={e => setPassConfirm(e.target.value)}
-              autoComplete="new-password"
-              maxLength={15}
-            />
-            <Aviso msg={mensajePass} />
-            <BtnGuardar
-              cargando={cargandoPass}
-              disabled={!passActual || !passNueva || !passConfirm}
-              label="Actualizar contraseña"
-              labelCargando="Actualizando..."
-            />
-          </form>
-        </div>
-      </section>
+          {/* Fila 2: Mis nóminas + Zona de peligro */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+            {SeccionNominas}
 
-      {/* Mis nóminas */}
-      <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mt-6">
-        <h3 className="text-base font-semibold text-kaja-blueText mb-5 flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Mis nóminas
-        </h3>
-        <Aviso msg={avisoNomina} />
-
-        {loadingNominas ? (
-          <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
-            <Loader2 className="w-4 h-4 animate-spin text-kaja-orange" />
-            <span className="text-sm">Cargando nóminas…</span>
-          </div>
-        ) : nominas.length === 0 ? (
-          <div className="text-center py-10 text-gray-400">
-            <FileText className="w-10 h-10 mx-auto mb-2 opacity-20" />
-            <p className="text-sm font-medium">Aún no tienes nóminas disponibles</p>
-            <p className="text-xs mt-1">Tu administrador las irá subiendo cada mes</p>
-          </div>
-        ) : (() => {
-          const aniosUnicos = [...new Set(nominas.map(n => Number(n.anio)))].sort((a, b) => b - a)
-          return (
-            <div className="flex flex-col gap-3">
-              {aniosUnicos.map(anio => {
-                const nominasAnio = nominas.filter(n => Number(n.anio) === anio)
-                const abierto = aniosAbiertos.includes(anio)
-                return (
-                  <div key={anio} className="border border-gray-100 rounded-xl overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setAniosAbiertos(prev =>
-                        prev.includes(anio) ? prev.filter(a => a !== anio) : [...prev, anio]
-                      )}
-                      className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition"
-                    >
-                      <span className="text-sm font-bold text-kaja-blueText">{anio}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400">{nominasAnio.length} nómina{nominasAnio.length !== 1 ? 's' : ''}</span>
-                        {abierto ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-                      </div>
-                    </button>
-
-                    {abierto && (
-                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-3">
-                        {MESES.map((mes, i) => {
-                          const nomina = nominasAnio.find(n => Number(n.mes) === i + 1)
-                          return nomina ? (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={() => descargarNomina(nomina.id, mes.toLowerCase(), anio)}
-                              disabled={descargandoId === nomina.id}
-                              title={`Descargar nómina de ${mes} ${anio}`}
-                              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-kaja-orange/10
-                                         border border-kaja-orange/20 hover:bg-kaja-orange/20 transition group
-                                         disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              {descargandoId === nomina.id
-                                ? <Loader2 className="w-4 h-4 text-kaja-orange animate-spin" />
-                                : <Download className="w-4 h-4 text-kaja-orange group-hover:scale-110 transition-transform" />
-                              }
-                              <span className="text-xs font-semibold text-kaja-orange text-center leading-tight">{mes}</span>
-                            </button>
-                          ) : (
-                            <div
-                              key={i}
-                              className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-gray-50 border border-gray-100 opacity-40"
-                            >
-                              <FileText className="w-4 h-4 text-gray-300" />
-                              <span className="text-xs text-gray-400 text-center leading-tight">{mes}</span>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })()}
-      </section>
-
-      {/* Zona de peligro (solo admin) */}
-      {esAdmin && (
-        <section className="bg-white rounded-xl shadow-sm border border-red-100 p-6 mt-6">
-          <h3 className="text-base font-semibold text-red-600 mb-1 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5" />
-            Zona de peligro
-          </h3>
-          <p className="text-sm text-gray-500 mb-4">
-            Las acciones de esta sección son permanentes e irreversibles.
-          </p>
-          <div className="flex items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
-            <div>
-              <p className="text-sm font-semibold text-gray-800">Eliminar empresa</p>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Borra la empresa y todos sus datos: usuarios, productos, ventas y gastos.
+            {/* Zona de peligro */}
+            <section className="bg-white rounded-xl shadow-sm border border-red-100 p-6 h-fit">
+              <h3 className="text-base font-semibold text-red-600 mb-1 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5" />
+                Zona de peligro
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Las acciones de esta sección son permanentes e irreversibles.
               </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => { setModalBorrar(true); setErrorBorrar('') }}
-              className="shrink-0 flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
-                         rounded-lg hover:bg-red-700 active:scale-95 transition"
-            >
-              <Trash2 className="w-4 h-4" />
-              Eliminar
-            </button>
+              <div className="flex items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Eliminar empresa</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Borra la empresa y todos sus datos: usuarios, productos, ventas y gastos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setModalBorrar(true); setErrorBorrar('') }}
+                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
+                             rounded-lg hover:bg-red-700 active:scale-95 transition"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Eliminar
+                </button>
+              </div>
+            </section>
           </div>
-        </section>
+        </>
+      ) : (
+        /* Vista empleado básico: Mi perfil + Mis nóminas en paralelo */
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+          {SeccionPerfil}
+          {SeccionNominas}
+        </div>
       )}
 
       {/* Modal confirmación borrar empresa */}
