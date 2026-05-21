@@ -24,6 +24,9 @@ class RegistroController
         if ($empresaNif === '')       $errores['empresaNif']           = 'El NIF de la empresa es obligatorio.';
         if ($razonSocial === '')      $errores['razonSocial']          = 'La razón social es obligatoria.';
         if ($nombreComercial === '')  $errores['nombreComercial']      = 'El nombre comercial es obligatorio.';
+        if ($empresaEmail === '')     $errores['empresaEmail']         = 'El email de la empresa es obligatorio.';
+        elseif (!filter_var($empresaEmail, FILTER_VALIDATE_EMAIL))
+            $errores['empresaEmail']         = 'El formato del email no es válido.';
         if ($adminNif === '')         $errores['adminNif']             = 'El NIF del administrador es obligatorio.';
         if ($adminNombre === '')      $errores['adminNombre']          = 'El nombre del administrador es obligatorio.';
         if ($adminPassword === '')    $errores['adminPassword']        = 'La contraseña es obligatoria.';
@@ -83,7 +86,7 @@ class RegistroController
                         'empresa_' . $idEmpresa
                     );
                     EmpresaModel::actualizarLogo($idEmpresa, $url);
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     // La imagen es opcional; el admin puede subirla después
                 }
             }
@@ -97,7 +100,7 @@ class RegistroController
                         'user_' . $idAdmin
                     );
                     UsuarioModel::actualizarImagenPerfil($idAdmin, $url);
-                } catch (\Exception $e) {
+                } catch (\Exception) {
                     // La foto es opcional; el admin puede subirla después
                 }
             }
@@ -105,7 +108,7 @@ class RegistroController
             http_response_code(201);
             echo json_encode(['mensaje' => 'Empresa registrada correctamente. Ya puede iniciar sesión.']);
 
-        } catch (PDOException $e) {
+        } catch (PDOException) {
             if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
             http_response_code(500);
             echo json_encode(['error' => 'Error interno del servidor']);

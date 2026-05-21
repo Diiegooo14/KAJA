@@ -181,6 +181,12 @@ export default function Register({ onVolver }) {
         ...prev,
         adminNif: validarDNI(finalValue) ? '' : 'DNI no válido. Comprueba la letra.',
       }))
+    } else if (name === 'empresaEmail' && finalValue.length > 0) {
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(finalValue)
+      setErrores(prev => ({
+        ...prev,
+        empresaEmail: emailValido ? '' : 'Introduce un email válido (ej: correo@empresa.es)',
+      }))
     } else {
       setErrores(prev => ({ ...prev, [name]: '' }))
     }
@@ -202,8 +208,17 @@ export default function Register({ onVolver }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    const nuevosErrores = {}
     if (form.adminNif && !validarDNI(form.adminNif)) {
-      setErrores(prev => ({ ...prev, adminNif: 'DNI no válido. Comprueba la letra.' }))
+      nuevosErrores.adminNif = 'DNI no válido. Comprueba la letra.'
+    }
+    if (!form.empresaEmail) {
+      nuevosErrores.empresaEmail = 'El email de la empresa es obligatorio.'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.empresaEmail)) {
+      nuevosErrores.empresaEmail = 'Introduce un email válido (ej: correo@empresa.es)'
+    }
+    if (Object.keys(nuevosErrores).length > 0) {
+      setErrores(prev => ({ ...prev, ...nuevosErrores }))
       return
     }
     setLoading(true)
@@ -302,7 +317,7 @@ export default function Register({ onVolver }) {
                   <Campo label="Nombre Comercial *" name="nombreComercial" value={form.nombreComercial} onChange={handleChange} placeholder="Mi Tienda" error={errores.nombreComercial} maxLength={30} />
                   <Campo label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} placeholder="Calle Mayor 1" error={errores.direccion} maxLength={40} />
                   <Campo label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} placeholder="600000000" error={errores.telefono} maxLength={9} inputMode="numeric" pattern="[0-9]*" />
-                  <Campo label="Email de la empresa" name="empresaEmail" value={form.empresaEmail} onChange={handleChange} placeholder="contacto@empresa.es" error={errores.empresaEmail} type="email" maxLength={30} />
+                  <Campo label="Email de la empresa *" name="empresaEmail" value={form.empresaEmail} onChange={handleChange} placeholder="contacto@empresa.es" error={errores.empresaEmail} type="email" maxLength={60} />
                 </div>
               </div>
 
