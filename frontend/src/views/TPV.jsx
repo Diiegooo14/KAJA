@@ -163,27 +163,28 @@ export default function TPV({ usuario }) {
     const [ventaCobrada, setVentaCobrada] = useState(null)
     const [empresa, setEmpresa] = useState(null)
 
-    useEffect(() => {
-        async function cargar() {
-            setLoading(true)
-            setError('')
-            try {
-                const [dataProductos, dataEmpresa] = await Promise.all([
-                    fetchJSON(`${API_URL}/productos?pagina=1&porPagina=999`),
-                    fetchJSON(`${API_URL}/empresa`).catch(() => null),
-                ])
-                const lista = dataProductos.datos ?? []
-                setProductos(lista)
-                const cats = [...new Map(lista.map(p => [p.idCategoria, { id: p.idCategoria, nombre: p.categoria }])).values()]
-                setCategorias(cats)
-                setEmpresa(dataEmpresa)
-            } catch (e) {
-                setError(e.message)
-            } finally {
-                setLoading(false)
-            }
+    async function cargarProductos() {
+        setLoading(true)
+        setError('')
+        try {
+            const [dataProductos, dataEmpresa] = await Promise.all([
+                fetchJSON(`${API_URL}/productos?pagina=1&porPagina=999`),
+                fetchJSON(`${API_URL}/empresa`).catch(() => null),
+            ])
+            const lista = dataProductos.datos ?? []
+            setProductos(lista)
+            const cats = [...new Map(lista.map(p => [p.idCategoria, { id: p.idCategoria, nombre: p.categoria }])).values()]
+            setCategorias(cats)
+            setEmpresa(dataEmpresa)
+        } catch (e) {
+            setError(e.message)
+        } finally {
+            setLoading(false)
         }
-        cargar()
+    }
+
+    useEffect(() => {
+        cargarProductos()
     }, [])
 
     const productosFiltrados = productos.filter(p => {
@@ -243,6 +244,7 @@ export default function TPV({ usuario }) {
             })
             setModalConfirmar(false)
             setCarrito([])
+            await cargarProductos()
         } catch (e) {
             setErrorCobro(e.message)
         } finally {
