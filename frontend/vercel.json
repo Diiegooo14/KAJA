@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://kaja.freedev.app/:path*" }
+    { "source": "/api/:path*", "destination": "https://kaja-zir6.onrender.com/:path*" }
   ]
 }
