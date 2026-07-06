@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect, lazy, Suspense } from 'react'
 import {
   Search, Menu, X, LogOut,
-  Home, ShoppingCart, Package, Receipt, Users, BarChart3, Settings,
+  Home, ShoppingCart, Package, Receipt, Users, BarChart3, Settings, Percent,
   ShoppingBag, AlertTriangle, ArrowRight, TrendingUp, Clock, Zap,
 } from 'lucide-react'
 
 const Inventario      = lazy(() => import('./Inventario'))
+const Promociones     = lazy(() => import('./Promociones'))
 const VentasHoy       = lazy(() => import('./VentasHoy'))
 const TPV             = lazy(() => import('./TPV'))
 const Gastos          = lazy(() => import('./Gastos'))
@@ -80,6 +81,7 @@ const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Inicio',             icon: Home },
   { id: 'tpv',        label: 'TPV',                icon: ShoppingCart },
   { id: 'inventario', label: 'Inventario',          icon: Package },
+  { id: 'promociones', label: 'Promociones',        icon: Percent,   soloAdmin: true },
   { id: 'gastos',     label: 'Gastos',             icon: Receipt,   soloAdmin: true },
   { id: 'usuarios',   label: 'Usuarios',           icon: Users,     soloAdmin: true },
   { id: 'financiero', label: 'Gestión Financiera', icon: BarChart3, soloAdmin: true },
@@ -350,8 +352,9 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
   const esAdmin = usuario.rol === 'Administrador'
 
   function renderContenido() {
-    if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos') && !esAdmin) navegarA('dashboard')
+    if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos' || seccionActiva === 'promociones') && !esAdmin) navegarA('dashboard')
     if (seccionActiva === 'inventario')  return <Inventario filtroStockBajo={filtroStockBajo} busquedaInicial={busquedaGlobal} />
+    if (seccionActiva === 'promociones') return <Promociones />
     if (seccionActiva === 'ventashoy')   return <VentasHoy />
     if (seccionActiva === 'tpv')         return <TPV usuario={usuario} />
     if (seccionActiva === 'gastos')      return <Gastos />

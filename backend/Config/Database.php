@@ -22,11 +22,8 @@ class Database
                 PDO::ATTR_EMULATE_PREPARES => false,
             ];
 
-            $sslCa = '/etc/ssl/certs/ca-certificates.crt';
-            if (file_exists($sslCa)) {
-                $options[PDO::MYSQL_ATTR_SSL_CA] = $sslCa;
-                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-            }
+            $options[PDO::MYSQL_ATTR_SSL_CA] = __DIR__ . '/cacert.pem';
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
 
             self::$instance = new PDO($dsn, Config::$USERNAME, Config::$PASSWORD, $options);
         }

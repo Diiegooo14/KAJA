@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, X, CheckCircle, Download } from 'lucide-react'
+import { useEffect, useState, useMemo } from 'react'
+import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, X, CheckCircle, Download, Percent } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -101,11 +101,11 @@ async function generarTicketPDF(venta, empresa) {
 
     // Líneas con desglose de IVA
     for (const item of venta.lineas) {
-        const precioConIva = parseFloat(item.precioVenta)
+        const subtotal = item.subtotalFinal ?? (parseFloat(item.precioVenta) * item.cantidad)
+        const precioConIva = subtotal / item.cantidad
         const ivaRate = (item.iva ?? 21) / 100
         const precioSinIva = ivaRate > 0 ? precioConIva / (1 + ivaRate) : precioConIva
         const ivaUnit = precioConIva - precioSinIva
-        const subtotal = precioConIva * item.cantidad
 
         doc.setFontSize(8)
         doc.setFont('helvetica', 'bold')
@@ -155,6 +155,7 @@ export default function TPV({ usuario }) {
     const [categoriaActiva, setCategoriaActiva] = useState('todas')
     const [carrito, setCarrito] = useState([])
     const [vistaMovil, setVistaMovil] = useState('productos')
+    const [promociones, setPromociones] = useState([])
 
     // Cobro
     const [modalConfirmar, setModalConfirmar] = useState(false)
@@ -167,15 +168,17 @@ export default function TPV({ usuario }) {
         setLoading(true)
         setError('')
         try {
-            const [dataProductos, dataEmpresa] = await Promise.all([
+            const [dataProductos, dataEmpresa, dataPromos] = await Promise.all([
                 fetchJSON(`${API_URL}/productos?pagina=1&porPagina=999`),
                 fetchJSON(`${API_URL}/empresa`).catch(() => null),
+                fetchJSON(`${API_URL}/promociones?estado=Activo`).catch(() => []),
             ])
             const lista = dataProductos.datos ?? []
             setProductos(lista)
             const cats = [...new Map(lista.map(p => [p.idCategoria, { id: p.idCategoria, nombre: p.categoria }])).values()]
             setCategorias(cats)
             setEmpresa(dataEmpresa)
+            setPromociones(dataPromos)
         } catch (e) {
             setError(e.message)
         } finally {
@@ -186,6 +189,92 @@ export default function TPV({ usuario }) {
     useEffect(() => {
         cargarProductos()
     }, [])
+
+    const promoPorProducto = useMemo(
+        () => Object.fromEntries(promociones.filter(p => p.tipo === 'PRODUCTO').map(p => [p.idProducto, p])),
+        [promociones]
+    )
+    const promoPorCategoria = useMemo(
+        () => Object.fromEntries(promociones.filter(p => p.tipo === 'CATEGORIA').map(p => [p.idCategoria, p])),
+        [promociones]
+    )
+
+    // Calcula, para cada producto del carrito, cuántas unidades caen en oferta y cuántas a precio normal.
+    // Promo de producto tiene prioridad sobre la de categoría. En categoría, las unidades más caras
+    // entran primero en la oferta (minimiza el total a pagar, mezclando productos distintos).
+    const desglose = useMemo(() => {
+        const resultado = new Map()
+        const resueltos = new Set()
+
+        carrito.forEach(item => {
+            const promo = promoPorProducto[item.id]
+            if (!promo) return
+            const precioNormal = parseFloat(item.precioVenta)
+            const grupos = Math.floor(item.cantidad / promo.cantidad)
+            const resto = item.cantidad - grupos * promo.cantidad
+            const precioPromoUnit = parseFloat(promo.precioTotal) / promo.cantidad
+            const lineas = []
+            if (grupos > 0) lineas.push({ cantidad: grupos * promo.cantidad, precioVenta: precioPromoUnit })
+            if (resto > 0) lineas.push({ cantidad: resto, precioVenta: precioNormal })
+            resultado.set(item.id, { subtotal: lineas.reduce((a, l) => a + l.cantidad * l.precioVenta, 0), lineas })
+            resueltos.add(item.id)
+        })
+
+        const gruposPorCategoria = new Map()
+        carrito.forEach(item => {
+            if (resueltos.has(item.id)) return
+            const promo = promoPorCategoria[item.idCategoria]
+            if (!promo) return
+            if (!gruposPorCategoria.has(item.idCategoria)) gruposPorCategoria.set(item.idCategoria, { promo, items: [] })
+            gruposPorCategoria.get(item.idCategoria).items.push(item)
+        })
+
+        gruposPorCategoria.forEach(({ promo, items }) => {
+            const unidades = []
+            items.forEach(item => {
+                for (let i = 0; i < item.cantidad; i++) unidades.push({ id: item.id, precio: parseFloat(item.precioVenta) })
+            })
+            unidades.sort((a, b) => b.precio - a.precio)
+            const grupos = Math.floor(unidades.length / promo.cantidad)
+            const unidadesEnPromo = grupos * promo.cantidad
+            const precioPromoUnit = parseFloat(promo.precioTotal) / promo.cantidad
+
+            const enPromo = new Map()
+            const aPrecioNormal = new Map()
+            unidades.forEach((u, idx) => {
+                const destino = idx < unidadesEnPromo ? enPromo : aPrecioNormal
+                destino.set(u.id, (destino.get(u.id) ?? 0) + 1)
+            })
+
+            items.forEach(item => {
+                const cantEnPromo = enPromo.get(item.id) ?? 0
+                const cantNormal = aPrecioNormal.get(item.id) ?? 0
+                const precioNormal = parseFloat(item.precioVenta)
+                const lineas = []
+                if (cantEnPromo > 0) lineas.push({ cantidad: cantEnPromo, precioVenta: precioPromoUnit })
+                if (cantNormal > 0) lineas.push({ cantidad: cantNormal, precioVenta: precioNormal })
+                resultado.set(item.id, { subtotal: lineas.reduce((a, l) => a + l.cantidad * l.precioVenta, 0), lineas })
+                resueltos.add(item.id)
+            })
+        })
+
+        carrito.forEach(item => {
+            if (resueltos.has(item.id)) return
+            const precioNormal = parseFloat(item.precioVenta)
+            resultado.set(item.id, { subtotal: precioNormal * item.cantidad, lineas: [{ cantidad: item.cantidad, precioVenta: precioNormal }] })
+        })
+
+        return resultado
+    }, [carrito, promoPorProducto, promoPorCategoria])
+
+    function subtotalLinea(item) {
+        return desglose.get(item.id)?.subtotal ?? parseFloat(item.precioVenta) * item.cantidad
+    }
+
+    function tienePromoAplicada(item) {
+        const lineas = desglose.get(item.id)?.lineas ?? []
+        return lineas.length > 1 || (lineas.length === 1 && lineas[0].precioVenta !== parseFloat(item.precioVenta))
+    }
 
     const productosFiltrados = productos.filter(p => {
         const matchBusqueda = !busqueda || p.nombre.toLowerCase().includes(busqueda.toLowerCase())
@@ -219,13 +308,14 @@ export default function TPV({ usuario }) {
         setCargandoCobro(true)
         setErrorCobro('')
         try {
-            const lineas = carrito.map(item => ({
-                id: item.id,
-                nombre: item.nombre,
-                cantidad: item.cantidad,
-                precioVenta: item.precioVenta,
-                iva: item.iva ?? 21,
-            }))
+            const lineas = []
+            carrito.forEach(item => {
+                const iva = item.iva ?? 21
+                const lineasItem = desglose.get(item.id)?.lineas ?? [{ cantidad: item.cantidad, precioVenta: item.precioVenta }]
+                lineasItem.forEach(l => {
+                    lineas.push({ id: item.id, nombre: item.nombre, cantidad: l.cantidad, precioVenta: l.precioVenta, iva })
+                })
+            })
             const res = await fetch(`${API_URL}/ventas`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...headers() },
@@ -240,7 +330,7 @@ export default function TPV({ usuario }) {
                 ...data,
                 fecha: new Date().toISOString(),
                 vendedor: usuario?.nombre ?? '',
-                lineas: carrito,
+                lineas: carrito.map(item => ({ ...item, subtotalFinal: subtotalLinea(item) })),
             })
             setModalConfirmar(false)
             setCarrito([])
@@ -252,7 +342,7 @@ export default function TPV({ usuario }) {
         }
     }
 
-    const total = carrito.reduce((acc, item) => acc + parseFloat(item.precioVenta) * item.cantidad, 0)
+    const total = carrito.reduce((acc, item) => acc + subtotalLinea(item), 0)
     const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0)
 
     const panelProductos = (
@@ -311,6 +401,7 @@ export default function TPV({ usuario }) {
                             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {productosFiltrados.map(p => {
                                     const enCarrito = carrito.find(item => item.id === p.id)
+                                    const promo = promoPorProducto[p.id] ?? promoPorCategoria[p.idCategoria]
                                     return (
                                         <button
                                             key={p.id}
@@ -321,7 +412,13 @@ export default function TPV({ usuario }) {
                                                     : 'border-gray-100 bg-white hover:border-kaja-orange/50 hover:bg-orange-50/40 shadow-sm'}`}
                                         >
                                             <span className="text-xs text-gray-600 mb-1 truncate w-full">{p.categoria}</span>
-                                            <span className="text-sm font-semibold text-gray-800 leading-tight mb-3 line-clamp-2">{p.nombre}</span>
+                                            <span className="text-sm font-semibold text-gray-800 leading-tight mb-2 line-clamp-2">{p.nombre}</span>
+                                            {promo && (
+                                                <span className="inline-flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+                                                    <Percent className="w-3 h-3" />
+                                                    {promo.cantidad}×{parseFloat(promo.precioTotal).toFixed(2)}€
+                                                </span>
+                                            )}
                                             <div className="flex items-end justify-between w-full mt-auto">
                                                 <span className="text-base font-bold text-kaja-orange">
                                                     {parseFloat(p.precioVenta).toFixed(2)} €
@@ -409,9 +506,12 @@ export default function TPV({ usuario }) {
                                     </button>
                                 </div>
                                 <span className="text-sm font-bold text-kaja-orange">
-                                    {(parseFloat(item.precioVenta) * item.cantidad).toFixed(2)} €
+                                    {subtotalLinea(item).toFixed(2)} €
                                 </span>
                             </div>
+                            {tienePromoAplicada(item) && (
+                                <p className="text-[11px] text-emerald-600 font-semibold mt-1">Promo aplicada</p>
+                            )}
                         </div>
                     ))
                 )}
@@ -488,7 +588,7 @@ export default function TPV({ usuario }) {
                             {carrito.map(item => (
                                 <div key={item.id} className="flex justify-between text-sm text-gray-700">
                                     <span className="flex-1 truncate pr-2">{item.nombre} <span className="text-gray-600">×{item.cantidad}</span></span>
-                                    <span className="font-semibold shrink-0">{(parseFloat(item.precioVenta) * item.cantidad).toFixed(2)} €</span>
+                                    <span className="font-semibold shrink-0">{subtotalLinea(item).toFixed(2)} €</span>
                                 </div>
                             ))}
                             <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold text-kaja-blue">
@@ -571,11 +671,11 @@ export default function TPV({ usuario }) {
 
                             {/* Líneas con desglose */}
                             {ventaCobrada.lineas.map(item => {
-                                const precioConIva = parseFloat(item.precioVenta)
+                                const subtotal = item.subtotalFinal ?? (parseFloat(item.precioVenta) * item.cantidad)
+                                const precioConIva = subtotal / item.cantidad
                                 const ivaRate = (item.iva ?? 21) / 100
                                 const precioSinIva = ivaRate > 0 ? precioConIva / (1 + ivaRate) : precioConIva
                                 const ivaUnit = precioConIva - precioSinIva
-                                const subtotal = precioConIva * item.cantidad
                                 return (
                                     <div key={item.id} className="space-y-0.5 py-0.5">
                                         <div className="flex justify-between font-semibold gap-2">

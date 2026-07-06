@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Search, Loader2, Check, X, AlertTriangle, Tag, Trash2, ChevronDown } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 const POR_PAGINA = 10
@@ -49,6 +49,10 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
     // Pestaña activos/inactivos
     const [tabEstado, setTabEstado] = useState('Activo')
 
+    // Filtro por categoría
+    const [filtroCategoria, setFiltroCategoria] = useState('')
+    const [categoriasFiltro, setCategoriasFiltro] = useState([])
+
     // Modal categorías
     const [modalCategoriasAbierto, setModalCategoriasAbierto] = useState(false)
     const [categoriasLista, setCategoriasLista] = useState([])
@@ -62,8 +66,12 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     useEffect(() => {
         setBusqueda(busquedaInicial)
-        cargarProductos(busquedaInicial, 1, tabEstado)
-    }, [filtroStockBajo, busquedaInicial, tabEstado])
+        cargarProductos(busquedaInicial, 1, tabEstado, filtroCategoria)
+    }, [filtroStockBajo, busquedaInicial, tabEstado, filtroCategoria])
+
+    useEffect(() => {
+        fetchJSON(`${API_URL}/categorias`).then(setCategoriasFiltro).catch(() => setCategoriasFiltro([]))
+    }, [])
 
     function headers() {
         return { Authorization: `Bearer ${localStorage.getItem('kaja_token')}` }
@@ -78,13 +86,14 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         return data
     }
 
-    async function cargarProductos(search = '', pag = 1, estado = tabEstado) {
+    async function cargarProductos(search = '', pag = 1, estado = tabEstado, categoria = filtroCategoria) {
         setLoading(true)
         setError('')
         try {
             const params = new URLSearchParams({ pagina: pag, porPagina: POR_PAGINA })
             if (search) params.set('search', search)
             if (filtroStockBajo) params.set('stockBajo', '1')
+            if (categoria) params.set('categoria', categoria)
             params.set('estado', estado)
             const respuesta = await fetchJSON(`${API_URL}/productos?${params}`)
             setProductos(respuesta.datos)
@@ -102,11 +111,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
         const val = e.target.value
         setBusqueda(val)
         clearTimeout(window._busquedaTimer)
-        window._busquedaTimer = setTimeout(() => cargarProductos(val, 1, tabEstado), 300)
+        window._busquedaTimer = setTimeout(() => cargarProductos(val, 1, tabEstado, filtroCategoria), 300)
     }
 
     function irAPagina(pag) {
-        cargarProductos(busqueda, pag, tabEstado)
+        cargarProductos(busqueda, pag, tabEstado, filtroCategoria)
     }
 
     async function abrirModal(producto = null) {
@@ -168,7 +177,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             const data = await fetchJSON(`${API_URL}/productos?id=${productoParaEliminar.id}`, { method: 'DELETE' })
             setProductoParaEliminar(null)
             mostrarNotificacion(data.mensaje ?? 'Producto eliminado correctamente')
-            cargarProductos(busqueda, pagina, tabEstado)
+            cargarProductos(busqueda, pagina, tabEstado, filtroCategoria)
         } catch (e) {
             mostrarNotificacion('Error: ' + e.message)
             setProductoParaEliminar(null)
@@ -185,6 +194,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             setCategoriaParaEliminar(null)
             const data = await fetchJSON(`${API_URL}/categorias`)
             setCategoriasLista(data)
+            setCategoriasFiltro(data)
+            if (String(filtroCategoria) === String(categoriaParaEliminar.id)) setFiltroCategoria('')
             mostrarNotificacion('Categoría eliminada correctamente')
         } catch (e) {
             mostrarNotificacion('Error: ' + e.message)
@@ -254,6 +265,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                     body: JSON.stringify({ nombre: nombreCat }),
                 })
                 idCategoria = cat.id
+                setCategoriasFiltro(prev => [...prev, { id: cat.id, nombre: nombreCat }])
             }
 
             if (productoEditando) {
@@ -273,7 +285,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             setModalAbierto(false)
             setProductoEditando(null)
             mostrarNotificacion(productoEditando ? 'Producto actualizado correctamente' : 'Producto creado correctamente')
-            cargarProductos(busqueda, productoEditando ? pagina : 1, tabEstado)
+            cargarProductos(busqueda, productoEditando ? pagina : 1, tabEstado, filtroCategoria)
         } catch (e) {
             setFormError(e.message)
         } finally {
@@ -368,6 +380,22 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm
                                     focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
                     />
+                </div>
+
+                <div className="relative shrink-0">
+                    <select
+                        value={filtroCategoria}
+                        onChange={e => setFiltroCategoria(e.target.value)}
+                        className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-9 py-2 text-sm font-medium
+                                    text-kaja-blueText shadow-sm cursor-pointer
+                                    focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
+                    >
+                        <option value="">Todas las categorías</option>
+                        {categoriasFiltro.map(c => (
+                            <option key={c.id} value={c.id}>{c.nombre}</option>
+                        ))}
+                    </select>
+                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
 
                 {!loading && !error && (

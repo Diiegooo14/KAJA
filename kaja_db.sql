@@ -78,6 +78,23 @@ CREATE TABLE DETALLE_VENTA (
     FOREIGN KEY (idProducto) REFERENCES PRODUCTO(id) ON DELETE RESTRICT
 );
 
+CREATE TABLE PROMOCION (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    idEmpresa INT NOT NULL,
+    tipo ENUM('PRODUCTO', 'CATEGORIA') NOT NULL,
+    idProducto INT NULL,
+    idCategoria INT NULL,
+    cantidad INT NOT NULL,
+    precioTotal DECIMAL(10,2) NOT NULL,
+    estado ENUM('Activo', 'Inactivo') DEFAULT 'Activo',
+    fechaCreacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_promocion_producto (idProducto),
+    UNIQUE KEY unique_promocion_categoria (idCategoria),
+    FOREIGN KEY (idProducto) REFERENCES PRODUCTO(id) ON DELETE CASCADE,
+    FOREIGN KEY (idCategoria) REFERENCES CATEGORIA(id) ON DELETE CASCADE,
+    FOREIGN KEY (idEmpresa) REFERENCES EMPRESA(id) ON DELETE CASCADE
+);
+
 CREATE TABLE TIPO_GASTO (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombreTipo VARCHAR(50) NOT NULL
