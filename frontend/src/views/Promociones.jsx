@@ -1,9 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Pencil, Plus, Loader2, Check, X, Trash2, Percent, Tag, Package } from 'lucide-react'
+import { Pencil, Plus, Loader2, Check, X, Trash2, Percent, Tag, Package, Layers } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
-const FORM_VACIO = { tipo: 'PRODUCTO', idProducto: '', idCategoria: '', cantidad: '', precioTotal: '', estado: 'Activo' }
+const FORM_VACIO = {
+    tipo: 'PRODUCTO',
+    idProducto: '',
+    idCategoria: '',
+    idProductos: [],
+    busquedaProducto: '',
+    cantidad: '',
+    precioTotal: '',
+    estado: 'Activo',
+}
 
 export default function Promociones() {
     const [promociones, setPromociones] = useState([])
@@ -71,6 +80,8 @@ export default function Promociones() {
                 tipo: promo.tipo,
                 idProducto: promo.idProducto ? String(promo.idProducto) : '',
                 idCategoria: promo.idCategoria ? String(promo.idCategoria) : '',
+                idProductos: promo.items?.map(i => i.idProducto) ?? [],
+                busquedaProducto: '',
                 cantidad: String(promo.cantidad),
                 precioTotal: String(promo.precioTotal),
                 estado: promo.estado,
@@ -89,10 +100,25 @@ export default function Promociones() {
         const { name, value } = e.target
         setForm(prev => {
             const updated = { ...prev, [name]: value }
-            if (name === 'tipo') { updated.idProducto = ''; updated.idCategoria = '' }
+            if (name === 'tipo') {
+                updated.idProducto = ''
+                updated.idCategoria = ''
+                updated.idProductos = []
+                updated.busquedaProducto = ''
+            }
             return updated
         })
         setCamposError(prev => ({ ...prev, [name]: '' }))
+    }
+
+    function toggleProductoSeleccion(idProducto) {
+        setForm(prev => ({
+            ...prev,
+            idProductos: prev.idProductos.includes(idProducto)
+                ? prev.idProductos.filter(id => id !== idProducto)
+                : [...prev.idProductos, idProducto],
+        }))
+        setCamposError(prev => ({ ...prev, idProductos: '' }))
     }
 
     async function handleGuardar(e) {
@@ -107,7 +133,10 @@ export default function Promociones() {
         const errores = {}
         if (form.tipo === 'PRODUCTO' && !idProducto) errores.idProducto = 'Selecciona un producto.'
         if (form.tipo === 'CATEGORIA' && !idCategoria) errores.idCategoria = 'Selecciona una categoría.'
-        if (isNaN(cantidad) || cantidad < 2) errores.cantidad = 'Mínimo 2 unidades.'
+        if (form.tipo === 'SELECCION' && !promoEditando && form.idProductos.length < 2)
+            errores.idProductos = 'Selecciona al menos 2 productos.'
+        if (form.tipo !== 'SELECCION' && (isNaN(cantidad) || cantidad < 2))
+            errores.cantidad = 'Mínimo 2 unidades.'
         if (isNaN(precioTotal) || precioTotal <= 0) errores.precioTotal = 'Debe ser mayor que 0.'
 
         if (Object.keys(errores).length > 0) {
@@ -118,16 +147,22 @@ export default function Promociones() {
         setGuardando(true)
         try {
             if (promoEditando) {
+                const body = promoEditando.tipo === 'SELECCION'
+                    ? { tipo: 'SELECCION', precioTotal, estado: form.estado }
+                    : { cantidad, precioTotal, estado: form.estado }
                 await fetchJSON(`${API_URL}/promociones?id=${promoEditando.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cantidad, precioTotal, estado: form.estado }),
+                    body: JSON.stringify(body),
                 })
             } else {
+                const body = form.tipo === 'SELECCION'
+                    ? { tipo: 'SELECCION', idProductos: form.idProductos, precioTotal }
+                    : { tipo: form.tipo, idProducto, idCategoria, cantidad, precioTotal }
                 await fetchJSON(`${API_URL}/promociones`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ tipo: form.tipo, idProducto, idCategoria, cantidad, precioTotal }),
+                    body: JSON.stringify(body),
                 })
             }
             setModalAbierto(false)
@@ -167,13 +202,19 @@ export default function Promociones() {
     const productosSinPromo = productos.filter(p => !promociones.some(pr => pr.idProducto === p.id))
     const categoriasSinPromo = categorias.filter(c => !promociones.some(pr => pr.idCategoria === c.id))
 
+    const nombrePromo = (p) => {
+        if (p.tipo === 'PRODUCTO') return p.producto
+        if (p.tipo === 'CATEGORIA') return p.categoria
+        return p.items?.map(i => i.producto).join(' + ') ?? '—'
+    }
+
     return (
         <div className="p-6 max-w-5xl mx-auto w-full">
 
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-kaja-blue">Promociones</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">Ofertas de N unidades por precio fijo</p>
+                    <p className="text-sm text-gray-500 mt-0.5">Ofertas de N unidades o combos por precio fijo</p>
                 </div>
                 <button
                     onClick={() => abrirModal()}
@@ -217,18 +258,35 @@ export default function Promociones() {
                                             <td className="px-4 py-3.5">
                                                 {p.tipo === 'PRODUCTO'
                                                     ? <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-kaja-light text-kaja-blueText/70"><Package className="w-3.5 h-3.5" /> Producto</span>
-                                                    : <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600"><Tag className="w-3.5 h-3.5" /> Categoría</span>}
+                                                    : p.tipo === 'CATEGORIA'
+                                                        ? <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-600"><Tag className="w-3.5 h-3.5" /> Categoría</span>
+                                                        : <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-violet-50 text-violet-600"><Layers className="w-3.5 h-3.5" /> Selección</span>}
                                             </td>
                                             <td className="px-4 py-3.5 font-medium text-kaja-blueText">
-                                                {p.tipo === 'PRODUCTO' ? p.producto : p.categoria}
                                                 {p.tipo === 'PRODUCTO' && (
-                                                    <span className="ml-2 text-xs text-kaja-blueText/40 tabular-nums">{parseFloat(p.precioVenta).toFixed(2)} €/ud</span>
+                                                    <>
+                                                        {p.producto}
+                                                        <span className="ml-2 text-xs text-kaja-blueText/40 tabular-nums">{parseFloat(p.precioVenta).toFixed(2)} €/ud</span>
+                                                    </>
+                                                )}
+                                                {p.tipo === 'CATEGORIA' && p.categoria}
+                                                {p.tipo === 'SELECCION' && (
+                                                    <span className="text-sm leading-relaxed">
+                                                        {p.items?.map((item, i) => (
+                                                            <span key={item.idProducto}>
+                                                                {i > 0 && <span className="mx-1 text-gray-300">+</span>}
+                                                                {item.producto}
+                                                            </span>
+                                                        ))}
+                                                    </span>
                                                 )}
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
                                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
                                                     <Percent className="w-3.5 h-3.5" />
-                                                    {p.cantidad} × {parseFloat(p.precioTotal).toFixed(2)} €
+                                                    {p.tipo === 'SELECCION'
+                                                        ? `Combo ${parseFloat(p.precioTotal).toFixed(2)} €`
+                                                        : `${p.cantidad} × ${parseFloat(p.precioTotal).toFixed(2)} €`}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
@@ -284,7 +342,8 @@ export default function Promociones() {
                             </div>
                             <h3 className="text-base font-bold text-gray-800">Eliminar promoción</h3>
                             <p className="text-sm text-gray-500">
-                                ¿Seguro que quieres eliminar la promoción de <span className="font-semibold text-gray-700">"{promoParaEliminar.tipo === 'PRODUCTO' ? promoParaEliminar.producto : promoParaEliminar.categoria}"</span>?
+                                ¿Seguro que quieres eliminar la promoción de{' '}
+                                <span className="font-semibold text-gray-700">"{nombrePromo(promoParaEliminar)}"</span>?
                             </p>
                         </div>
                         <div className="flex gap-3">
@@ -323,9 +382,10 @@ export default function Promociones() {
 
                         <form onSubmit={handleGuardar} noValidate>
                             <div className="space-y-4">
+                                {/* Selector de tipo (solo al crear) */}
                                 {!promoEditando && (
                                     <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
-                                        {[{ v: 'PRODUCTO', l: 'Producto' }, { v: 'CATEGORIA', l: 'Categoría' }].map(op => (
+                                        {[{ v: 'PRODUCTO', l: 'Producto' }, { v: 'CATEGORIA', l: 'Categoría' }, { v: 'SELECCION', l: 'Selección' }].map(op => (
                                             <button
                                                 key={op.v}
                                                 type="button"
@@ -339,7 +399,8 @@ export default function Promociones() {
                                     </div>
                                 )}
 
-                                {form.tipo === 'PRODUCTO' ? (
+                                {/* PRODUCTO */}
+                                {form.tipo === 'PRODUCTO' && (
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                                             Producto
@@ -359,7 +420,10 @@ export default function Promociones() {
                                         </select>
                                         {camposError.idProducto && <p className="mt-1 text-xs text-red-500">{camposError.idProducto}</p>}
                                     </div>
-                                ) : (
+                                )}
+
+                                {/* CATEGORIA */}
+                                {form.tipo === 'CATEGORIA' && (
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                                             Categoría
@@ -380,22 +444,105 @@ export default function Promociones() {
                                         {camposError.idCategoria && <p className="mt-1 text-xs text-red-500">{camposError.idCategoria}</p>}
                                     </div>
                                 )}
-                                <div className="grid grid-cols-2 gap-3">
+
+                                {/* SELECCION — crear: lista con checkboxes */}
+                                {form.tipo === 'SELECCION' && !promoEditando && (
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
-                                            Unidades
+                                            Productos del combo
+                                            {form.idProductos.length >= 2 && (
+                                                <span className="ml-2 text-kaja-orange font-bold normal-case">
+                                                    {form.idProductos.length} seleccionados
+                                                </span>
+                                            )}
                                         </label>
-                                        <input
-                                            name="cantidad" type="number" min="2" step="1"
-                                            value={form.cantidad} onChange={handleFormChange}
-                                            placeholder="Ej: 2"
-                                            className={inputCls('cantidad')}
-                                        />
-                                        {camposError.cantidad && <p className="mt-1 text-xs text-red-500">{camposError.cantidad}</p>}
+                                        <div className={`border rounded-lg overflow-hidden ${camposError.idProductos ? 'border-red-400' : 'border-gray-200'}`}>
+                                            <div className="p-2 border-b border-gray-100 bg-gray-50">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Buscar producto..."
+                                                    value={form.busquedaProducto}
+                                                    onChange={e => setForm(prev => ({ ...prev, busquedaProducto: e.target.value }))}
+                                                    className="w-full px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:border-kaja-blue"
+                                                />
+                                            </div>
+                                            <div className="max-h-44 overflow-y-auto divide-y divide-gray-50">
+                                                {productos
+                                                    .filter(p => !form.busquedaProducto || p.nombre.toLowerCase().includes(form.busquedaProducto.toLowerCase()))
+                                                    .map(p => (
+                                                        <label key={p.id} className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={form.idProductos.includes(p.id)}
+                                                                onChange={() => toggleProductoSeleccion(p.id)}
+                                                                className="w-4 h-4 accent-kaja-orange shrink-0"
+                                                            />
+                                                            <span className="text-sm text-gray-700 flex-1 leading-tight">{p.nombre}</span>
+                                                            <span className="text-xs text-gray-400 tabular-nums shrink-0">{parseFloat(p.precioVenta).toFixed(2)} €</span>
+                                                        </label>
+                                                    ))
+                                                }
+                                            </div>
+                                        </div>
+                                        {camposError.idProductos && <p className="mt-1 text-xs text-red-500">{camposError.idProductos}</p>}
                                     </div>
+                                )}
+
+                                {/* SELECCION — editar: lista de solo lectura */}
+                                {form.tipo === 'SELECCION' && promoEditando && (
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
-                                            Precio total (€)
+                                            Productos del combo
+                                        </label>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 space-y-1.5">
+                                            {promoEditando.items?.map(item => (
+                                                <div key={item.idProducto} className="flex items-center justify-between text-sm">
+                                                    <span className="text-gray-700">{item.producto}</span>
+                                                    <span className="text-xs text-gray-400 tabular-nums">{parseFloat(item.precioVenta).toFixed(2)} €/ud</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <p className="mt-1 text-xs text-gray-400">
+                                            Los productos del combo no se pueden cambiar. Elimínala y crea una nueva.
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Cantidad + Precio (PRODUCTO y CATEGORIA) */}
+                                {form.tipo !== 'SELECCION' && (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                                                Unidades
+                                            </label>
+                                            <input
+                                                name="cantidad" type="number" min="2" step="1"
+                                                value={form.cantidad} onChange={handleFormChange}
+                                                placeholder="Ej: 2"
+                                                className={inputCls('cantidad')}
+                                            />
+                                            {camposError.cantidad && <p className="mt-1 text-xs text-red-500">{camposError.cantidad}</p>}
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                                                Precio total (€)
+                                            </label>
+                                            <input
+                                                name="precioTotal" type="number" min="0" step="0.01"
+                                                value={form.precioTotal} onChange={handleFormChange}
+                                                placeholder="Ej: 5.00"
+                                                className={inputCls('precioTotal')}
+                                            />
+                                            {camposError.precioTotal && <p className="mt-1 text-xs text-red-500">{camposError.precioTotal}</p>}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Solo precio para SELECCION */}
+                                {form.tipo === 'SELECCION' && (
+                                    <div>
+                                        <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
+                                            Precio del combo (€)
                                         </label>
                                         <input
                                             name="precioTotal" type="number" min="0" step="0.01"
@@ -405,11 +552,14 @@ export default function Promociones() {
                                         />
                                         {camposError.precioTotal && <p className="mt-1 text-xs text-red-500">{camposError.precioTotal}</p>}
                                     </div>
-                                </div>
+                                )}
+
                                 <p className="text-xs text-gray-400">
                                     {form.tipo === 'PRODUCTO'
                                         ? 'Ejemplo: 2 unidades por 5,00 € — al añadir 2 (o múltiplos) de este producto en el TPV, se aplicará el precio de oferta.'
-                                        : 'Ejemplo: 2 unidades por 5,00 € — al combinar 2 (o múltiplos) de cualquier producto de esta categoría en el TPV, se aplicará el precio de oferta.'}
+                                        : form.tipo === 'CATEGORIA'
+                                            ? 'Ejemplo: 2 unidades por 5,00 € — al combinar 2 (o múltiplos) de cualquier producto de esta categoría en el TPV, se aplicará el precio de oferta.'
+                                            : 'Ejemplo: colgante X + pendientes Y por 5,00 € — al añadir ambos productos al ticket, se aplica automáticamente el precio del combo.'}
                                 </p>
 
                                 {promoEditando && (

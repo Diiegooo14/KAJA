@@ -24,11 +24,49 @@ class PromocionModel
 
         $consulta = $pdo->prepare($sql);
         $consulta->execute($parametros);
-        return $consulta->fetchAll();
+        $promociones = $consulta->fetchAll();
+
+        $idsSeleccion = array_values(array_map(
+            fn($p) => $p['id'],
+            array_filter($promociones, fn($p) => $p['tipo'] === 'SELECCION')
+        ));
+
+        if (!empty($idsSeleccion)) {
+            $placeholders = implode(',', array_fill(0, count($idsSeleccion), '?'));
+            $itemsQuery = $pdo->prepare(
+                "SELECT pi.idPromocion, pi.idProducto, prod.nombre AS producto, prod.precioVenta, prod.iva
+                 FROM PROMOCION_ITEMS pi
+                 JOIN PRODUCTO prod ON pi.idProducto = prod.id
+                 WHERE pi.idPromocion IN ($placeholders)"
+            );
+            $itemsQuery->execute($idsSeleccion);
+            $rows = $itemsQuery->fetchAll();
+
+            $itemsPorPromo = [];
+            foreach ($rows as $row) {
+                $itemsPorPromo[$row['idPromocion']][] = $row;
+            }
+
+            foreach ($promociones as &$promo) {
+                if ($promo['tipo'] === 'SELECCION') {
+                    $promo['items'] = $itemsPorPromo[$promo['id']] ?? [];
+                }
+            }
+            unset($promo);
+        }
+
+        return $promociones;
     }
 
-    public static function crear(int $idEmpresa, string $tipo, ?int $idProducto, ?int $idCategoria, int $cantidad, float $precioTotal): int
-    {
+    public static function crear(
+        int $idEmpresa,
+        string $tipo,
+        ?int $idProducto,
+        ?int $idCategoria,
+        int $cantidad,
+        float $precioTotal,
+        array $idProductos = []
+    ): int {
         $pdo = Database::connect();
         $consulta = $pdo->prepare(
             'INSERT INTO PROMOCION (idEmpresa, tipo, idProducto, idCategoria, cantidad, precioTotal)
@@ -42,20 +80,41 @@ class PromocionModel
             ':cantidad'    => $cantidad,
             ':precioTotal' => $precioTotal,
         ]);
-        return (int) $pdo->lastInsertId();
+        $id = (int) $pdo->lastInsertId();
+
+        if ($tipo === 'SELECCION' && !empty($idProductos)) {
+            $stmt = $pdo->prepare(
+                'INSERT INTO PROMOCION_ITEMS (idPromocion, idProducto) VALUES (:idPromocion, :idProducto)'
+            );
+            foreach ($idProductos as $idProd) {
+                $stmt->execute([':idPromocion' => $id, ':idProducto' => (int) $idProd]);
+            }
+        }
+
+        return $id;
     }
 
-    public static function actualizar(int $id, int $cantidad, float $precioTotal, string $estado): void
+    public static function actualizar(int $id, ?int $cantidad, float $precioTotal, string $estado): void
     {
         $pdo = Database::connect();
-        $pdo->prepare(
-            'UPDATE PROMOCION SET cantidad = :cantidad, precioTotal = :precioTotal, estado = :estado WHERE id = :id'
-        )->execute([
-            ':cantidad'    => $cantidad,
-            ':precioTotal' => $precioTotal,
-            ':estado'      => $estado,
-            ':id'          => $id,
-        ]);
+        if ($cantidad !== null) {
+            $pdo->prepare(
+                'UPDATE PROMOCION SET cantidad = :cantidad, precioTotal = :precioTotal, estado = :estado WHERE id = :id'
+            )->execute([
+                ':cantidad'    => $cantidad,
+                ':precioTotal' => $precioTotal,
+                ':estado'      => $estado,
+                ':id'          => $id,
+            ]);
+        } else {
+            $pdo->prepare(
+                'UPDATE PROMOCION SET precioTotal = :precioTotal, estado = :estado WHERE id = :id'
+            )->execute([
+                ':precioTotal' => $precioTotal,
+                ':estado'      => $estado,
+                ':id'          => $id,
+            ]);
+        }
     }
 
     public static function eliminar(int $id): void

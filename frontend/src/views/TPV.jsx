@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, X, CheckCircle, Download, Percent } from 'lucide-react'
+import { Search, Plus, Minus, Trash2, ShoppingCart, Loader2, X, CheckCircle, Download, Percent, Layers } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -198,6 +198,20 @@ export default function TPV({ usuario }) {
         () => Object.fromEntries(promociones.filter(p => p.tipo === 'CATEGORIA').map(p => [p.idCategoria, p])),
         [promociones]
     )
+    const promoSeleccion = useMemo(
+        () => promociones.filter(p => p.tipo === 'SELECCION'),
+        [promociones]
+    )
+    // Para el badge en las tarjetas: primer combo activo al que pertenece cada producto
+    const promoSeleccionPorProducto = useMemo(() => {
+        const map = {}
+        promoSeleccion.forEach(promo => {
+            promo.items?.forEach(item => {
+                if (!map[item.idProducto]) map[item.idProducto] = promo
+            })
+        })
+        return map
+    }, [promoSeleccion])
 
     // Calcula, para cada producto del carrito, cuántas unidades caen en oferta y cuántas a precio normal.
     // Promo de producto tiene prioridad sobre la de categoría. En categoría, las unidades más caras
@@ -206,6 +220,7 @@ export default function TPV({ usuario }) {
         const resultado = new Map()
         const resueltos = new Set()
 
+        // 1. Promos de PRODUCTO (mayor prioridad)
         carrito.forEach(item => {
             const promo = promoPorProducto[item.id]
             if (!promo) return
@@ -220,6 +235,28 @@ export default function TPV({ usuario }) {
             resueltos.add(item.id)
         })
 
+        // 2. Promos de SELECCION: todos los productos del combo deben estar en el carrito
+        promoSeleccion.forEach(promo => {
+            if (!promo.items?.length) return
+            const cartItems = promo.items.map(req => carrito.find(c => c.id === Number(req.idProducto)))
+            // Si falta algún producto o alguno ya tiene promo de PRODUCTO, saltar
+            if (cartItems.some(c => !c) || cartItems.some(c => resueltos.has(c.id))) return
+
+            const aplicaciones = Math.min(...cartItems.map(c => c.cantidad))
+            if (aplicaciones < 1) return
+
+            const precioPromoUnit = parseFloat(promo.precioTotal) / promo.cantidad
+            cartItems.forEach(item => {
+                const precioNormal = parseFloat(item.precioVenta)
+                const lineas = []
+                if (aplicaciones > 0) lineas.push({ cantidad: aplicaciones, precioVenta: precioPromoUnit })
+                if (item.cantidad - aplicaciones > 0) lineas.push({ cantidad: item.cantidad - aplicaciones, precioVenta: precioNormal })
+                resultado.set(item.id, { subtotal: lineas.reduce((a, l) => a + l.cantidad * l.precioVenta, 0), lineas })
+                resueltos.add(item.id)
+            })
+        })
+
+        // 3. Promos de CATEGORIA (menor prioridad)
         const gruposPorCategoria = new Map()
         carrito.forEach(item => {
             if (resueltos.has(item.id)) return
@@ -265,7 +302,7 @@ export default function TPV({ usuario }) {
         })
 
         return resultado
-    }, [carrito, promoPorProducto, promoPorCategoria])
+    }, [carrito, promoPorProducto, promoPorCategoria, promoSeleccion])
 
     function subtotalLinea(item) {
         return desglose.get(item.id)?.subtotal ?? parseFloat(item.precioVenta) * item.cantidad
@@ -401,7 +438,7 @@ export default function TPV({ usuario }) {
                             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
                                 {productosFiltrados.map(p => {
                                     const enCarrito = carrito.find(item => item.id === p.id)
-                                    const promo = promoPorProducto[p.id] ?? promoPorCategoria[p.idCategoria]
+                                    const promo = promoPorProducto[p.id] ?? promoPorCategoria[p.idCategoria] ?? promoSeleccionPorProducto[p.id]
                                     return (
                                         <button
                                             key={p.id}
@@ -413,7 +450,13 @@ export default function TPV({ usuario }) {
                                         >
                                             <span className="text-xs text-gray-600 mb-1 truncate w-full">{p.categoria}</span>
                                             <span className="text-sm font-semibold text-gray-800 leading-tight mb-2 line-clamp-2">{p.nombre}</span>
-                                            {promo && (
+                                            {promo && promo.tipo === 'SELECCION' && (
+                                                <span className="inline-flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-100 text-violet-700">
+                                                    <Layers className="w-3 h-3" />
+                                                    Combo {parseFloat(promo.precioTotal).toFixed(2)}€
+                                                </span>
+                                            )}
+                                            {promo && promo.tipo !== 'SELECCION' && (
                                                 <span className="inline-flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
                                                     <Percent className="w-3 h-3" />
                                                     {promo.cantidad}×{parseFloat(promo.precioTotal).toFixed(2)}€

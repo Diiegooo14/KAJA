@@ -28,8 +28,11 @@ class PromocionController
         $idCategoria = isset($datos['idCategoria']) ? (int) $datos['idCategoria'] : null;
         $cantidad    = (int) ($datos['cantidad'] ?? 0);
         $precioTotal = (float) ($datos['precioTotal'] ?? 0);
+        $idProductos = isset($datos['idProductos'])
+            ? array_values(array_unique(array_filter(array_map('intval', $datos['idProductos']))))
+            : [];
 
-        if (!in_array($tipo, ['PRODUCTO', 'CATEGORIA'], true)) {
+        if (!in_array($tipo, ['PRODUCTO', 'CATEGORIA', 'SELECCION'], true)) {
             http_response_code(400);
             echo json_encode(['error' => 'Tipo de promoción inválido']);
             exit;
@@ -44,9 +47,22 @@ class PromocionController
             echo json_encode(['error' => 'Selecciona una categoría']);
             exit;
         }
-        if ($cantidad < 2 || $precioTotal <= 0) {
+        if ($tipo === 'SELECCION') {
+            if (count($idProductos) < 2) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Selecciona al menos 2 productos distintos']);
+                exit;
+            }
+            $cantidad = count($idProductos);
+        }
+        if ($precioTotal <= 0) {
             http_response_code(400);
-            echo json_encode(['error' => 'Cantidad mínima de 2 y precio mayor que 0']);
+            echo json_encode(['error' => 'El precio debe ser mayor que 0']);
+            exit;
+        }
+        if ($tipo !== 'SELECCION' && $cantidad < 2) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Cantidad mínima de 2 unidades']);
             exit;
         }
 
@@ -57,7 +73,8 @@ class PromocionController
                 $tipo === 'PRODUCTO' ? $idProducto : null,
                 $tipo === 'CATEGORIA' ? $idCategoria : null,
                 $cantidad,
-                $precioTotal
+                $precioTotal,
+                $tipo === 'SELECCION' ? $idProductos : []
             );
             http_response_code(201);
             echo json_encode(['id' => $id, 'mensaje' => 'Promoción creada']);
@@ -77,19 +94,29 @@ class PromocionController
         Jwt::requerirAdministrador();
 
         $datos = json_decode(file_get_contents('php://input'), true) ?? [];
-        $cantidad    = (int) ($datos['cantidad'] ?? 0);
         $precioTotal = (float) ($datos['precioTotal'] ?? 0);
         $estado      = $datos['estado'] ?? 'Activo';
+        $esSeleccion = ($datos['tipo'] ?? '') === 'SELECCION';
 
-        if ($cantidad < 2 || $precioTotal <= 0) {
+        if ($precioTotal <= 0) {
             http_response_code(400);
-            echo json_encode(['error' => 'Datos inválidos: cantidad mínima de 2 y precio mayor que 0']);
+            echo json_encode(['error' => 'El precio debe ser mayor que 0']);
             exit;
         }
         if (!in_array($estado, ['Activo', 'Inactivo'], true)) {
             http_response_code(400);
             echo json_encode(['error' => 'Estado inválido']);
             exit;
+        }
+
+        $cantidad = null;
+        if (!$esSeleccion) {
+            $cantidad = (int) ($datos['cantidad'] ?? 0);
+            if ($cantidad < 2) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Datos inválidos: cantidad mínima de 2 unidades']);
+                exit;
+            }
         }
 
         try {
