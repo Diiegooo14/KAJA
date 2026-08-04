@@ -141,7 +141,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
   }
 
   return (
-    <div className="flex items-center gap-4 mb-6">
+    <div className="flex flex-wrap items-center gap-4 mb-6">
       <div className="relative shrink-0">
         <div className="w-20 h-20 rounded-full overflow-hidden bg-kaja-light flex items-center justify-center border-2 border-gray-100">
           {preview
@@ -156,7 +156,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
         )}
       </div>
 
-      <div>
+      <div className="min-w-0">
         <input
           ref={inputRef}
           type="file"
@@ -164,7 +164,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
           onChange={seleccionar}
           className="hidden"
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => inputRef.current.click()}
@@ -589,7 +589,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   )
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto w-full">
+    <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
       <h2 className="text-2xl font-bold text-kaja-blueText mb-6 uppercase tracking-wide">
         Configuración
       </h2>
@@ -695,7 +695,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
               <p className="text-sm text-gray-500 mb-4">
                 Las acciones de esta sección son permanentes e irreversibles.
               </p>
-              <div className="flex items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">Eliminar empresa</p>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -705,7 +705,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                 <button
                   type="button"
                   onClick={() => { setModalBorrar(true); setErrorBorrar('') }}
-                  className="shrink-0 flex items-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
+                  className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
                              rounded-lg hover:bg-red-700 active:scale-95 transition"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -725,8 +725,8 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
 
       {/* Modal confirmación borrar empresa */}
       {modalBorrar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
               <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-6 h-6 text-red-600" />

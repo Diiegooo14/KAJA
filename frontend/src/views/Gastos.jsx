@@ -210,7 +210,7 @@ export default function Gastos() {
 
             {/* Mensaje */}
             {toast && (
-                <div className="fixed top-4 right-4 z-50 bg-kaja-blueText text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg">
+                <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 z-50 bg-kaja-blueText text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg text-center sm:text-left">
                     {toast}
                 </div>
             )}
@@ -367,17 +367,17 @@ export default function Gastos() {
 
                     {/* Tarjetas datos */}
                     <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
-                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total Mes</p>
-                            <p className="text-2xl font-bold text-white">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
+                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1 truncate">Total Mes</p>
+                            <p className="text-lg sm:text-2xl font-bold text-white truncate">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
                         </div>
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Gastos fijos</p>
-                            <p className="text-2xl font-bold text-kaja-blueText">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Gastos fijos</p>
+                            <p className="text-lg sm:text-2xl font-bold text-kaja-blueText truncate">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
                         </div>
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Gastos variables</p>
-                            <p className="text-2xl font-bold text-kaja-orange">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Gastos variables</p>
+                            <p className="text-lg sm:text-2xl font-bold text-kaja-orange truncate">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
                         </div>
                     </div>
 
@@ -461,9 +461,9 @@ export default function Gastos() {
             </div>
             {/* Modal detalle / edición gasto */}
             {gastoVisor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarModal} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blueText flex items-center gap-2">
                                 {modoEdicion

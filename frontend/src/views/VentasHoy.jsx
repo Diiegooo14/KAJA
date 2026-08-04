@@ -63,7 +63,7 @@ export default function VentasHoy() {
     <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full animate-fade-in">
 
       {/* Cabecera */}
-      <div className="flex items-end justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Hoy</p>
           <h1 className="text-2xl font-bold text-kaja-blueText">Ventas del día</h1>
@@ -74,8 +74,8 @@ export default function VentasHoy() {
         <button
           onClick={cargar}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600
-            hover:bg-gray-50 active:scale-95 transition disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600
+            hover:bg-gray-50 active:scale-95 transition disabled:opacity-50 self-start sm:self-auto"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar

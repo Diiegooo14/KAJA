@@ -392,6 +392,7 @@ export default function TPV({ usuario }) {
                         value={busqueda}
                         onChange={e => setBusqueda(e.target.value)}
                         placeholder="Buscar producto..."
+                        aria-label="Buscar producto"
                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm
                                     focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
                     />
@@ -622,8 +623,8 @@ export default function TPV({ usuario }) {
 
             {/* Modal confirmación */}
             {modalConfirmar && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-4" role="dialog" aria-modal="true">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
                         <h2 className="text-lg font-bold text-kaja-blue text-center">Confirmar cobro</h2>
 
                         {/* Resumen del ticket */}
@@ -670,8 +671,8 @@ export default function TPV({ usuario }) {
 
             {/* Modal ticket cobrado */}
             {ventaCobrada && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-4" role="dialog" aria-modal="true">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
                             <CheckCircle className="w-12 h-12 text-green-500" />
                             <h2 className="text-lg font-bold text-kaja-blue">¡Venta registrada!</h2>

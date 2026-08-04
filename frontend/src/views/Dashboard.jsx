@@ -176,24 +176,24 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
   const mesTxt  = new Date().toLocaleDateString('es-ES', { month: 'long' })
 
   return (
-    <div className="p-6 max-w-5xl mx-auto w-full animate-fade-in flex flex-col gap-5">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full animate-fade-in flex flex-col gap-5">
 
       {/* ── Hero ─────────────────────────────────────────────────────── */}
-      <div className="relative bg-kaja-sidebar rounded-2xl overflow-hidden px-8 py-7 flex items-center justify-between gap-6 shadow-lg">
+      <div className="relative bg-kaja-sidebar rounded-2xl overflow-hidden px-5 sm:px-8 py-6 sm:py-7 flex items-center justify-between gap-4 sm:gap-6 shadow-lg">
         <div className="absolute -top-14 -right-14 w-52 h-52 rounded-full bg-white/4 pointer-events-none" />
         <div className="absolute -bottom-10 right-28 w-36 h-36 rounded-full bg-kaja-orange/8 pointer-events-none" />
         <div className="absolute top-6 right-60 w-14 h-14 rounded-full bg-white/3 pointer-events-none" />
 
-        <div className="relative z-10">
+        <div className="relative z-10 min-w-0">
           <p className="text-kaja-orange text-xs font-bold uppercase tracking-widest mb-1">{saludo}</p>
-          <h1 className="text-3xl font-bold text-white mb-1">{usuario.nombre}</h1>
-          <p className="text-white/70 text-sm capitalize">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 truncate">{usuario.nombre}</h1>
+          <p className="text-white/70 text-xs sm:text-sm capitalize">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
 
         {empresa && (
-          <div className="relative z-10 hidden sm:flex items-center gap-3 shrink-0">
+          <div className="relative z-10 hidden md:flex items-center gap-3 shrink-0">
             <div className="text-right">
               <p className="text-white font-semibold text-sm">{empresa.nombreComercial}</p>
               <p className="text-white/70 text-xs mt-0.5">{empresa.razonSocial ?? 'Empresa'}</p>
@@ -204,7 +204,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
       </div>
 
       {/* ── KPIs ─────────────────────────────────────────────────────── */}
-      <div className={`grid gap-4 ${esAdmin ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
+      <div className={`grid gap-3 sm:gap-4 ${esAdmin ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-1 sm:grid-cols-3'}`}>
         <KpiStat
           icon={ShoppingBag}
           label="Ventas hoy"
@@ -428,6 +428,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
               <button
                 key={item.id}
                 onClick={() => navegarA(item.id)}
+                aria-current={activo ? 'page' : undefined}
                 className={`relative w-full flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-medium transition-all text-left
                   ${activo
                     ? 'bg-kaja-orange/15 text-kaja-orange'
@@ -481,7 +482,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           </button>
 
           {/* Search */}
-          <div className="flex-1 max-w-sm">
+          <div className="flex-1 min-w-0 max-w-sm">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
               <input
@@ -489,6 +490,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
                 value={busquedaGlobal}
                 onChange={handleBusquedaGlobal}
                 placeholder="Buscar producto..."
+                aria-label="Buscar producto"
                 className="w-full pl-9 pr-4 py-2 bg-white/10 border border-white/15 rounded-xl text-sm text-white placeholder:text-white/55
                   focus:outline-none focus:ring-2 focus:ring-kaja-orange/60 focus:border-kaja-orange/50 transition"
               />
@@ -496,9 +498,9 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
           </div>
 
           {/* Empresa + usuario */}
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-3 sm:gap-4 ml-auto shrink-0">
             {empresa && (
-              <div className="hidden md:flex items-center gap-2.5 pr-4 border-r border-white/15">
+              <div className="hidden lg:flex items-center gap-2.5 pr-4 border-r border-white/15">
                 <EmpresaAvatar nombre={empresa.nombreComercial} logo={empresa.logo_empresa} size="sm" />
                 <div className="leading-tight">
                   <p className="text-sm font-semibold text-white">{empresa.nombreComercial}</p>

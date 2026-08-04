@@ -315,15 +315,15 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
     }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto w-full">
+        <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full">
 
             {/* Cabecera */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-kaja-blue">Inventario</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <span className="text-sm text-gray-600">{total} productos</span>
                     <button
                         onClick={abrirModalCategorias}
@@ -369,14 +369,15 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             )}
 
             {/* Buscador + paginación superior */}
-            <div className="flex items-center gap-3 mb-5">
-                <div className="relative max-w-sm flex-1">
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+                <div className="relative flex-1 min-w-50">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <input
                         type="text"
                         value={busqueda}
                         onChange={handleBusqueda}
                         placeholder="Buscar producto..."
+                        aria-label="Buscar producto"
                         className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm
                                     focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
                     />
@@ -386,6 +387,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                     <select
                         value={filtroCategoria}
                         onChange={e => setFiltroCategoria(e.target.value)}
+                        aria-label="Filtrar por categoría"
                         className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-9 py-2 text-sm font-medium
                                     text-kaja-blueText shadow-sm cursor-pointer
                                     focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-kaja-blue transition"
@@ -399,7 +401,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 </div>
 
                 {!loading && !error && (
-                    <div className="flex items-center gap-2 ml-auto shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto justify-center sm:justify-end shrink-0">
                         <span className="text-sm text-gray-600 mr-1">
                             {total === 0
                                 ? 'Sin resultados'
@@ -542,9 +544,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Toast de éxito */}
             {notificacion && (
-                <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3
+                <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3 px-4 py-3
                                 bg-green-600 text-white text-sm font-medium rounded-xl shadow-lg
-                                animate-fade-in">
+                                animate-fade-in justify-center sm:justify-start">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
                 </div>
@@ -552,9 +554,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Modal categorías */}
             {modalCategoriasAbierto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalCategoriasAbierto(false)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-5">
                             <h2 className="text-lg font-bold text-kaja-blue flex items-center gap-2">
                                 <Tag className="w-5 h-5" />
@@ -607,9 +609,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Modal aviso / confirmación al eliminar categoría */}
             {categoriaParaEliminar && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center">
+                <div className="fixed inset-0 z-60 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminandoCategoria && setCategoriaParaEliminar(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         {parseInt(categoriaParaEliminar.totalProductos) > 0 ? (
                             <>
                                 <div className="flex flex-col items-center gap-3 mb-5 text-center">
@@ -668,9 +670,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Modal confirmación eliminar producto */}
             {productoParaEliminar && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center">
+                <div className="fixed inset-0 z-60 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminandoProducto && setProductoParaEliminar(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-3 mb-5 text-center">
                             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                                 <Trash2 className="w-6 h-6 text-red-500" />
@@ -705,9 +707,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Modal detalle producto (solo lectura) */}
             {productoVisor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarVisor} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blue">Detalle del producto</h2>
                             <button onClick={cerrarVisor}
@@ -774,9 +776,9 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             )}
 
             {modalAbierto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarModal} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blue">
                                 {productoEditando ? 'Editar producto' : 'Nuevo producto'}

@@ -288,13 +288,13 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
         <div className="flex flex-col h-full overflow-hidden">
 
             {toast && (
-                <div className="fixed top-4 right-4 z-50 bg-kaja-blueText text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg">
+                <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-4 z-50 bg-kaja-blueText text-white text-sm font-medium px-5 py-3 rounded-xl shadow-lg text-center sm:text-left">
                     {toast}
                 </div>
             )}
 
-            <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex items-center bg-white">
-                <div className="flex-1">
+            <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
+                <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
                     <h1 className="text-xl font-bold text-kaja-blueText">Gestión de Usuarios</h1>
                 </div>
@@ -426,17 +426,17 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                 <div className="flex-1 flex flex-col overflow-hidden bg-kaja-light min-h-0">
 
                     <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
-                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-5 py-4 shadow-sm">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1">Total usuarios</p>
-                            <p className="text-2xl font-bold text-white">{resumen.total}</p>
+                        <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1 truncate">Total usuarios</p>
+                            <p className="text-xl sm:text-2xl font-bold text-white">{resumen.total}</p>
                         </div>
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Activos</p>
-                            <p className="text-2xl font-bold text-emerald-600">{resumen.activos}</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Activos</p>
+                            <p className="text-xl sm:text-2xl font-bold text-emerald-600">{resumen.activos}</p>
                         </div>
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4">
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1">Inactivos</p>
-                            <p className="text-2xl font-bold text-kaja-orange">{resumen.inactivos}</p>
+                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
+                            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Inactivos</p>
+                            <p className="text-xl sm:text-2xl font-bold text-kaja-orange">{resumen.inactivos}</p>
                         </div>
                     </div>
 
@@ -532,9 +532,9 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
 
             {/* Modal editar usuario */}
             {editando && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cancelarEdicion} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blueText flex items-center gap-2">
                                 <Pencil className="w-5 h-5 text-kaja-orange" />
@@ -667,7 +667,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
 
             {/* Modal nóminas */}
             {modalNominas && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalNominas(null)} />
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[90vh]">
 
@@ -788,9 +788,9 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
 
             {/* Modal detalle usuario */}
             {usuarioVisor && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setUsuarioVisor(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blueText">Detalle del usuario</h2>
                             <button onClick={() => setUsuarioVisor(null)}

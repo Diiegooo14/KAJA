@@ -209,17 +209,17 @@ export default function Promociones() {
     }
 
     return (
-        <div className="p-6 max-w-5xl mx-auto w-full">
+        <div className="p-4 sm:p-6 max-w-5xl mx-auto w-full">
 
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
                     <h1 className="text-2xl font-bold text-kaja-blue">Promociones</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Ofertas de N unidades o combos por precio fijo</p>
                 </div>
                 <button
                     onClick={() => abrirModal()}
-                    className="flex items-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
-                                rounded-lg hover:brightness-90 active:scale-95 transition"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-kaja-orange text-white text-sm font-semibold
+                                rounded-lg hover:brightness-90 active:scale-95 transition self-start sm:self-auto"
                 >
                     <Plus className="w-4 h-4" />
                     Nueva promoción
@@ -324,18 +324,18 @@ export default function Promociones() {
             )}
 
             {notificacion && (
-                <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3
+                <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3 px-4 py-3
                                 bg-green-600 text-white text-sm font-medium rounded-xl shadow-lg
-                                animate-fade-in">
+                                animate-fade-in justify-center sm:justify-start">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
                 </div>
             )}
 
             {promoParaEliminar && (
-                <div className="fixed inset-0 z-60 flex items-center justify-center">
+                <div className="fixed inset-0 z-60 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminando && setPromoParaEliminar(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-3 mb-5 text-center">
                             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                                 <Trash2 className="w-6 h-6 text-red-500" />
@@ -367,9 +367,9 @@ export default function Promociones() {
             )}
 
             {modalAbierto && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
                     <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={cerrarModal} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-bold text-kaja-blue">
                                 {promoEditando ? 'Editar promoción' : 'Nueva promoción'}
