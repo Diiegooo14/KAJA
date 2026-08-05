@@ -15,7 +15,8 @@ CREATE TABLE EMPRESA (
     direccion VARCHAR(200),
     telefono VARCHAR(20),
     email VARCHAR(100),
-    logo_empresa VARCHAR(255)
+    logo_empresa VARCHAR(255),
+    ivaPorDefecto DECIMAL(5,2) NOT NULL DEFAULT 21.00
 );
 
 CREATE TABLE USUARIO (

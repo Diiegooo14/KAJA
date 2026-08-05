@@ -63,6 +63,7 @@ class ProductoController
         $idCategoria = (int) ($datos['idCategoria'] ?? 0);
         $precioCoste = (float) ($datos['precioCoste'] ?? 0);
         $precioVenta = (float) ($datos['precioVenta'] ?? 0);
+        $iva = (int) ($datos['iva'] ?? 21);
         $stock = (int) ($datos['stock'] ?? 0);
 
         if ($nombre === '' || $idCategoria <= 0 || $precioCoste <= 0 || $precioVenta <= 0) {
@@ -75,9 +76,14 @@ class ProductoController
             echo json_encode(['error' => 'El stock no puede ser negativo']);
             exit;
         }
+        if (!in_array($iva, [0, 4, 10, 21], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Tipo de IVA no válido']);
+            exit;
+        }
 
         try {
-            $id = ProductoModel::crear(compact('nombre', 'idCategoria', 'idEmpresa', 'precioCoste', 'precioVenta', 'stock'));
+            $id = ProductoModel::crear(compact('nombre', 'idCategoria', 'idEmpresa', 'precioCoste', 'precioVenta', 'iva', 'stock'));
             http_response_code(201);
             echo json_encode(['id' => $id, 'mensaje' => 'Producto creado']);
         } catch (PDOException $e) {
@@ -96,6 +102,7 @@ class ProductoController
         $idCategoria = (int) ($datos['idCategoria'] ?? 0);
         $precioCoste = (float) ($datos['precioCoste'] ?? 0);
         $precioVenta = (float) ($datos['precioVenta'] ?? 0);
+        $iva = (int) ($datos['iva'] ?? 21);
         $stock = (int) ($datos['stock'] ?? 0);
         $estado = $datos['estado'] ?? 'Activo';
 
@@ -114,11 +121,16 @@ class ProductoController
             echo json_encode(['error' => 'Estado inválido']);
             exit;
         }
+        if (!in_array($iva, [0, 4, 10, 21], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Tipo de IVA no válido']);
+            exit;
+        }
 
         $estado = $stock > 0 ? 'Activo' : 'Inactivo';
 
         try {
-            ProductoModel::actualizar($id, compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'stock', 'estado'));
+            ProductoModel::actualizar($id, compact('nombre', 'idCategoria', 'precioCoste', 'precioVenta', 'iva', 'stock', 'estado'));
             echo json_encode(['mensaje' => 'Producto actualizado']);
         } catch (PDOException $e) {
             http_response_code(500);

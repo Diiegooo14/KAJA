@@ -206,7 +206,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
   const [empresa, setEmpresa] = useState(null)
   const [errorCargaEmpresa, setErrorCargaEmpresa] = useState(false)
   const [formEmpresa, setFormEmpresa] = useState({
-    razonSocial: '', nombreComercial: '', direccion: '', telefono: '', email: '',
+    razonSocial: '', nombreComercial: '', direccion: '', telefono: '', email: '', ivaPorDefecto: '21',
   })
   const [mensajeEmpresa, setMensajeEmpresa] = useState(null)
   const [cargandoEmpresa, setCargandoEmpresa] = useState(false)
@@ -285,6 +285,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
           direccion:       data.direccion       ?? '',
           telefono:        data.telefono        ?? '',
           email:           data.email           ?? '',
+          ivaPorDefecto:   String(data.ivaPorDefecto ?? 21),
         })
       })
       .catch(() => setErrorCargaEmpresa(true))
@@ -666,6 +667,25 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                         type="email"
                         maxLength={30}
                       />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                        IVA por defecto
+                      </label>
+                      <select
+                        value={formEmpresa.ivaPorDefecto}
+                        onChange={campoEmpresa('ivaPorDefecto')}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white text-gray-800
+                                  focus:outline-none focus:ring-2 focus:ring-kaja-light focus:border-transparent transition"
+                      >
+                        <option value="21">21% — General</option>
+                        <option value="10">10% — Reducido</option>
+                        <option value="4">4% — Superreducido</option>
+                        <option value="0">0% — Exento</option>
+                      </select>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Se usará como valor inicial al crear un producto nuevo.
+                      </p>
                     </div>
                     <Aviso msg={mensajeEmpresa} />
                     <BtnGuardar

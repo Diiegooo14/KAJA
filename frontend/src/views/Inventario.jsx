@@ -15,7 +15,7 @@ const FORM_VACIO = {
     estado: 'Activo',
 }
 
-export default function Inventario({ filtroStockBajo = false, busquedaInicial = '' }) {
+export default function Inventario({ filtroStockBajo = false, busquedaInicial = '', empresa = null }) {
     const [productos, setProductos] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -130,7 +130,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             iva: String(producto.iva ?? 21),
             stock: producto.stock,
             estado: producto.estado ?? 'Activo',
-        } : FORM_VACIO)
+        } : { ...FORM_VACIO, iva: String(empresa?.ivaPorDefecto ?? 21) })
         setFormError('')
         setModalAbierto(true)
         try {

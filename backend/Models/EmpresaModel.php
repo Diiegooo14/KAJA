@@ -6,7 +6,7 @@ class EmpresaModel
     {
         $pdo  = Database::connect();
         $stmt = $pdo->prepare(
-            'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email, logo_empresa
+            'SELECT nif, razonSocial, nombreComercial, direccion, telefono, email, logo_empresa, ivaPorDefecto
                 FROM EMPRESA WHERE id = :id LIMIT 1'
         );
         $stmt->execute([':id' => $id]);
@@ -26,7 +26,8 @@ class EmpresaModel
         $pdo->prepare(
             'UPDATE EMPRESA
                 SET razonSocial = :razonSocial, nombreComercial = :nombreComercial,
-                direccion = :direccion, telefono = :telefono, email = :email
+                direccion = :direccion, telefono = :telefono, email = :email,
+                ivaPorDefecto = :ivaPorDefecto
                 WHERE id = :id'
         )->execute([
             ':razonSocial'     => $datos['razonSocial'],
@@ -34,6 +35,7 @@ class EmpresaModel
             ':direccion'       => $datos['direccion'],
             ':telefono'        => $datos['telefono'],
             ':email'           => $datos['email'],
+            ':ivaPorDefecto'   => $datos['ivaPorDefecto'],
             ':id'              => $id,
         ]);
     }

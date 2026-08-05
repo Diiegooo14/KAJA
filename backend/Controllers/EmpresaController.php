@@ -32,6 +32,7 @@ class EmpresaController
         $direccion       = trim($datos['direccion']       ?? '') ?: null;
         $telefono        = trim($datos['telefono']        ?? '') ?: null;
         $email           = trim($datos['email']           ?? '') ?: null;
+        $ivaPorDefecto   = (int) ($datos['ivaPorDefecto']  ?? 21);
 
         if ($razonSocial === '') {
             http_response_code(400);
@@ -45,6 +46,12 @@ class EmpresaController
             return;
         }
 
+        if (!in_array($ivaPorDefecto, [0, 4, 10, 21], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'El IVA por defecto no es válido']);
+            return;
+        }
+
         try {
             EmpresaModel::actualizar($idEmpresa, [
                 'razonSocial'     => $razonSocial,
@@ -52,6 +59,7 @@ class EmpresaController
                 'direccion'       => $direccion,
                 'telefono'        => $telefono,
                 'email'           => $email,
+                'ivaPorDefecto'   => $ivaPorDefecto,
             ]);
             echo json_encode(['mensaje' => 'Datos de empresa actualizados correctamente']);
         } catch (PDOException $e) {

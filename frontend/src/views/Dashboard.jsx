@@ -353,7 +353,7 @@ export default function Dashboard({ usuario, onLogout, onActualizarUsuario }) {
 
   function renderContenido() {
     if ((seccionActiva === 'usuarios' || seccionActiva === 'gastos' || seccionActiva === 'promociones') && !esAdmin) navegarA('dashboard')
-    if (seccionActiva === 'inventario')  return <Inventario filtroStockBajo={filtroStockBajo} busquedaInicial={busquedaGlobal} />
+    if (seccionActiva === 'inventario')  return <Inventario filtroStockBajo={filtroStockBajo} busquedaInicial={busquedaGlobal} empresa={empresa} />
     if (seccionActiva === 'promociones') return <Promociones />
     if (seccionActiva === 'ventashoy')   return <VentasHoy />
     if (seccionActiva === 'tpv')         return <TPV usuario={usuario} />
