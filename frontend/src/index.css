@@ -2,31 +2,31 @@
 
 @theme {
 	/* Base — ink & paper */
-	--color-kaja-ink:        #15182a;
-	--color-kaja-ink-soft:   #3a3f55;
+	--color-kaja-ink:        #0e1024;
+	--color-kaja-ink-soft:   #2f3350;
 	--color-kaja-muted:      #6b7280;
-	--color-kaja-paper:      #f3f2ee;
+	--color-kaja-paper:      #faf9f7;
 	--color-kaja-surface:    #ffffff;
-	--color-kaja-sunken:     #eceae3;
-	--color-kaja-border:     #e1ded4;
+	--color-kaja-sunken:     #f0eee9;
+	--color-kaja-border:     #e3e0d8;
 
-	/* Marca — ember (naranja KAJA refinado) */
-	--color-kaja-ember:      #e8600f;
-	--color-kaja-ember-deep: #b8480a;
-	--color-kaja-ember-soft: #fbe4d2;
+	/* Marca — ember (naranja KAJA, mucho más vivo) */
+	--color-kaja-ember:      #ff5a1f;
+	--color-kaja-ember-deep: #d43e0a;
+	--color-kaja-ember-soft: #ffe1d1;
 
 	/* Acento secundario — brass (moneda/latón) */
-	--color-kaja-brass:      #a8752a;
-	--color-kaja-brass-deep: #7d5820;
-	--color-kaja-brass-soft: #f1e2c2;
+	--color-kaja-brass:      #c6892e;
+	--color-kaja-brass-deep: #8f5f18;
+	--color-kaja-brass-soft: #f6e6c4;
 
 	/* Estados semánticos */
-	--color-kaja-teal:       #0f5c56;
-	--color-kaja-teal-soft:  #d9ece9;
-	--color-kaja-rose:       #b23a3a;
-	--color-kaja-rose-soft:  #f6dcdc;
-	--color-kaja-amber:      #a1690f;
-	--color-kaja-amber-soft: #f4e3c2;
+	--color-kaja-teal:       #0d8a7c;
+	--color-kaja-teal-soft:  #cdf0e9;
+	--color-kaja-rose:       #e0394a;
+	--color-kaja-rose-soft:  #fbdade;
+	--color-kaja-amber:      #d97f0a;
+	--color-kaja-amber-soft: #fbe6c4;
 
 	/* Alias retrocompatibles — mismas clases usadas en toda la app, nuevos valores */
 	--color-kaja-blue:       var(--color-kaja-ink);
