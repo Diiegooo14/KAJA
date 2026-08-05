@@ -295,22 +295,22 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
     function badgeStock(stock) {
         if (stock === 0)
-            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-700">Sin stock</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-rose-soft text-kaja-rose">Sin stock</span>
         if (stock <= 5)
-            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-yellow-100 text-yellow-700">{stock} uds</span>
-        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700">{stock} uds</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-amber-soft text-kaja-amber font-mono tabular-nums">{stock} uds</span>
+        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-teal-soft text-kaja-teal font-mono tabular-nums">{stock} uds</span>
     }
 
     function badgeEstado(estado) {
         if (estado === 'Activo')
-            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700">Activo</span>
-        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-700">Inactivo</span>
+            return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-teal-soft text-kaja-teal">Activo</span>
+        return <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-rose-soft text-kaja-rose">Inactivo</span>
     }
 
     function inputCls(campo) {
         const base = 'w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 transition'
         return camposError[campo]
-            ? `${base} border-red-400 focus:ring-red-100 focus:border-red-400`
+            ? `${base} border-kaja-rose focus:ring-kaja-rose-soft focus:border-kaja-rose`
             : `${base} border-gray-200 focus:ring-kaja-light focus:border-kaja-blue`
     }
 
@@ -320,11 +320,11 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             {/* Cabecera */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-kaja-blue">Inventario</h1>
+                    <h1 className="text-2xl font-bold font-display text-kaja-blue">Inventario</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Listado de productos en la base de datos</p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-sm text-gray-600">{total} productos</span>
+                    <span className="text-sm text-gray-600 font-mono tabular-nums">{total} productos</span>
                     <button
                         onClick={abrirModalCategorias}
                         className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-kaja-blue text-sm font-semibold
@@ -362,8 +362,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
             {/* Mensaje filtro stock bajo */}
             {filtroStockBajo && (
-                <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                    <AlertTriangle className="w-4 h-4 shrink-0 text-yellow-500" />
+                <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-kaja-amber-soft border border-kaja-amber/30 rounded-lg text-sm text-kaja-amber">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-kaja-amber" />
                     Mostrando solo productos con stock bajo (&lt;15 unidades)
                 </div>
             )}
@@ -402,7 +402,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
 
                 {!loading && !error && (
                     <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto sm:ml-auto justify-center sm:justify-end shrink-0">
-                        <span className="text-sm text-gray-600 mr-1">
+                        <span className="text-sm text-gray-600 mr-1 font-mono tabular-nums">
                             {total === 0
                                 ? 'Sin resultados'
                                 : `${(pagina - 1) * POR_PAGINA + 1}–${Math.min(pagina * POR_PAGINA, total)} de ${total}`}
@@ -469,7 +469,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                 </div>
             )}
             {error && !loading && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+                <div className="bg-kaja-rose-soft border border-kaja-rose/30 rounded-lg px-4 py-3 text-sm text-kaja-rose">{error}</div>
             )}
 
             {/* Tabla */}
@@ -497,16 +497,16 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <tr key={p.id}
                                             onClick={() => abrirVisor(p)}
                                             className="border-b border-gray-100 hover:bg-kaja-orange/5 transition cursor-pointer">
-                                            <td className="px-4 py-3.5 text-kaja-blueText/30 text-xs tabular-nums">{p.id}</td>
+                                            <td className="px-4 py-3.5 text-kaja-blueText/30 text-xs font-mono tabular-nums">{p.id}</td>
                                             <td className="px-4 py-3.5 font-medium text-kaja-blueText">{p.nombre}</td>
                                             <td className="px-4 py-3.5">
                                                 <span className="px-2.5 py-1 rounded-lg text-xs bg-kaja-light text-kaja-blueText/70 font-medium">
                                                     {p.categoria}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3.5 text-right text-kaja-blueText/40 text-xs tabular-nums">{parseFloat(p.precioCoste).toFixed(2)} €</td>
+                                            <td className="px-4 py-3.5 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{parseFloat(p.precioCoste).toFixed(2)} €</td>
                                             <td className="px-4 py-3.5 text-right">
-                                                <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                                                <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
                                                     {parseFloat(p.precioVenta).toFixed(2)} €
                                                 </span>
                                             </td>
@@ -524,7 +524,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                                     </button>
                                                     <button
                                                         onClick={e => { e.stopPropagation(); setProductoParaEliminar(p) }}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-rose hover:bg-kaja-rose-soft transition"
                                                         title="Eliminar producto"
                                                         aria-label="Eliminar producto"
                                                     >
@@ -545,7 +545,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             {/* Toast de éxito */}
             {notificacion && (
                 <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3 px-4 py-3
-                                bg-green-600 text-white text-sm font-medium rounded-xl shadow-lg
+                                bg-kaja-teal text-white text-sm font-medium rounded-xl shadow-lg
                                 animate-fade-in justify-center sm:justify-start">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
@@ -589,7 +589,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         </span>
                                         <button
                                             onClick={() => setCategoriaParaEliminar(c)}
-                                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition shrink-0"
+                                            className="p-1.5 rounded-lg text-gray-300 hover:text-kaja-rose hover:bg-kaja-rose-soft transition shrink-0"
                                             title="Eliminar categoría"
                                             aria-label="Eliminar categoría"
                                         >
@@ -615,13 +615,13 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                         {parseInt(categoriaParaEliminar.totalProductos) > 0 ? (
                             <>
                                 <div className="flex flex-col items-center gap-3 mb-5 text-center">
-                                    <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                        <AlertTriangle className="w-6 h-6 text-red-500" />
+                                    <div className="w-12 h-12 rounded-full bg-kaja-rose-soft flex items-center justify-center">
+                                        <AlertTriangle className="w-6 h-6 text-kaja-rose" />
                                     </div>
                                     <h3 className="text-base font-bold text-gray-800">No se puede eliminar</h3>
                                     <p className="text-sm text-gray-500">
                                         La categoría <span className="font-semibold text-gray-700">"{categoriaParaEliminar.nombre}"</span> tiene{' '}
-                                        <span className="font-semibold text-red-600">{categoriaParaEliminar.totalProductos} producto{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}</span> asociado{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}.
+                                        <span className="font-semibold text-kaja-rose">{categoriaParaEliminar.totalProductos} producto{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}</span> asociado{categoriaParaEliminar.totalProductos !== 1 ? 's' : ''}.
                                         Reasigna o elimina los productos antes de borrar esta categoría.
                                     </p>
                                 </div>
@@ -655,7 +655,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                     <button
                                         onClick={eliminarCategoria}
                                         disabled={eliminandoCategoria}
-                                        className="flex-1 py-2.5 bg-red-500 text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                                        className="flex-1 py-2.5 bg-kaja-rose text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
                                     >
                                         {eliminandoCategoria
                                             ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
@@ -674,8 +674,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminandoProducto && setProductoParaEliminar(null)} />
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-3 mb-5 text-center">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 className="w-6 h-6 text-red-500" />
+                            <div className="w-12 h-12 rounded-full bg-kaja-rose-soft flex items-center justify-center">
+                                <Trash2 className="w-6 h-6 text-kaja-rose" />
                             </div>
                             <h3 className="text-base font-bold text-gray-800">Eliminar producto</h3>
                             <p className="text-sm text-gray-500">
@@ -694,7 +694,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                             <button
                                 onClick={eliminarProducto}
                                 disabled={eliminandoProducto}
-                                className="flex-1 py-2.5 bg-red-500 text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 py-2.5 bg-kaja-rose text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {eliminandoProducto
                                     ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</>
@@ -727,20 +727,20 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
                                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Precio de coste</p>
-                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800 font-mono tabular-nums">
                                         {parseFloat(productoVisor.precioCoste).toFixed(2)} €
                                     </p>
                                 </div>
                                 <div>
                                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Precio de venta</p>
-                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-kaja-blue">
+                                    <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-semibold text-kaja-blue font-mono tabular-nums">
                                         {parseFloat(productoVisor.precioVenta).toFixed(2)} €
                                     </p>
                                 </div>
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tipo de IVA</p>
-                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800">
+                                <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800 font-mono tabular-nums">
                                     {productoVisor.iva ?? 21}%
                                 </p>
                             </div>
@@ -801,8 +801,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         maxLength={30}
                                         className={inputCls('nombre')}
                                     />
-                                    {form.nombre.length === 30 && <p className="mt-1 text-xs text-amber-500">Límite de 30 caracteres alcanzado</p>}
-                                    {camposError.nombre && <p className="mt-1 text-xs text-red-500">{camposError.nombre}</p>}
+                                    {form.nombre.length === 30 && <p className="mt-1 text-xs text-kaja-amber">Límite de 30 caracteres alcanzado</p>}
+                                    {camposError.nombre && <p className="mt-1 text-xs text-kaja-rose">{camposError.nombre}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -818,7 +818,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         ))}
                                         <option value="__nueva__">+ Crear nueva categoría</option>
                                     </select>
-                                    {camposError.idCategoria && <p className="mt-1 text-xs text-red-500">{camposError.idCategoria}</p>}
+                                    {camposError.idCategoria && <p className="mt-1 text-xs text-kaja-rose">{camposError.idCategoria}</p>}
                                 </div>
 
                                 {/* Campo nueva categoría (solo si se elige crear nueva) */}
@@ -834,8 +834,8 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             className={inputCls('nuevaCategoria')}
                                             autoFocus
                                         />
-                                        {form.nuevaCategoria.length === 30 && <p className="mt-1 text-xs text-amber-500">Límite de 30 caracteres alcanzado</p>}
-                                        {camposError.nuevaCategoria && <p className="mt-1 text-xs text-red-500">{camposError.nuevaCategoria}</p>}
+                                        {form.nuevaCategoria.length === 30 && <p className="mt-1 text-xs text-kaja-amber">Límite de 30 caracteres alcanzado</p>}
+                                        {camposError.nuevaCategoria && <p className="mt-1 text-xs text-kaja-rose">{camposError.nuevaCategoria}</p>}
                                     </div>
                                 )}
                                 <div className="grid grid-cols-2 gap-3">
@@ -849,7 +849,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             placeholder="0.00"
                                             className={inputCls('precioCoste')}
                                         />
-                                        {camposError.precioCoste && <p className="mt-1 text-xs text-red-500">{camposError.precioCoste}</p>}
+                                        {camposError.precioCoste && <p className="mt-1 text-xs text-kaja-rose">{camposError.precioCoste}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -861,7 +861,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                             placeholder="0.00"
                                             className={inputCls('precioVenta')}
                                         />
-                                        {camposError.precioVenta && <p className="mt-1 text-xs text-red-500">{camposError.precioVenta}</p>}
+                                        {camposError.precioVenta && <p className="mt-1 text-xs text-kaja-rose">{camposError.precioVenta}</p>}
                                     </div>
                                 </div>
                                 <div>
@@ -877,7 +877,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         <option value="4">4% — Superreducido</option>
                                         <option value="0">0% — Exento</option>
                                     </select>
-                                    {camposError.iva && <p className="mt-1 text-xs text-red-500">{camposError.iva}</p>}
+                                    {camposError.iva && <p className="mt-1 text-xs text-kaja-rose">{camposError.iva}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -889,7 +889,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                                         placeholder="0"
                                         className={inputCls('stock')}
                                     />
-                                    {camposError.stock && <p className="mt-1 text-xs text-red-500">{camposError.stock}</p>}
+                                    {camposError.stock && <p className="mt-1 text-xs text-kaja-rose">{camposError.stock}</p>}
                                 </div>
                             </div>
                             {productoEditando && (
@@ -908,7 +908,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                             )}
                             {/* Error del formulario */}
                             {formError && (
-                                <div className="mt-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                <div className="mt-4 px-3 py-2.5 bg-kaja-rose-soft border border-kaja-rose/30 rounded-lg text-sm text-kaja-rose">
                                     {formError}
                                 </div>
                             )}

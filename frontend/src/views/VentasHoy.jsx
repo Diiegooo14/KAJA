@@ -19,7 +19,7 @@ function KpiCard({ icon: Icon, label, value, variant }) {
       </div>
       <div>
         <p className="text-[11px] font-bold uppercase tracking-widest text-white/65 mb-0.5">{label}</p>
-        <p className="text-2xl font-bold leading-tight">{value}</p>
+        <p className="text-2xl font-bold leading-tight font-mono tabular-nums">{value}</p>
       </div>
     </div>
   )
@@ -66,7 +66,7 @@ export default function VentasHoy() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Hoy</p>
-          <h1 className="text-2xl font-bold text-kaja-blueText">Ventas del día</h1>
+          <h1 className="text-2xl font-bold text-kaja-blueText font-display">Ventas del día</h1>
           <p className="text-sm text-gray-600 mt-0.5">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
@@ -91,7 +91,7 @@ export default function VentasHoy() {
       )}
 
       {error && !loading && (
-        <div className="bg-rose-50 border border-rose-200 rounded-2xl px-5 py-4 text-sm text-rose-700">{error}</div>
+        <div className="bg-kaja-rose-soft border border-kaja-rose/30 rounded-2xl px-5 py-4 text-sm text-kaja-rose">{error}</div>
       )}
 
       {!loading && !error && (
@@ -155,10 +155,10 @@ export default function VentasHoy() {
                               <span className="text-kaja-blueText/80 font-medium">{venta.vendedor}</span>
                             </div>
                           </td>
-                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.baseImponible)}</td>
-                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.totalIva)}</td>
+                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.baseImponible)}</td>
+                          <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.totalIva)}</td>
                           <td className="px-5 py-4 text-right">
-                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
                               {fmtEur(venta.totalFinal)}
                             </span>
                           </td>
@@ -191,14 +191,14 @@ export default function VentasHoy() {
                                     {venta.lineas.map((linea, li) => (
                                       <tr key={li} className="border-t border-kaja-light">
                                         <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{linea.producto}</td>
-                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono">{linea.cantidad}</td>
-                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 tabular-nums">
+                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{linea.cantidad}</td>
+                                        <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">
                                           {fmtEur(parseFloat(linea.subtotal) / parseFloat(linea.cantidad) / (1 + parseFloat(linea.ivaAplicado) / 100))}
                                         </td>
                                         <td className="px-4 py-2.5 text-right">
-                                          <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono">{parseFloat(linea.ivaAplicado).toFixed(0)}%</span>
+                                          <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono tabular-nums">{parseFloat(linea.ivaAplicado).toFixed(0)}%</span>
                                         </td>
-                                        <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText tabular-nums">{fmtEur(linea.subtotal)}</td>
+                                        <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText font-mono tabular-nums">{fmtEur(linea.subtotal)}</td>
                                       </tr>
                                     ))}
                                   </tbody>

@@ -41,9 +41,9 @@ function DashboardMockup() {
             <div className="absolute inset-0 bg-kaja-orange/15 blur-3xl rounded-full scale-75" />
             <div className="relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                 <div className="flex items-center gap-1.5 px-4 py-3 bg-white/5 border-b border-white/10">
-                    <div className="w-2.5 h-2.5 rounded-full bg-rose-400/60" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-kaja-rose/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-kaja-amber/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-kaja-teal/60" />
                     <div className="flex-1 mx-4 h-4 bg-white/5 rounded" />
                 </div>
                 <div className="flex" style={{ height: 220 }}>
@@ -58,9 +58,9 @@ function DashboardMockup() {
                     <div className="flex-1 p-3 flex flex-col gap-2">
                         <div className="grid grid-cols-3 gap-2">
                             {[
-                                'bg-orange-500/20',
-                                'bg-slate-600/40',
-                                'bg-rose-500/20',
+                                'bg-kaja-ember/20',
+                                'bg-kaja-ink/40',
+                                'bg-kaja-rose/20',
                             ].map((bg, i) => (
                                 <div key={i} className={`${bg} rounded-lg p-2`}>
                                     <div className="w-8 h-1.5 bg-white/20 rounded mb-1.5" />
@@ -76,7 +76,7 @@ function DashboardMockup() {
                                     style={{
                                         height: `${h}%`,
                                         background: i % 3 === 0
-                                            ? 'rgba(249,115,22,0.6)'
+                                            ? 'rgba(232,96,15,0.6)'
                                             : 'rgba(255,255,255,0.1)',
                                     }}
                                 />
@@ -126,16 +126,16 @@ function InputField({ id, label, type = 'text', value, onChange, error, placehol
                     className={`w-full px-4 py-3 rounded-xl border text-sm bg-gray-50 text-gray-900 placeholder-gray-400
             focus:outline-none focus:bg-white focus:ring-2 transition
             ${error
-                            ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-400'
+                            ? 'border-kaja-rose focus:ring-kaja-rose-soft focus:border-kaja-rose'
                             : 'border-gray-200 focus:ring-kaja-orange/20 focus:border-kaja-orange/50'
                         }`}
                 />
                 {extra}
             </div>
             {maxLength && value.length === maxLength && (
-                <p className="text-xs text-amber-500">Límite de {maxLength} caracteres alcanzado</p>
+                <p className="text-xs text-kaja-amber">Límite de {maxLength} caracteres alcanzado</p>
             )}
-            {error && <p className="text-xs text-rose-500">{error}</p>}
+            {error && <p className="text-xs text-kaja-rose">{error}</p>}
         </div>
     )
 }
@@ -208,7 +208,7 @@ export default function Login({ onLogin, onRegistro }) {
                             Sistema TPV para tu negocio
                         </div>
 
-                        <h1 className="text-5xl lg:text-[3.75rem] font-bold text-white leading-[1.1] mb-6 tracking-tight">
+                        <h1 className="text-5xl lg:text-[3.75rem] font-bold font-display text-white leading-[1.1] mb-6 tracking-tight">
                             Tu punto de venta,{' '}
                             <span className="text-kaja-orange">inteligente</span>
                         </h1>
@@ -277,7 +277,7 @@ export default function Login({ onLogin, onRegistro }) {
                 <div className="max-w-7xl mx-auto px-6 lg:px-12">
                     <div className="text-center mb-16">
                         <p className="text-kaja-orange text-sm font-semibold uppercase tracking-widest mb-3">Funcionalidades</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                        <h2 className="text-3xl font-bold font-display text-gray-900 mb-4">
                             Todo lo que necesita tu negocio
                         </h2>
                         <p className="text-gray-600 max-w-md mx-auto text-sm leading-relaxed">
@@ -290,25 +290,25 @@ export default function Login({ onLogin, onRegistro }) {
                             icon={ShoppingCart}
                             title="Punto de Venta"
                             description="Cobra a tus clientes en segundos con una interfaz clara y optimizada para cualquier dispositivo."
-                            accent="bg-gradient-to-br from-orange-400 to-orange-600"
+                            accent="bg-gradient-to-br from-kaja-ember to-kaja-ember-deep"
                         />
                         <FeatureCard
                             icon={Package}
                             title="Control de Inventario"
                             description="Stock en tiempo real. Alertas de nivel bajo e historial completo de movimientos de productos."
-                            accent="bg-gradient-to-br from-blue-500 to-blue-700"
+                            accent="bg-gradient-to-br from-kaja-ink to-kaja-ink-soft"
                         />
                         <FeatureCard
                             icon={BarChart3}
                             title="Análisis Financiero"
                             description="Visualiza ingresos, gastos y márgenes con informes detallados para tomar mejores decisiones."
-                            accent="bg-gradient-to-br from-emerald-500 to-emerald-700"
+                            accent="bg-gradient-to-br from-kaja-teal to-[#1a7d74]"
                         />
                         <FeatureCard
                             icon={Users}
                             title="Gestión de Usuarios"
                             description="Crea cuentas con roles diferenciados. Administradores con acceso total y empleados con acceso limitado."
-                            accent="bg-gradient-to-br from-violet-500 to-violet-700"
+                            accent="bg-gradient-to-br from-kaja-brass to-kaja-brass-deep"
                         />
                     </div>
                 </div>
@@ -319,7 +319,7 @@ export default function Login({ onLogin, onRegistro }) {
 
                     <div>
                         <p className="text-kaja-orange text-sm font-semibold uppercase tracking-widest mb-3">Acceso</p>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+                        <h2 className="text-3xl font-bold font-display text-gray-900 mb-4">
                             Accede a tu panel de control
                         </h2>
                         <p className="text-gray-600 mb-10 leading-relaxed text-sm max-w-md">
@@ -369,7 +369,7 @@ export default function Login({ onLogin, onRegistro }) {
                         />
 
                         <div className="mb-6">
-                            <h3 className="text-xl font-bold text-gray-900 mb-1">Iniciar sesión</h3>
+                            <h3 className="text-xl font-bold font-display text-gray-900 mb-1">Iniciar sesión</h3>
                             <p className="text-sm text-gray-600">Introduce tus credenciales para continuar</p>
                         </div>
 
@@ -409,7 +409,7 @@ export default function Login({ onLogin, onRegistro }) {
                             />
 
                             {error && (
-                                <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">
+                                <div className="px-4 py-3 bg-kaja-rose-soft border border-kaja-rose/30 rounded-xl text-sm text-kaja-rose">
                                     {error}
                                 </div>
                             )}

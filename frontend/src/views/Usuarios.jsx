@@ -103,7 +103,7 @@ function FotoUsuario({ idUsuario, imagenActual, nombre, onSubida }) {
                     Cambiar foto
                 </button>
                 <p className="text-xs text-gray-400 mt-0.5">JPG, PNG, GIF o WEBP · Máx. 5MB</p>
-                {errorFoto && <p className="text-xs text-red-500 mt-0.5">{errorFoto}</p>}
+                {errorFoto && <p className="text-xs text-kaja-rose mt-0.5">{errorFoto}</p>}
             </div>
         </div>
     )
@@ -296,7 +296,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
             <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
                 <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
-                    <h1 className="text-xl font-bold text-kaja-blueText">Gestión de Usuarios</h1>
+                    <h1 className="text-xl font-bold text-kaja-blueText font-display">Gestión de Usuarios</h1>
                 </div>
                 <button
                     onClick={() => setMostrarForm(true)}
@@ -342,7 +342,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 text-kaja-blueText transition"
                                 />
                                 {form.nombre.length === 30 && (
-                                    <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+                                    <p className="text-xs text-kaja-amber mt-1">Límite de 30 caracteres alcanzado</p>
                                 )}
                             </div>
 
@@ -362,7 +362,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 text-kaja-blueText transition"
                                 />
                                 {form.nif.length === 9 && (
-                                    <p className="text-xs text-amber-500 mt-1">Límite de 9 caracteres alcanzado</p>
+                                    <p className="text-xs text-kaja-amber mt-1">Límite de 9 caracteres alcanzado</p>
                                 )}
                             </div>
 
@@ -382,7 +382,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 transition"
                                 />
                                 {form.password.length === 15 && (
-                                    <p className="text-xs text-amber-500 mt-1">Límite de 15 caracteres alcanzado</p>
+                                    <p className="text-xs text-kaja-amber mt-1">Límite de 15 caracteres alcanzado</p>
                                 )}
                             </div>
 
@@ -404,7 +404,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                             </div>
 
                             {formError && (
-                                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
+                                <p className="text-xs text-kaja-rose bg-kaja-rose-soft rounded-lg px-3 py-2">{formError}</p>
                             )}
 
                             <button
@@ -428,15 +428,15 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                     <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
                         <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1 truncate">Total usuarios</p>
-                            <p className="text-xl sm:text-2xl font-bold text-white">{resumen.total}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-white font-mono tabular-nums">{resumen.total}</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Activos</p>
-                            <p className="text-xl sm:text-2xl font-bold text-emerald-600">{resumen.activos}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-kaja-teal font-mono tabular-nums">{resumen.activos}</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Inactivos</p>
-                            <p className="text-xl sm:text-2xl font-bold text-kaja-orange">{resumen.inactivos}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-kaja-orange font-mono tabular-nums">{resumen.inactivos}</p>
                         </div>
                     </div>
 
@@ -457,7 +457,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                     <span className="text-sm">Cargando usuarios…</span>
                                 </div>
                             ) : error ? (
-                                <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
+                                <div className="px-5 py-4 text-sm text-kaja-rose bg-kaja-rose-soft">{error}</div>
                             ) : usuarios.length === 0 ? (
                                 <div className="text-center py-16 text-gray-400 text-sm">Sin usuarios registrados</div>
                             ) : (
@@ -494,8 +494,8 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                         <div className="px-3 py-3.5">
                                             <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
                                                 ${u.estado === 'Activo'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : 'bg-red-100 text-red-600'}`}>
+                                                    ? 'bg-kaja-teal-soft text-kaja-teal'
+                                                    : 'bg-kaja-rose-soft text-kaja-rose'}`}>
                                                 {u.estado}
                                             </span>
                                         </div>
@@ -574,7 +574,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 text-kaja-blueText transition"
                                 />
                                 {form.nombre.length === 30 && (
-                                    <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+                                    <p className="text-xs text-kaja-amber mt-1">Límite de 30 caracteres alcanzado</p>
                                 )}
                             </div>
                             <div>
@@ -601,7 +601,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                 />
                                 {form.password.length === 15 && (
-                                    <p className="text-xs text-amber-500 mt-1">Límite de 15 caracteres alcanzado</p>
+                                    <p className="text-xs text-kaja-amber mt-1">Límite de 15 caracteres alcanzado</p>
                                 )}
                             </div>
                             <div>
@@ -637,7 +637,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                 </div>
                             )}
                             {formError && (
-                                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
+                                <p className="text-xs text-kaja-rose bg-kaja-rose-soft rounded-lg px-3 py-2">{formError}</p>
                             )}
                             <div className="flex gap-3">
                                 <button
@@ -727,10 +727,10 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                 }
                             </button>
                             {errorNomina && (
-                                <p className="text-xs text-red-500 mt-2 bg-red-50 px-3 py-2 rounded-lg">{errorNomina}</p>
+                                <p className="text-xs text-kaja-rose mt-2 bg-kaja-rose-soft px-3 py-2 rounded-lg">{errorNomina}</p>
                             )}
                             {exitoNomina && (
-                                <p className="text-xs text-green-600 mt-2 bg-green-50 px-3 py-2 rounded-lg">{exitoNomina}</p>
+                                <p className="text-xs text-kaja-teal mt-2 bg-kaja-teal-soft px-3 py-2 rounded-lg">{exitoNomina}</p>
                             )}
                         </div>
 
@@ -771,7 +771,7 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                                 </a>
                                                 <button
                                                     onClick={() => eliminarNomina(n.id)}
-                                                    className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                                    className="p-2 rounded-lg text-gray-400 hover:text-kaja-rose hover:bg-kaja-rose-soft transition"
                                                     title="Eliminar nómina"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
@@ -832,8 +832,8 @@ export default function Usuarios({ usuario, onActualizarUsuario }) {
                                     <div className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg">
                                         <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold
                                             ${usuarioVisor.estado === 'Activo'
-                                                ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-red-100 text-red-600'}`}>
+                                                ? 'bg-kaja-teal-soft text-kaja-teal'
+                                                : 'bg-kaja-rose-soft text-kaja-rose'}`}>
                                             {usuarioVisor.estado}
                                         </span>
                                     </div>

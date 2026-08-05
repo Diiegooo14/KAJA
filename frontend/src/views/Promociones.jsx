@@ -195,7 +195,7 @@ export default function Promociones() {
     function inputCls(campo) {
         const base = 'w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 transition'
         return camposError[campo]
-            ? `${base} border-red-400 focus:ring-red-100 focus:border-red-400`
+            ? `${base} border-kaja-rose focus:ring-kaja-rose-soft focus:border-kaja-rose`
             : `${base} border-gray-200 focus:ring-kaja-light focus:border-kaja-blue`
     }
 
@@ -213,7 +213,7 @@ export default function Promociones() {
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-kaja-blue">Promociones</h1>
+                    <h1 className="text-2xl font-bold font-display text-kaja-blue">Promociones</h1>
                     <p className="text-sm text-gray-500 mt-0.5">Ofertas de N unidades o combos por precio fijo</p>
                 </div>
                 <button
@@ -233,7 +233,7 @@ export default function Promociones() {
                 </div>
             )}
             {error && !loading && (
-                <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+                <div className="bg-kaja-rose-soft border border-kaja-rose/30 rounded-lg px-4 py-3 text-sm text-kaja-rose">{error}</div>
             )}
 
             {!loading && !error && (
@@ -266,7 +266,7 @@ export default function Promociones() {
                                                 {p.tipo === 'PRODUCTO' && (
                                                     <>
                                                         {p.producto}
-                                                        <span className="ml-2 text-xs text-kaja-blueText/40 tabular-nums">{parseFloat(p.precioVenta).toFixed(2)} €/ud</span>
+                                                        <span className="ml-2 text-xs text-kaja-blueText/40 font-mono tabular-nums">{parseFloat(p.precioVenta).toFixed(2)} €/ud</span>
                                                     </>
                                                 )}
                                                 {p.tipo === 'CATEGORIA' && p.categoria}
@@ -282,7 +282,7 @@ export default function Promociones() {
                                                 )}
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
                                                     <Percent className="w-3.5 h-3.5" />
                                                     {p.tipo === 'SELECCION'
                                                         ? `Combo ${parseFloat(p.precioTotal).toFixed(2)} €`
@@ -291,7 +291,7 @@ export default function Promociones() {
                                             </td>
                                             <td className="px-4 py-3.5 text-center">
                                                 {p.estado === 'Activo'
-                                                    ? <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-100 text-emerald-700">Activa</span>
+                                                    ? <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-kaja-teal-soft text-kaja-teal">Activa</span>
                                                     : <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-500">Inactiva</span>}
                                             </td>
                                             <td className="px-3 py-3.5 text-center">
@@ -306,7 +306,7 @@ export default function Promociones() {
                                                     </button>
                                                     <button
                                                         onClick={() => setPromoParaEliminar(p)}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition"
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-rose hover:bg-kaja-rose-soft transition"
                                                         title="Eliminar promoción"
                                                         aria-label="Eliminar promoción"
                                                     >
@@ -325,7 +325,7 @@ export default function Promociones() {
 
             {notificacion && (
                 <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 z-50 flex items-center gap-3 px-4 py-3
-                                bg-green-600 text-white text-sm font-medium rounded-xl shadow-lg
+                                bg-kaja-teal text-white text-sm font-medium rounded-xl shadow-lg
                                 animate-fade-in justify-center sm:justify-start">
                     <Check className="w-5 h-5 shrink-0" />
                     {notificacion}
@@ -337,8 +337,8 @@ export default function Promociones() {
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !eliminando && setPromoParaEliminar(null)} />
                     <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-3 mb-5 text-center">
-                            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                                <Trash2 className="w-6 h-6 text-red-500" />
+                            <div className="w-12 h-12 rounded-full bg-kaja-rose-soft flex items-center justify-center">
+                                <Trash2 className="w-6 h-6 text-kaja-rose" />
                             </div>
                             <h3 className="text-base font-bold text-gray-800">Eliminar promoción</h3>
                             <p className="text-sm text-gray-500">
@@ -357,7 +357,7 @@ export default function Promociones() {
                             <button
                                 onClick={eliminarPromo}
                                 disabled={eliminando}
-                                className="flex-1 py-2.5 bg-red-500 text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="flex-1 py-2.5 bg-kaja-rose text-white font-semibold rounded-lg hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {eliminando ? <><Loader2 className="w-4 h-4 animate-spin" /> Eliminando…</> : 'Sí, eliminar'}
                             </button>
@@ -418,7 +418,7 @@ export default function Promociones() {
                                                 <option key={p.id} value={p.id}>{p.nombre} ({parseFloat(p.precioVenta).toFixed(2)} €/ud)</option>
                                             ))}
                                         </select>
-                                        {camposError.idProducto && <p className="mt-1 text-xs text-red-500">{camposError.idProducto}</p>}
+                                        {camposError.idProducto && <p className="mt-1 text-xs text-kaja-rose">{camposError.idProducto}</p>}
                                     </div>
                                 )}
 
@@ -441,7 +441,7 @@ export default function Promociones() {
                                                 <option key={c.id} value={c.id}>{c.nombre}</option>
                                             ))}
                                         </select>
-                                        {camposError.idCategoria && <p className="mt-1 text-xs text-red-500">{camposError.idCategoria}</p>}
+                                        {camposError.idCategoria && <p className="mt-1 text-xs text-kaja-rose">{camposError.idCategoria}</p>}
                                     </div>
                                 )}
 
@@ -451,12 +451,12 @@ export default function Promociones() {
                                         <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
                                             Productos del combo
                                             {form.idProductos.length >= 2 && (
-                                                <span className="ml-2 text-kaja-orange font-bold normal-case">
+                                                <span className="ml-2 text-kaja-orange font-bold normal-case font-mono tabular-nums">
                                                     {form.idProductos.length} seleccionados
                                                 </span>
                                             )}
                                         </label>
-                                        <div className={`border rounded-lg overflow-hidden ${camposError.idProductos ? 'border-red-400' : 'border-gray-200'}`}>
+                                        <div className={`border rounded-lg overflow-hidden ${camposError.idProductos ? 'border-kaja-rose' : 'border-gray-200'}`}>
                                             <div className="p-2 border-b border-gray-100 bg-gray-50">
                                                 <input
                                                     type="text"
@@ -478,13 +478,13 @@ export default function Promociones() {
                                                                 className="w-4 h-4 accent-kaja-orange shrink-0"
                                                             />
                                                             <span className="text-sm text-gray-700 flex-1 leading-tight">{p.nombre}</span>
-                                                            <span className="text-xs text-gray-400 tabular-nums shrink-0">{parseFloat(p.precioVenta).toFixed(2)} €</span>
+                                                            <span className="text-xs text-gray-400 font-mono tabular-nums shrink-0">{parseFloat(p.precioVenta).toFixed(2)} €</span>
                                                         </label>
                                                     ))
                                                 }
                                             </div>
                                         </div>
-                                        {camposError.idProductos && <p className="mt-1 text-xs text-red-500">{camposError.idProductos}</p>}
+                                        {camposError.idProductos && <p className="mt-1 text-xs text-kaja-rose">{camposError.idProductos}</p>}
                                     </div>
                                 )}
 
@@ -498,7 +498,7 @@ export default function Promociones() {
                                             {promoEditando.items?.map(item => (
                                                 <div key={item.idProducto} className="flex items-center justify-between text-sm">
                                                     <span className="text-gray-700">{item.producto}</span>
-                                                    <span className="text-xs text-gray-400 tabular-nums">{parseFloat(item.precioVenta).toFixed(2)} €/ud</span>
+                                                    <span className="text-xs text-gray-400 font-mono tabular-nums">{parseFloat(item.precioVenta).toFixed(2)} €/ud</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -521,7 +521,7 @@ export default function Promociones() {
                                                 placeholder="Ej: 2"
                                                 className={inputCls('cantidad')}
                                             />
-                                            {camposError.cantidad && <p className="mt-1 text-xs text-red-500">{camposError.cantidad}</p>}
+                                            {camposError.cantidad && <p className="mt-1 text-xs text-kaja-rose">{camposError.cantidad}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wide">
@@ -533,7 +533,7 @@ export default function Promociones() {
                                                 placeholder="Ej: 5.00"
                                                 className={inputCls('precioTotal')}
                                             />
-                                            {camposError.precioTotal && <p className="mt-1 text-xs text-red-500">{camposError.precioTotal}</p>}
+                                            {camposError.precioTotal && <p className="mt-1 text-xs text-kaja-rose">{camposError.precioTotal}</p>}
                                         </div>
                                     </div>
                                 )}
@@ -550,7 +550,7 @@ export default function Promociones() {
                                             placeholder="Ej: 5.00"
                                             className={inputCls('precioTotal')}
                                         />
-                                        {camposError.precioTotal && <p className="mt-1 text-xs text-red-500">{camposError.precioTotal}</p>}
+                                        {camposError.precioTotal && <p className="mt-1 text-xs text-kaja-rose">{camposError.precioTotal}</p>}
                                     </div>
                                 )}
 
@@ -579,7 +579,7 @@ export default function Promociones() {
                             </div>
 
                             {formError && (
-                                <div className="mt-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                                <div className="mt-4 px-3 py-2.5 bg-kaja-rose-soft border border-kaja-rose/30 rounded-lg text-sm text-kaja-rose">
                                     {formError}
                                 </div>
                             )}

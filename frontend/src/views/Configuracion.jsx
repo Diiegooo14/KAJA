@@ -40,7 +40,7 @@ function Campo({ label, value, onChange, type = 'text', readOnly = false, autoCo
           }`}
       />
       {maxLength && (value ?? '').length === maxLength && (
-        <p className="text-xs text-amber-500 mt-1">Límite de {maxLength} caracteres alcanzado</p>
+        <p className="text-xs text-kaja-amber mt-1">Límite de {maxLength} caracteres alcanzado</p>
       )}
     </div>
   )
@@ -49,7 +49,7 @@ function Campo({ label, value, onChange, type = 'text', readOnly = false, autoCo
 function Aviso({ msg }) {
   if (!msg) return null
   return (
-    <p className={`text-sm mt-2 ${msg.ok ? 'text-green-600' : 'text-red-500'}`}>
+    <p className={`text-sm mt-2 ${msg.ok ? 'text-kaja-teal' : 'text-kaja-rose'}`}>
       {msg.texto}
     </p>
   )
@@ -180,8 +180,8 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
               type="button"
               onClick={eliminar}
               disabled={ocupado}
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 rounded-lg text-sm
-                         text-red-500 hover:bg-red-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-kaja-rose/30 rounded-lg text-sm
+                         text-kaja-rose hover:bg-kaja-rose-soft transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Trash2 className="w-4 h-4" />
               Eliminar
@@ -190,7 +190,7 @@ function SubidaImagen({ urlActual, placeholder, endpoint, publicLabel, onSubida 
         </div>
         <p className="text-xs text-gray-400 mt-1">JPG, PNG, GIF o WEBP · Máx. 5MB</p>
         {mensaje && (
-          <p className={`text-xs mt-1 ${mensaje.ok ? 'text-green-600' : 'text-red-500'}`}>
+          <p className={`text-xs mt-1 ${mensaje.ok ? 'text-kaja-teal' : 'text-kaja-rose'}`}>
             {mensaje.texto}
           </p>
         )}
@@ -542,7 +542,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
           </button>
         </div>
         {nombre.length === 30 && (
-          <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>
+          <p className="text-xs text-kaja-amber mt-1">Límite de 30 caracteres alcanzado</p>
         )}
         <Aviso msg={mensajeNombre} />
       </form>
@@ -591,7 +591,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto w-full">
-      <h2 className="text-2xl font-bold text-kaja-blueText mb-6 uppercase tracking-wide">
+      <h2 className="text-2xl font-bold text-kaja-blueText mb-6 uppercase tracking-wide font-display">
         Configuración
       </h2>
 
@@ -608,7 +608,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
 
               {errorCargaEmpresa ? (
                 <div className="flex items-center gap-3">
-                  <p className="text-sm text-red-500">No se pudieron cargar los datos de la empresa.</p>
+                  <p className="text-sm text-kaja-rose">No se pudieron cargar los datos de la empresa.</p>
                   <button
                     onClick={cargarEmpresa}
                     className="text-sm text-kaja-blueText underline hover:no-underline"
@@ -707,15 +707,15 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
             {SeccionNominas}
 
             {/* Zona de peligro */}
-            <section className="bg-white rounded-xl shadow-sm border border-red-100 p-6 h-fit">
-              <h3 className="text-base font-semibold text-red-600 mb-1 flex items-center gap-2">
+            <section className="bg-white rounded-xl shadow-sm border border-kaja-rose/30 p-6 h-fit">
+              <h3 className="text-base font-semibold text-kaja-rose mb-1 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5" />
                 Zona de peligro
               </h3>
               <p className="text-sm text-gray-500 mb-4">
                 Las acciones de esta sección son permanentes e irreversibles.
               </p>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-red-100 rounded-lg bg-red-50/50">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-kaja-rose/30 rounded-lg bg-kaja-rose-soft/50">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">Eliminar empresa</p>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -725,8 +725,8 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                 <button
                   type="button"
                   onClick={() => { setModalBorrar(true); setErrorBorrar('') }}
-                  className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white text-sm font-medium
-                             rounded-lg hover:bg-red-700 active:scale-95 transition"
+                  className="shrink-0 flex items-center justify-center gap-2 px-4 py-2 bg-kaja-rose text-white text-sm font-medium
+                             rounded-lg hover:brightness-90 active:scale-95 transition"
                 >
                   <Trash2 className="w-4 h-4" />
                   Eliminar
@@ -748,8 +748,8 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" role="dialog" aria-modal="true">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-fade-in max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-6 h-6 text-red-600" />
+              <div className="w-12 h-12 rounded-xl bg-kaja-rose-soft flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-kaja-rose" />
               </div>
               <button
                 onClick={() => setModalBorrar(false)}
@@ -773,7 +773,7 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
             </ul>
 
             {errorBorrar && (
-              <p className="text-sm text-red-600 mb-4 px-3 py-2 bg-red-50 rounded-lg">{errorBorrar}</p>
+              <p className="text-sm text-kaja-rose mb-4 px-3 py-2 bg-kaja-rose-soft rounded-lg">{errorBorrar}</p>
             )}
 
             <div className="flex gap-3">
@@ -790,8 +790,8 @@ export default function Configuracion({ usuario, onActualizarUsuario, onActualiz
                 type="button"
                 onClick={eliminarEmpresa}
                 disabled={borrandoEmpresa}
-                className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold
-                           hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed
+                className="flex-1 py-2.5 bg-kaja-rose text-white rounded-xl text-sm font-semibold
+                           hover:brightness-90 transition disabled:opacity-60 disabled:cursor-not-allowed
                            flex items-center justify-center gap-2"
               >
                 {borrandoEmpresa

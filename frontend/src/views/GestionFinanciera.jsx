@@ -77,8 +77,8 @@ function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
     default: 'bg-white border border-gray-100 text-kaja-blueText',
     orange: 'bg-linear-to-br from-kaja-orange to-amber-500 text-white',
     navy: 'bg-linear-to-br from-kaja-sidebar to-slate-700 text-white',
-    green: 'bg-linear-to-br from-emerald-500 to-teal-500 text-white',
-    red: 'bg-linear-to-br from-rose-500 to-red-600 text-white',
+    green: 'bg-linear-to-br from-kaja-teal to-kaja-teal/70 text-white',
+    red: 'bg-linear-to-br from-kaja-rose to-kaja-rose/70 text-white',
   }
   const iconBg = {
     default: 'bg-kaja-light/60',
@@ -96,7 +96,7 @@ function KpiCard({ label, value, icon: Icon, variant = 'default', sub }) {
         <p className={`text-[11px] font-bold uppercase tracking-widest mb-0.5 ${variant === 'default' ? 'text-kaja-blueText/80' : 'text-white/70'}`}>
           {label}
         </p>
-        <p className="text-2xl font-bold leading-tight truncate">{value}</p>
+        <p className="text-2xl font-bold leading-tight truncate font-mono tabular-nums">{value}</p>
         {sub && <p className={`text-xs mt-0.5 ${variant === 'default' ? 'text-kaja-blueText/70' : 'text-white/75'}`}>{sub}</p>}
       </div>
     </div>
@@ -126,7 +126,7 @@ const CHART_OPTS = (tooltipTitle) => ({
       labels: { font: { size: 12, family: 'inherit', weight: '600' }, padding: 16, boxWidth: 12, boxHeight: 12, borderRadius: 4, useBorderRadius: true },
     },
     tooltip: {
-      backgroundColor: '#1e293b',
+      backgroundColor: '#15182a',
       titleFont: { size: 12, weight: '600' },
       bodyFont: { size: 13, weight: '700' },
       padding: 12,
@@ -157,8 +157,8 @@ const DATASETS = (ventas, gastos, labelVentas = 'Ingresos reales') => ({
     {
       label: labelVentas,
       data: ventas,
-      backgroundColor: 'rgba(217,119,6,0.85)',
-      borderColor: 'rgba(217,119,6,1)',
+      backgroundColor: 'rgba(15,92,86,0.85)',
+      borderColor: 'rgba(15,92,86,1)',
       borderWidth: 0,
       borderRadius: 8,
       borderSkipped: false,
@@ -166,8 +166,8 @@ const DATASETS = (ventas, gastos, labelVentas = 'Ingresos reales') => ({
     {
       label: 'Gastos',
       data: gastos,
-      backgroundColor: 'rgba(44,62,80,0.75)',
-      borderColor: 'rgba(44,62,80,1)',
+      backgroundColor: 'rgba(178,58,58,0.85)',
+      borderColor: 'rgba(178,58,58,1)',
       borderWidth: 0,
       borderRadius: 8,
       borderSkipped: false,
@@ -247,7 +247,7 @@ function TabVentas() {
 
       {error && (
         <div className="flex items-center justify-center py-16">
-          <p className="text-sm text-rose-500 font-medium">{error}</p>
+          <p className="text-sm text-kaja-rose font-medium">{error}</p>
         </div>
       )}
 
@@ -299,10 +299,10 @@ function TabVentas() {
                           <span className="text-kaja-blueText/80 font-medium">{venta.vendedor}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.baseImponible)}</td>
-                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs tabular-nums">{fmtEur(venta.totalIva)}</td>
+                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.baseImponible)}</td>
+                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.totalIva)}</td>
                       <td className="px-5 py-4 text-right">
-                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
                           {fmtEur(venta.totalFinal)}
                         </span>
                       </td>
@@ -335,12 +335,12 @@ function TabVentas() {
                                 {(venta.lineas ?? []).map((l, li) => (
                                   <tr key={li} className="border-t border-kaja-light">
                                     <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{l.producto}</td>
-                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono">{l.cantidad}</td>
-                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 tabular-nums">{fmtEur(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100))}</td>
+                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{l.cantidad}</td>
+                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{fmtEur(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100))}</td>
                                     <td className="px-4 py-2.5 text-right">
-                                      <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono">{l.ivaAplicado}%</span>
+                                      <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono tabular-nums">{l.ivaAplicado}%</span>
                                     </td>
-                                    <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText tabular-nums">{fmtEur(l.subtotal)}</td>
+                                    <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText font-mono tabular-nums">{fmtEur(l.subtotal)}</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -428,7 +428,7 @@ function TabResumenMensual() {
           <span className="text-sm font-medium">Cargando resumen mensual...</span>
         </div>
       )}
-      {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
+      {error && <p className="text-center text-sm text-kaja-rose py-12 font-medium">{error}</p>}
 
       {!cargando && !error && (
         <ChartCard title={`Ingresos reales vs Gastos · ${MESES[mes - 1]} ${anio} · por día`}>
@@ -496,7 +496,7 @@ function TabResumenAnual() {
           <span className="text-sm font-medium">Cargando resumen anual...</span>
         </div>
       )}
-      {error && <p className="text-center text-sm text-rose-500 py-12 font-medium">{error}</p>}
+      {error && <p className="text-center text-sm text-kaja-rose py-12 font-medium">{error}</p>}
 
       {!cargando && !error && (
         <ChartCard title={`Ingresos reales vs Gastos · ${anio} · por mes`}>
@@ -528,7 +528,7 @@ export default function GestionFinanciera() {
         <div className="flex items-end justify-between mb-5">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-1">Panel</p>
-            <h1 className="text-2xl font-bold text-kaja-blueText">Gestión Financiera</h1>
+            <h1 className="text-2xl font-bold text-kaja-blueText font-display">Gestión Financiera</h1>
           </div>
         </div>
 

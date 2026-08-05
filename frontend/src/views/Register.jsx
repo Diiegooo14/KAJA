@@ -31,7 +31,7 @@ function AvatarUpload({ preview, onSeleccionar, error, label }) {
         onClick={() => inputRef.current.click()}
         aria-label={preview ? `Cambiar ${label}` : `Subir ${label}`}
         className={`relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 group transition
-          ${error ? 'ring-2 ring-rose-400' : 'ring-2 ring-gray-200 hover:ring-kaja-orange'}`}
+          ${error ? 'ring-2 ring-kaja-rose' : 'ring-2 ring-gray-200 hover:ring-kaja-orange'}`}
       >
         {preview
           ? <img src={preview} alt={label} width="80" height="80" className="w-full h-full object-cover" />
@@ -53,7 +53,7 @@ function AvatarUpload({ preview, onSeleccionar, error, label }) {
         />
         <p className="text-sm font-medium text-kaja-blueText mb-0.5">{label}</p>
         <p className="text-xs text-gray-400">Opcional · JPG, PNG, GIF, WEBP · Máx. 5MB</p>
-        {error && <p className="text-xs text-rose-500 mt-0.5">{error}</p>}
+        {error && <p className="text-xs text-kaja-rose mt-0.5">{error}</p>}
       </div>
     </div>
   )
@@ -79,14 +79,14 @@ function Campo({ label, name, value, onChange, placeholder, error, type = 'text'
         className={`w-full px-4 py-3 rounded-xl border text-sm bg-gray-50 text-gray-900 placeholder-gray-400
           focus:outline-none focus:bg-white focus:ring-2 transition
           ${error
-            ? 'border-rose-400 focus:ring-rose-100 focus:border-rose-400'
+            ? 'border-kaja-rose focus:ring-kaja-rose-soft focus:border-kaja-rose'
             : 'border-gray-200 focus:ring-kaja-orange/20 focus:border-kaja-orange/50'
           }`}
       />
       {maxLength && value.length === maxLength && (
-        <p className="text-xs text-amber-500">Límite de {maxLength} caracteres alcanzado</p>
+        <p className="text-xs text-kaja-amber">Límite de {maxLength} caracteres alcanzado</p>
       )}
-      {error && <p className="text-xs text-rose-500">{error}</p>}
+      {error && <p className="text-xs text-kaja-rose">{error}</p>}
     </div>
   )
 }
@@ -128,7 +128,7 @@ function PantallaExito({ onVolver }) {
           <img src="/img/kaja-transparente.webp" alt="KAJA" width="200" height="40" className="h-10 brightness-0 invert object-contain" />
         </div>
         <div className="relative z-10">
-          <h2 className="text-3xl font-bold text-white mb-3">¡Todo listo!</h2>
+          <h2 className="text-3xl font-bold font-display text-white mb-3">¡Todo listo!</h2>
           <p className="text-white/75 text-sm leading-relaxed">Tu empresa ya está registrada en el sistema KAJA. Ahora puedes empezar a gestionar tus ventas.</p>
         </div>
         <p className="relative z-10 text-white/25 text-xs">© 2026 Sistema KAJA</p>
@@ -136,10 +136,10 @@ function PantallaExito({ onVolver }) {
 
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
         <div className="w-full max-w-sm text-center">
-          <div className="w-20 h-20 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-emerald-500" />
+          <div className="w-20 h-20 rounded-2xl bg-kaja-teal-soft flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-kaja-teal" />
           </div>
-          <h2 className="text-2xl font-bold text-kaja-blueText mb-2">¡Alta completada!</h2>
+          <h2 className="text-2xl font-bold font-display text-kaja-blueText mb-2">¡Alta completada!</h2>
           <p className="text-sm text-gray-400 leading-relaxed mb-8">
             Tu empresa ha sido registrada correctamente en el sistema KAJA.
             Ya puedes iniciar sesión con las credenciales del administrador.
@@ -268,7 +268,7 @@ export default function Register({ onVolver }) {
         <div className="relative z-10 space-y-8">
           <div>
             <p className="text-s font-bold uppercase tracking-widest text-kaja-orange mb-3">Nuevo registro</p>
-            <h1 className="text-4xl font-bold text-white leading-tight mb-4">
+            <h1 className="text-4xl font-bold font-display text-white leading-tight mb-4">
               Empieza a gestionar<br />
               <span className="text-kaja-orange">tu negocio hoy</span>
             </h1>
@@ -294,7 +294,7 @@ export default function Register({ onVolver }) {
 
             {/* Header */}
             <div className="mb-5">
-              <h2 className="text-2xl font-bold text-kaja-blueText mb-1">Alta en el sistema KAJA</h2>
+              <h2 className="text-2xl font-bold font-display text-kaja-blueText mb-1">Alta en el sistema KAJA</h2>
               <p className="text-sm text-gray-400">Introduce los datos de tu empresa y del administrador principal.</p>
             </div>
 
@@ -343,7 +343,7 @@ export default function Register({ onVolver }) {
               {/*  Acciones */}
               <div className="flex flex-col gap-3 lg:col-span-2">
                 {error && (
-                  <div className="px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl text-sm text-rose-700">
+                  <div className="px-4 py-3 bg-kaja-rose-soft border border-kaja-rose/30 rounded-xl text-sm text-kaja-rose">
                     {error}
                   </div>
                 )}

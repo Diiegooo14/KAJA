@@ -104,7 +104,7 @@ function KpiStat({ icon: Icon, label, value, sub, gradient, onClick, clickable }
         </div>
       </div>
       <div>
-        <p className="text-2xl font-bold leading-none">{value}</p>
+        <p className="text-2xl font-bold leading-none font-mono tabular-nums">{value}</p>
         <p className="text-xs text-white/75 mt-1.5 capitalize">{sub}</p>
       </div>
     </div>
@@ -186,7 +186,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
 
         <div className="relative z-10 min-w-0">
           <p className="text-kaja-orange text-xs font-bold uppercase tracking-widest mb-1">{saludo}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 truncate">{usuario.nombre}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1 truncate font-display">{usuario.nombre}</h1>
           <p className="text-white/70 text-xs sm:text-sm capitalize">
             {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
@@ -226,7 +226,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
           label="Stock bajo"
           value={loadingKpis ? '—' : kpis.stockBajoCount}
           sub="productos a reponer"
-          gradient="from-rose-500 to-rose-400"
+          gradient="from-kaja-amber to-kaja-amber/70"
           onClick={onStockBajo}
           clickable
         />
@@ -236,7 +236,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
             label="Gastos del mes"
             value={loadingKpis ? '—' : fmtEur(kpis.gastosMes)}
             sub={mesTxt}
-            gradient="from-indigo-600 to-indigo-400"
+            gradient="from-kaja-rose to-kaja-rose/70"
           />
         )}
       </div>
@@ -296,7 +296,7 @@ function HomePanel({ usuario, empresa, esAdmin, onNavegar, onStockBajo }) {
                     <p className="text-xs text-gray-600">{v.lineas.length} producto{v.lineas.length !== 1 ? 's' : ''}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-kaja-blueText">{fmtEur(v.totalFinal)}</p>
+                    <p className="text-sm font-bold text-kaja-blueText font-mono tabular-nums">{fmtEur(v.totalFinal)}</p>
                     <p className="text-xs text-gray-600 font-mono">{fmtHora(v.fecha)}</p>
                   </div>
                 </div>

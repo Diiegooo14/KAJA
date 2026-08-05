@@ -218,7 +218,7 @@ export default function Gastos() {
             <div className="shrink-0 px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-white">
                 <div className="flex-1">
                     <p className="text-[11px] font-bold uppercase tracking-widest text-kaja-orange mb-0.5">Administración</p>
-                    <h1 className="text-xl font-bold text-kaja-blueText">
+                    <h1 className="text-xl font-bold text-kaja-blueText font-display">
                         Gastos — <span className="text-kaja-orange">{MESES[mes - 1]} {anio}</span>
                     </h1>
                 </div>
@@ -274,7 +274,7 @@ export default function Gastos() {
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    Tipo de Gasto <span className="text-red-400">*</span>
+                                    Tipo de Gasto <span className="text-kaja-rose">*</span>
                                 </label>
                                 <select
                                     name="tipo"
@@ -292,7 +292,7 @@ export default function Gastos() {
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    Concepto <span className="text-red-400">*</span>
+                                    Concepto <span className="text-kaja-rose">*</span>
                                 </label>
                                 <input
                                     type="text"
@@ -305,12 +305,12 @@ export default function Gastos() {
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 transition"
                                 />
-                                {form.concepto.length === 30 && <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>}
+                                {form.concepto.length === 30 && <p className="text-xs text-kaja-amber mt-1">Límite de 30 caracteres alcanzado</p>}
                             </div>
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    Importe (€) <span className="text-red-400">*</span>
+                                    Importe (€) <span className="text-kaja-rose">*</span>
                                 </label>
                                 <input
                                     type="number"
@@ -325,12 +325,12 @@ export default function Gastos() {
                                                 focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange
                                                 transition"
                                 />
-                                {camposError.importe && <p className="text-xs text-red-500 mt-1">{camposError.importe}</p>}
+                                {camposError.importe && <p className="text-xs text-kaja-rose mt-1">{camposError.importe}</p>}
                             </div>
 
                             <div>
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
-                                    Fecha <span className="text-red-400">*</span>
+                                    Fecha <span className="text-kaja-rose">*</span>
                                 </label>
                                 <input
                                     type="date"
@@ -344,7 +344,7 @@ export default function Gastos() {
                             </div>
 
                             {formError && (
-                                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{formError}</p>
+                                <p className="text-xs text-kaja-rose bg-kaja-rose-soft rounded-lg px-3 py-2">{formError}</p>
                             )}
 
                             <button
@@ -369,15 +369,15 @@ export default function Gastos() {
                     <div className="shrink-0 px-4 sm:px-6 py-4 grid grid-cols-3 gap-2 sm:gap-4">
                         <div className="bg-linear-to-br from-kaja-sidebar to-slate-700 rounded-2xl px-3 sm:px-5 py-3 sm:py-4 shadow-sm">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-white/60 mb-1 truncate">Total Mes</p>
-                            <p className="text-lg sm:text-2xl font-bold text-white truncate">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
+                            <p className="text-lg sm:text-2xl font-bold text-white truncate font-mono tabular-nums">{parseFloat(resumen.totalMes).toFixed(2)} €</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Gastos fijos</p>
-                            <p className="text-lg sm:text-2xl font-bold text-kaja-blueText truncate">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
+                            <p className="text-lg sm:text-2xl font-bold text-kaja-blueText truncate font-mono tabular-nums">{parseFloat(resumen.totalFijos).toFixed(2)} €</p>
                         </div>
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-3 sm:px-5 py-3 sm:py-4">
                             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-gray-600 mb-1 truncate">Gastos variables</p>
-                            <p className="text-lg sm:text-2xl font-bold text-kaja-orange truncate">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
+                            <p className="text-lg sm:text-2xl font-bold text-kaja-orange truncate font-mono tabular-nums">{parseFloat(resumen.totalVariables).toFixed(2)} €</p>
                         </div>
                     </div>
 
@@ -398,7 +398,7 @@ export default function Gastos() {
                                     <span className="text-sm">Cargando gastos…</span>
                                 </div>
                             ) : error ? (
-                                <div className="px-5 py-4 text-sm text-red-600 bg-red-50">{error}</div>
+                                <div className="px-5 py-4 text-sm text-kaja-rose bg-kaja-rose-soft">{error}</div>
                             ) : gastos.length === 0 ? (
                                 <div className="text-center py-16 text-gray-400 text-sm">
                                     Sin gastos para este período
@@ -426,7 +426,7 @@ export default function Gastos() {
                                             </span>
                                         </div>
                                         <div className="px-3 py-3.5 text-right">
-                                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums">
+                                            <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold tabular-nums font-mono">
                                                 {parseFloat(g.importe).toFixed(2)} €
                                             </span>
                                         </div>
@@ -442,7 +442,7 @@ export default function Gastos() {
                                             <button
                                                 onClick={e => { e.stopPropagation(); handleEliminar(g.id) }}
                                                 disabled={eliminando === g.id}
-                                                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition
+                                                className="p-1.5 rounded-lg text-gray-400 hover:text-kaja-rose hover:bg-kaja-rose-soft transition
                                                             disabled:opacity-40 disabled:cursor-not-allowed"
                                                 title="Eliminar gasto"
                                                 aria-label="Eliminar gasto"
@@ -481,7 +481,7 @@ export default function Gastos() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                        Tipo de Gasto <span className="text-red-400">*</span>
+                                        Tipo de Gasto <span className="text-kaja-rose">*</span>
                                     </label>
                                     <select
                                         name="tipo"
@@ -498,7 +498,7 @@ export default function Gastos() {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                        Concepto <span className="text-red-400">*</span>
+                                        Concepto <span className="text-kaja-rose">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -509,12 +509,12 @@ export default function Gastos() {
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                     focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                     />
-                                    {editForm.concepto.length === 30 && <p className="text-xs text-amber-500 mt-1">Límite de 30 caracteres alcanzado</p>}
+                                    {editForm.concepto.length === 30 && <p className="text-xs text-kaja-amber mt-1">Límite de 30 caracteres alcanzado</p>}
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                            Importe (€) <span className="text-red-400">*</span>
+                                            Importe (€) <span className="text-kaja-rose">*</span>
                                         </label>
                                         <input
                                             type="number"
@@ -527,11 +527,11 @@ export default function Gastos() {
                                             className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm
                                                         focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
                                         />
-                                        {camposErrorEdit.importe && <p className="text-xs text-red-500 mt-1">{camposErrorEdit.importe}</p>}
+                                        {camposErrorEdit.importe && <p className="text-xs text-kaja-rose mt-1">{camposErrorEdit.importe}</p>}
                                     </div>
                                     <div>
                                         <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                            Fecha <span className="text-red-400">*</span>
+                                            Fecha <span className="text-kaja-rose">*</span>
                                         </label>
                                         <input
                                             type="date"
@@ -544,7 +544,7 @@ export default function Gastos() {
                                     </div>
                                 </div>
                                 {editError && (
-                                    <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{editError}</p>
+                                    <p className="text-xs text-kaja-rose bg-kaja-rose-soft rounded-lg px-3 py-2">{editError}</p>
                                 )}
                             </div>
                         ) : (
@@ -567,7 +567,7 @@ export default function Gastos() {
                                     </div>
                                     <div>
                                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Importe</p>
-                                        <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold text-kaja-orange">
+                                        <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold text-kaja-orange font-mono tabular-nums">
                                             {parseFloat(gastoVisor.importe).toFixed(2)} €
                                         </p>
                                     </div>

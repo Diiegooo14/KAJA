@@ -430,7 +430,7 @@ export default function TPV({ usuario }) {
                     </div>
                 )}
                 {error && !loading && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+                    <div className="bg-kaja-rose-soft border border-kaja-rose/30 rounded-lg px-4 py-3 text-sm text-kaja-rose">{error}</div>
                 )}
                 {!loading && !error && (
                     productosFiltrados.length === 0
@@ -458,19 +458,19 @@ export default function TPV({ usuario }) {
                                                 </span>
                                             )}
                                             {promo && promo.tipo !== 'SELECCION' && (
-                                                <span className="inline-flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-700">
+                                                <span className="inline-flex items-center gap-1 mb-2 px-1.5 py-0.5 rounded-full text-[11px] font-bold bg-kaja-teal-soft text-kaja-teal">
                                                     <Percent className="w-3 h-3" />
                                                     {promo.cantidad}×{parseFloat(promo.precioTotal).toFixed(2)}€
                                                 </span>
                                             )}
                                             <div className="flex items-end justify-between w-full mt-auto">
-                                                <span className="text-base font-bold text-kaja-orange">
+                                                <span className="text-base font-bold text-kaja-orange font-mono tabular-nums">
                                                     {parseFloat(p.precioVenta).toFixed(2)} €
                                                 </span>
                                                 <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-full ${
                                                     p.stock <= 5
-                                                        ? 'bg-yellow-100 text-yellow-700'
-                                                        : 'bg-green-100 text-green-700'
+                                                        ? 'bg-kaja-amber-soft text-kaja-amber'
+                                                        : 'bg-kaja-teal-soft text-kaja-teal'
                                                 }`}>
                                                     {p.stock} uds
                                                 </span>
@@ -503,7 +503,7 @@ export default function TPV({ usuario }) {
                 {carrito.length > 0 && (
                     <button
                         onClick={() => setCarrito([])}
-                        className="text-xs text-red-400 hover:text-red-600 transition font-medium flex items-center gap-1"
+                        className="text-xs text-kaja-rose/60 hover:text-kaja-rose transition font-medium flex items-center gap-1"
                     >
                         <Trash2 className="w-3 h-3" />
                         Limpiar
@@ -525,7 +525,7 @@ export default function TPV({ usuario }) {
                                 <button
                                     onClick={() => eliminarDelCarrito(item.id)}
                                     aria-label={`Eliminar ${item.nombre} del carrito`}
-                                    className="text-gray-300 hover:text-red-400 transition shrink-0 mt-0.5"
+                                    className="text-gray-300 hover:text-kaja-rose transition shrink-0 mt-0.5"
                                 >
                                     <X className="w-3.5 h-3.5" />
                                 </button>
@@ -549,12 +549,12 @@ export default function TPV({ usuario }) {
                                         <Plus className="w-3 h-3" />
                                     </button>
                                 </div>
-                                <span className="text-sm font-bold text-kaja-orange">
+                                <span className="text-sm font-bold text-kaja-orange font-mono tabular-nums">
                                     {subtotalLinea(item).toFixed(2)} €
                                 </span>
                             </div>
                             {tienePromoAplicada(item) && (
-                                <p className="text-[11px] text-emerald-600 font-semibold mt-1">Promo aplicada</p>
+                                <p className="text-[11px] text-kaja-teal font-semibold mt-1">Promo aplicada</p>
                             )}
                         </div>
                     ))
@@ -564,7 +564,7 @@ export default function TPV({ usuario }) {
             <div className="border-t border-gray-200 p-4 space-y-3 shrink-0">
                 <div className="flex items-center justify-between pt-1">
                     <span className="text-base font-bold text-kaja-blue">TOTAL</span>
-                    <span className="text-2xl font-bold text-kaja-blue">{total.toFixed(2)} €</span>
+                    <span className="text-2xl font-bold text-kaja-blue font-mono tabular-nums">{total.toFixed(2)} €</span>
                 </div>
                 <button
                     onClick={() => { setErrorCobro(''); setModalConfirmar(true) }}
@@ -632,17 +632,17 @@ export default function TPV({ usuario }) {
                             {carrito.map(item => (
                                 <div key={item.id} className="flex justify-between text-sm text-gray-700">
                                     <span className="flex-1 truncate pr-2">{item.nombre} <span className="text-gray-600">×{item.cantidad}</span></span>
-                                    <span className="font-semibold shrink-0">{subtotalLinea(item).toFixed(2)} €</span>
+                                    <span className="font-semibold shrink-0 font-mono tabular-nums">{subtotalLinea(item).toFixed(2)} €</span>
                                 </div>
                             ))}
                             <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold text-kaja-blue">
                                 <span>TOTAL</span>
-                                <span>{total.toFixed(2)} €</span>
+                                <span className="font-mono tabular-nums">{total.toFixed(2)} €</span>
                             </div>
                         </div>
 
                         {errorCobro && (
-                            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{errorCobro}</p>
+                            <p className="text-sm text-kaja-rose bg-kaja-rose-soft rounded-lg px-3 py-2">{errorCobro}</p>
                         )}
 
                         <div className="flex gap-3">
@@ -674,7 +674,7 @@ export default function TPV({ usuario }) {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-4" role="dialog" aria-modal="true">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 flex flex-col gap-5 max-h-[90vh] overflow-y-auto">
                         <div className="flex flex-col items-center gap-2">
-                            <CheckCircle className="w-12 h-12 text-green-500" />
+                            <CheckCircle className="w-12 h-12 text-kaja-teal" />
                             <h2 className="text-lg font-bold text-kaja-blue">¡Venta registrada!</h2>
                             <p className="text-sm text-gray-400">Nº {ventaCobrada.id}</p>
                         </div>
