@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import {
     Building2, LogOut, Loader2, X, Ban, Pencil, ShoppingBag,
-    Users, Package, ChevronLeft, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle,
+    Users, Package, ChevronLeft, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, RefreshCw,
 } from 'lucide-react'
 
-const API_URL = import.meta.env.VITE_API_URL
+const API_URL        = import.meta.env.VITE_API_URL
+const DEFAULT_AVATAR = 'https://res.cloudinary.com/di1ujwvir/image/upload/v1778341124/basica_usuario_qvq2fm.png'
 
 function headers() {
     return {
@@ -49,6 +50,13 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
     const [modalAnular, setModalAnular] = useState(null)
     const [motivoAnular, setMotivoAnular] = useState('')
     const [anulando, setAnulando] = useState(false)
+
+    const [modalReemitir, setModalReemitir] = useState(null)
+    const [motivoReemitir, setMotivoReemitir] = useState('')
+    const [idUsuarioDestino, setIdUsuarioDestino] = useState('')
+    const [usuariosParaReemitir, setUsuariosParaReemitir] = useState([])
+    const [cargandoUsuariosReemitir, setCargandoUsuariosReemitir] = useState(false)
+    const [reemitiendo, setReemitiendo] = useState(false)
 
     const [modalUsuario, setModalUsuario] = useState(null)
     const [formUsuario, setFormUsuario] = useState({ nombre: '', rol: 'Empleado', estado: 'Activo', password: '' })
@@ -133,6 +141,56 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
             setAccionError(e.message)
         } finally {
             setAnulando(false)
+        }
+    }
+
+    async function abrirReemitir(v) {
+        setModalReemitir(v)
+        setMotivoReemitir('')
+        setIdUsuarioDestino('')
+        setAccionError('')
+        setCargandoUsuariosReemitir(true)
+        try {
+            const data = await fetchJSON(`${API_URL}/superadmin?recurso=usuarios&idEmpresa=${empresaSel.id}`)
+            const activos = (data.usuarios ?? []).filter(u => u.estado === 'Activo')
+            setUsuariosParaReemitir(activos)
+            if (activos.length === 1) setIdUsuarioDestino(String(activos[0].id))
+        } catch (e) {
+            setAccionError(e.message)
+        } finally {
+            setCargandoUsuariosReemitir(false)
+        }
+    }
+
+    async function confirmarReemitir() {
+        if (motivoReemitir.trim().length < 5) {
+            setAccionError('El motivo debe tener al menos 5 caracteres')
+            return
+        }
+        if (!idUsuarioDestino) {
+            setAccionError('Selecciona a quién se atribuye la venta nueva')
+            return
+        }
+        setReemitiendo(true)
+        setAccionError('')
+        try {
+            const data = await fetchJSON(`${API_URL}/superadmin?recurso=reemitir`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    idVenta: modalReemitir.id,
+                    idEmpresa: empresaSel.id,
+                    idUsuarioDestino: Number(idUsuarioDestino),
+                    motivo: motivoReemitir.trim(),
+                }),
+            })
+            mostrarToast(`Venta reemitida como #${data.idVentaNueva} (${Number(data.totalFinal).toFixed(2)} €)`)
+            setModalReemitir(null)
+            await cargarTab()
+            await cargarEmpresas()
+        } catch (e) {
+            setAccionError(e.message)
+        } finally {
+            setReemitiendo(false)
         }
     }
 
@@ -314,87 +372,147 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
                                 </div>
                             ) : tab === 'ventas' ? (
                                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                                    <div className="overflow-x-auto">
-                                        <div className="grid grid-cols-[24px_115px_1fr_100px_90px_100px_100px] min-w-195 bg-kaja-sidebar">
-                                            {['', 'Fecha', 'Vendedor', 'Total', 'Estado', 'Anulada por', 'Acc.'].map(h => (
-                                                <div key={h} className="px-3 py-3 text-[11px] font-bold uppercase tracking-widest text-white/60">{h}</div>
-                                            ))}
-                                        </div>
-                                        {ventas.length === 0 ? (
-                                            <div className="text-center py-12 text-gray-400 text-sm">Sin ventas registradas</div>
-                                        ) : ventas.map(v => {
-                                            const expandida = ventaExpandida === v.id
-                                            return (
-                                                <div key={v.id} className="border-b border-gray-50">
-                                                    <div
-                                                        onClick={() => setVentaExpandida(expandida ? null : v.id)}
-                                                        className="grid grid-cols-[24px_115px_1fr_100px_90px_100px_100px] min-w-195 items-center text-sm cursor-pointer hover:bg-kaja-orange/5 transition"
-                                                    >
-                                                        <div className="px-3 py-3 text-gray-400">
-                                                            {expandida ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                                                        </div>
-                                                        <div className="px-3 py-3 text-xs font-mono text-gray-500">
-                                                            {new Date(v.fecha).toLocaleDateString('es-ES')}
-                                                        </div>
-                                                        <div className="px-3 py-3 text-kaja-blueText truncate">{v.vendedor}</div>
-                                                        <div className="px-3 py-3 font-mono">{Number(v.totalFinal).toFixed(2)} €</div>
-                                                        <div className="px-3 py-3">
-                                                            <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold
-                                                                ${v.estado === 'Emitida' ? 'bg-kaja-teal-soft text-kaja-teal' : 'bg-kaja-rose-soft text-kaja-rose'}`}>
-                                                                {v.estado}
-                                                            </span>
-                                                        </div>
-                                                        <div className="px-3 py-3 text-xs text-gray-400 truncate">{v.anuladoPor ?? '—'}</div>
-                                                        <div className="px-3 py-3">
-                                                            {v.estado === 'Emitida' && (
-                                                                <button
-                                                                    onClick={e => { e.stopPropagation(); setModalAnular(v); setMotivoAnular(''); setAccionError('') }}
-                                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-kaja-rose hover:bg-kaja-rose-soft transition"
-                                                                    title="Anular venta"
+                                    {ventas.length === 0 ? (
+                                        <div className="text-center py-12 text-gray-400 text-sm">Sin ventas registradas</div>
+                                    ) : (
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-sm min-w-225">
+                                                <thead>
+                                                    <tr className="bg-kaja-sidebar">
+                                                        <th className="px-4 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Fecha</th>
+                                                        <th className="px-4 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Vendedor</th>
+                                                        <th className="px-4 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">Base</th>
+                                                        <th className="px-4 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">IVA</th>
+                                                        <th className="px-4 py-3.5 text-right  text-[11px] font-bold uppercase tracking-widest text-white/60">Total</th>
+                                                        <th className="px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Líneas</th>
+                                                        <th className="px-4 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Estado</th>
+                                                        <th className="px-4 py-3.5 text-left   text-[11px] font-bold uppercase tracking-widest text-white/60">Anulada por</th>
+                                                        <th className="px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Acc.</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {ventas.map(v => {
+                                                        const expandida = ventaExpandida === v.id
+                                                        return (
+                                                            <Fragment key={v.id}>
+                                                                <tr
+                                                                    onClick={() => setVentaExpandida(expandida ? null : v.id)}
+                                                                    className="border-t border-gray-100 hover:bg-kaja-orange/5 cursor-pointer transition-colors"
                                                                 >
-                                                                    <Ban className="w-3.5 h-3.5" /> Anular
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                                    <td className="px-4 py-3.5">
+                                                                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-light/60 text-xs font-mono text-kaja-blueText/70 whitespace-nowrap">
+                                                                            {new Date(v.fecha).toLocaleDateString('es-ES')}{' '}
+                                                                            {new Date(v.fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-4 py-3.5">
+                                                                        <div className="flex items-center gap-2.5">
+                                                                            <img
+                                                                                src={v.imagenVendedor || DEFAULT_AVATAR}
+                                                                                alt={v.vendedor}
+                                                                                width="28"
+                                                                                height="28"
+                                                                                loading="lazy"
+                                                                                className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                                                                                onError={e => { e.target.src = DEFAULT_AVATAR }}
+                                                                            />
+                                                                            <span className="text-kaja-blueText/80 font-medium truncate">{v.vendedor}</span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="px-4 py-3.5 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{Number(v.baseImponible).toFixed(2)} €</td>
+                                                                    <td className="px-4 py-3.5 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{Number(v.totalIva).toFixed(2)} €</td>
+                                                                    <td className="px-4 py-3.5 text-right">
+                                                                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
+                                                                            {Number(v.totalFinal).toFixed(2)} €
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-4 py-3.5 text-center">
+                                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-bold text-kaja-blueText/70">
+                                                                            {(v.lineas ?? []).length} art.
+                                                                            {expandida ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-4 py-3.5">
+                                                                        <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold whitespace-nowrap
+                                                                            ${v.estado === 'Emitida' ? 'bg-kaja-teal-soft text-kaja-teal' : 'bg-kaja-rose-soft text-kaja-rose'}`}>
+                                                                            {v.estado}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="px-4 py-3.5 text-xs text-gray-400 truncate">{v.anuladoPor ?? '—'}</td>
+                                                                    <td className="px-4 py-3.5">
+                                                                        <div className="flex items-center justify-center gap-1">
+                                                                            {v.estado === 'Emitida' && (
+                                                                                <>
+                                                                                    <button
+                                                                                        onClick={e => { e.stopPropagation(); setModalAnular(v); setMotivoAnular(''); setAccionError('') }}
+                                                                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-semibold text-kaja-rose hover:bg-kaja-rose-soft transition"
+                                                                                        title="Anular venta"
+                                                                                    >
+                                                                                        <Ban className="w-3.5 h-3.5" />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={e => { e.stopPropagation(); abrirReemitir(v) }}
+                                                                                        className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-semibold text-kaja-orange hover:bg-orange-50 transition"
+                                                                                        title="Anular y reemitir con datos corregidos"
+                                                                                    >
+                                                                                        <RefreshCw className="w-3.5 h-3.5" />
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
 
-                                                    {expandida && (
-                                                        <div className="min-w-195 bg-kaja-light px-4 py-3">
-                                                            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
-                                                                <div className="grid grid-cols-[1fr_70px_90px_60px_90px] bg-gray-50">
-                                                                    {['Producto', 'Cant.', 'Precio ud.', 'IVA', 'Subtotal'].map(h => (
-                                                                        <div key={h} className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">{h}</div>
-                                                                    ))}
-                                                                </div>
-                                                                {(v.lineas ?? []).map((l, i) => (
-                                                                    <div key={i} className="grid grid-cols-[1fr_70px_90px_60px_90px] text-xs border-t border-gray-50">
-                                                                        <div className="px-3 py-2 text-kaja-blueText truncate">{l.producto}</div>
-                                                                        <div className="px-3 py-2 font-mono">{l.cantidad}</div>
-                                                                        <div className="px-3 py-2 font-mono">{Number(l.precioVentaHistorico).toFixed(2)} €</div>
-                                                                        <div className="px-3 py-2 font-mono">{Number(l.ivaAplicado)}%</div>
-                                                                        <div className="px-3 py-2 font-mono">{Number(l.subtotal).toFixed(2)} €</div>
-                                                                    </div>
-                                                                ))}
-                                                                <div className="grid grid-cols-[1fr_70px_90px_60px_90px] text-xs border-t border-gray-100 bg-gray-50 font-semibold">
-                                                                    <div className="px-3 py-2 col-span-3 text-gray-500">Base imponible</div>
-                                                                    <div className="px-3 py-2 col-span-2 font-mono text-kaja-blueText">{Number(v.baseImponible ?? 0).toFixed(2)} €</div>
-                                                                </div>
-                                                            </div>
+                                                                {expandida && (
+                                                                    <tr>
+                                                                        <td colSpan={9} className="px-4 pb-4 pt-1 bg-kaja-light/20">
+                                                                            <div className="rounded-xl overflow-hidden border border-kaja-light shadow-sm">
+                                                                                <table className="w-full text-xs">
+                                                                                    <thead>
+                                                                                        <tr className="bg-gray-50">
+                                                                                            <th className="px-4 py-2.5 text-left  text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Producto</th>
+                                                                                            <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Cant.</th>
+                                                                                            <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">P. Unit.</th>
+                                                                                            <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">IVA</th>
+                                                                                            <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Subtotal</th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        {(v.lineas ?? []).map((l, i) => (
+                                                                                            <tr key={i} className="border-t border-kaja-light">
+                                                                                                <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{l.producto}</td>
+                                                                                                <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{l.cantidad}</td>
+                                                                                                <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">
+                                                                                                    {(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100)).toFixed(2)} €
+                                                                                                </td>
+                                                                                                <td className="px-4 py-2.5 text-right">
+                                                                                                    <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono tabular-nums">{parseFloat(l.ivaAplicado).toFixed(0)}%</span>
+                                                                                                </td>
+                                                                                                <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText font-mono tabular-nums">{Number(l.subtotal).toFixed(2)} €</td>
+                                                                                            </tr>
+                                                                                        ))}
+                                                                                    </tbody>
+                                                                                </table>
+                                                                            </div>
 
-                                                            {v.estado === 'Anulada' && (
-                                                                <div className="mt-3 px-3 py-2.5 bg-kaja-rose-soft border border-kaja-rose/20 rounded-lg text-xs text-kaja-rose">
-                                                                    <p><strong>Motivo de anulación:</strong> {v.motivoAnulacion}</p>
-                                                                    <p className="mt-0.5 text-kaja-rose/70">
-                                                                        Anulada por {v.anuladoPor} el {v.fechaAnulacion ? new Date(v.fechaAnulacion).toLocaleString('es-ES') : '—'}
-                                                                    </p>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
+                                                                            {v.estado === 'Anulada' && (
+                                                                                <div className="mt-3 px-3 py-2.5 bg-kaja-rose-soft border border-kaja-rose/20 rounded-lg text-xs text-kaja-rose">
+                                                                                    <p><strong>Motivo de anulación:</strong> {v.motivoAnulacion}</p>
+                                                                                    <p className="mt-0.5 text-kaja-rose/70">
+                                                                                        Anulada por {v.anuladoPor} el {v.fechaAnulacion ? new Date(v.fechaAnulacion).toLocaleString('es-ES') : '—'}
+                                                                                    </p>
+                                                                                </div>
+                                                                            )}
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </Fragment>
+                                                        )
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
                                 </div>
                             ) : tab === 'usuarios' ? (
                                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -502,6 +620,70 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
                                 className="flex-1 py-2.5 bg-kaja-rose text-white font-bold rounded-xl hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {anulando ? <><Loader2 className="w-4 h-4 animate-spin" /> Anulando…</> : 'Confirmar anulación'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal anular y reemitir venta */}
+            {modalReemitir && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => !reemitiendo && setModalReemitir(null)} />
+                    <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-kaja-blueText flex items-center gap-2">
+                                <RefreshCw className="w-5 h-5 text-kaja-orange" /> Anular y reemitir #{modalReemitir.id}
+                            </h2>
+                            <button onClick={() => setModalReemitir(null)} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">
+                            Anula esta venta y crea una nueva con las mismas líneas, recalculadas con el
+                            precio/IVA <strong>actual</strong> de cada producto. Útil cuando el error ya
+                            está corregido en el producto y solo falta rehacer el ticket. Irreversible.
+                        </p>
+
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">Atribuir venta nueva a *</label>
+                        {cargandoUsuariosReemitir ? (
+                            <div className="flex items-center gap-2 text-sm text-gray-400 py-2">
+                                <Loader2 className="w-4 h-4 animate-spin" /> Cargando empleados…
+                            </div>
+                        ) : (
+                            <select
+                                value={idUsuarioDestino}
+                                onChange={e => setIdUsuarioDestino(e.target.value)}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm cursor-pointer mb-4
+                                            focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
+                            >
+                                <option value="">— Selecciona —</option>
+                                {usuariosParaReemitir.map(u => (
+                                    <option key={u.id} value={u.id}>{u.nombre} ({u.rol})</option>
+                                ))}
+                            </select>
+                        )}
+
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">Motivo *</label>
+                        <textarea
+                            value={motivoReemitir}
+                            onChange={e => setMotivoReemitir(e.target.value)}
+                            rows={3}
+                            maxLength={255}
+                            placeholder="Ej: IVA erróneo en el producto, ya corregido; se reemite el ticket"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-kaja-orange/30 focus:border-kaja-orange transition"
+                        />
+                        {accionError && <p className="text-xs text-kaja-rose mt-2">{accionError}</p>}
+                        <div className="flex gap-3 mt-5">
+                            <button onClick={() => setModalReemitir(null)} className="flex-1 py-2.5 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={confirmarReemitir}
+                                disabled={reemitiendo || cargandoUsuariosReemitir}
+                                className="flex-1 py-2.5 bg-kaja-orange text-white font-bold rounded-xl hover:brightness-90 active:scale-95 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {reemitiendo ? <><Loader2 className="w-4 h-4 animate-spin" /> Reemitiendo…</> : 'Anular y reemitir'}
                             </button>
                         </div>
                     </div>

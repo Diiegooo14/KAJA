@@ -23,8 +23,9 @@ match ($_SERVER['REQUEST_METHOD']) {
         default     => rutaInvalida(),
     },
     'POST' => match ($recurso) {
-        'anular' => SuperAdminController::anularVenta(),
-        default  => rutaInvalida(),
+        'anular'   => SuperAdminController::anularVenta(),
+        'reemitir' => SuperAdminController::reemitirVenta(),
+        default    => rutaInvalida(),
     },
     default => (function () {
         http_response_code(405);

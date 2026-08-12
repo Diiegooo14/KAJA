@@ -80,6 +80,55 @@ class SuperAdminController
         }
     }
 
+    public static function reemitirVenta(): void
+    {
+        $carga = Jwt::requerirSuperAdmin();
+
+        $datos            = json_decode(file_get_contents('php://input'), true) ?? [];
+        $idVenta          = (int) ($datos['idVenta']          ?? 0);
+        $idEmpresa        = (int) ($datos['idEmpresa']        ?? 0);
+        $idUsuarioDestino = (int) ($datos['idUsuarioDestino'] ?? 0);
+        $motivo           = trim($datos['motivo'] ?? '');
+
+        if ($idVenta <= 0 || $idEmpresa <= 0 || $idUsuarioDestino <= 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'idVenta, idEmpresa e idUsuarioDestino son obligatorios']);
+            return;
+        }
+        if (strlen($motivo) < 5) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Debes indicar un motivo (mínimo 5 caracteres)']);
+            return;
+        }
+        if (!self::empresaValida($idEmpresa)) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Empresa no encontrada']);
+            return;
+        }
+
+        $destino = UsuarioModel::buscarPorIdYEmpresa($idUsuarioDestino, $idEmpresa);
+        if (!$destino || $destino['estado'] !== 'Activo') {
+            http_response_code(400);
+            echo json_encode(['error' => 'El usuario destino debe ser un empleado activo de esa empresa']);
+            return;
+        }
+
+        try {
+            $resultado = VentaModel::reemitir($idVenta, $idEmpresa, $idUsuarioDestino, (int) $carga['id'], $motivo);
+            echo json_encode([
+                'mensaje'      => 'Venta anulada y reemitida correctamente',
+                'idVentaNueva' => $resultado['idVentaNueva'],
+                'totalFinal'   => $resultado['totalFinal'],
+            ]);
+        } catch (\RuntimeException $e) {
+            http_response_code(422);
+            echo json_encode(['error' => $e->getMessage()]);
+        } catch (PDOException) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Error interno del servidor']);
+        }
+    }
+
     public static function usuarios(): void
     {
         Jwt::requerirSuperAdmin();
