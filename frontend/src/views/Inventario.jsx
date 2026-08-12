@@ -127,10 +127,10 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
             nuevaCategoria: '',
             precioCoste: producto.precioCoste,
             precioVenta: producto.precioVenta,
-            iva: String(producto.iva ?? 21),
+            iva: String(Math.round(Number(producto.iva ?? 21))),
             stock: producto.stock,
             estado: producto.estado ?? 'Activo',
-        } : { ...FORM_VACIO, iva: String(empresa?.ivaPorDefecto ?? 21) })
+        } : { ...FORM_VACIO, iva: String(Math.round(Number(empresa?.ivaPorDefecto ?? 21))) })
         setFormError('')
         setModalAbierto(true)
         try {
@@ -741,7 +741,7 @@ export default function Inventario({ filtroStockBajo = false, busquedaInicial = 
                             <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Tipo de IVA</p>
                                 <p className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm text-gray-800 font-mono tabular-nums">
-                                    {productoVisor.iva ?? 21}%
+                                    {Math.round(Number(productoVisor.iva ?? 21))}%
                                 </p>
                             </div>
                             <div className="grid grid-cols-2 gap-3">

@@ -225,7 +225,7 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
         setModalProducto(p)
         setFormProducto({
             nombre: p.nombre, precioCoste: p.precioCoste, precioVenta: p.precioVenta,
-            iva: p.iva, stock: p.stock, idCategoria: p.idCategoria,
+            iva: Math.round(Number(p.iva ?? 21)), stock: p.stock, idCategoria: p.idCategoria,
         })
         setAccionError('')
     }
