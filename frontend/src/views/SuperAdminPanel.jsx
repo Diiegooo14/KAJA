@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
     Building2, LogOut, Loader2, X, Ban, Pencil, ShoppingBag,
-    Users, Package, ChevronLeft, ShieldAlert, AlertTriangle,
+    Users, Package, ChevronLeft, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle,
 } from 'lucide-react'
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -41,6 +41,7 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
     const [tab, setTab] = useState('ventas')
 
     const [ventas, setVentas] = useState([])
+    const [ventaExpandida, setVentaExpandida] = useState(null)
     const [usuarios, setUsuarios] = useState([])
     const [productos, setProductos] = useState([])
     const [loadingTab, setLoadingTab] = useState(false)
@@ -92,6 +93,7 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
     async function cargarTab() {
         setLoadingTab(true)
         setAccionError('')
+        setVentaExpandida(null)
         try {
             if (tab === 'ventas') {
                 const data = await fetchJSON(`${API_URL}/superadmin?recurso=ventas&idEmpresa=${empresaSel.id}`)
@@ -313,40 +315,85 @@ export default function SuperAdminPanel({ usuario, onLogout }) {
                             ) : tab === 'ventas' ? (
                                 <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                                     <div className="overflow-x-auto">
-                                        <div className="grid grid-cols-[130px_1fr_100px_90px_100px_100px] min-w-175 bg-kaja-sidebar">
-                                            {['Fecha', 'Vendedor', 'Total', 'Estado', 'Anulada por', 'Acc.'].map(h => (
+                                        <div className="grid grid-cols-[24px_115px_1fr_100px_90px_100px_100px] min-w-195 bg-kaja-sidebar">
+                                            {['', 'Fecha', 'Vendedor', 'Total', 'Estado', 'Anulada por', 'Acc.'].map(h => (
                                                 <div key={h} className="px-3 py-3 text-[11px] font-bold uppercase tracking-widest text-white/60">{h}</div>
                                             ))}
                                         </div>
                                         {ventas.length === 0 ? (
                                             <div className="text-center py-12 text-gray-400 text-sm">Sin ventas registradas</div>
-                                        ) : ventas.map(v => (
-                                            <div key={v.id} className="grid grid-cols-[130px_1fr_100px_90px_100px_100px] min-w-175 items-center text-sm border-b border-gray-50">
-                                                <div className="px-3 py-3 text-xs font-mono text-gray-500">
-                                                    {new Date(v.fecha).toLocaleDateString('es-ES')}
-                                                </div>
-                                                <div className="px-3 py-3 text-kaja-blueText truncate">{v.vendedor}</div>
-                                                <div className="px-3 py-3 font-mono">{Number(v.totalFinal).toFixed(2)} €</div>
-                                                <div className="px-3 py-3">
-                                                    <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold
-                                                        ${v.estado === 'Emitida' ? 'bg-kaja-teal-soft text-kaja-teal' : 'bg-kaja-rose-soft text-kaja-rose'}`}>
-                                                        {v.estado}
-                                                    </span>
-                                                </div>
-                                                <div className="px-3 py-3 text-xs text-gray-400 truncate">{v.anuladoPor ?? '—'}</div>
-                                                <div className="px-3 py-3">
-                                                    {v.estado === 'Emitida' && (
-                                                        <button
-                                                            onClick={() => { setModalAnular(v); setMotivoAnular(''); setAccionError('') }}
-                                                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-kaja-rose hover:bg-kaja-rose-soft transition"
-                                                            title="Anular venta"
-                                                        >
-                                                            <Ban className="w-3.5 h-3.5" /> Anular
-                                                        </button>
+                                        ) : ventas.map(v => {
+                                            const expandida = ventaExpandida === v.id
+                                            return (
+                                                <div key={v.id} className="border-b border-gray-50">
+                                                    <div
+                                                        onClick={() => setVentaExpandida(expandida ? null : v.id)}
+                                                        className="grid grid-cols-[24px_115px_1fr_100px_90px_100px_100px] min-w-195 items-center text-sm cursor-pointer hover:bg-kaja-orange/5 transition"
+                                                    >
+                                                        <div className="px-3 py-3 text-gray-400">
+                                                            {expandida ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                                        </div>
+                                                        <div className="px-3 py-3 text-xs font-mono text-gray-500">
+                                                            {new Date(v.fecha).toLocaleDateString('es-ES')}
+                                                        </div>
+                                                        <div className="px-3 py-3 text-kaja-blueText truncate">{v.vendedor}</div>
+                                                        <div className="px-3 py-3 font-mono">{Number(v.totalFinal).toFixed(2)} €</div>
+                                                        <div className="px-3 py-3">
+                                                            <span className={`inline-flex px-2 py-1 rounded-lg text-xs font-semibold
+                                                                ${v.estado === 'Emitida' ? 'bg-kaja-teal-soft text-kaja-teal' : 'bg-kaja-rose-soft text-kaja-rose'}`}>
+                                                                {v.estado}
+                                                            </span>
+                                                        </div>
+                                                        <div className="px-3 py-3 text-xs text-gray-400 truncate">{v.anuladoPor ?? '—'}</div>
+                                                        <div className="px-3 py-3">
+                                                            {v.estado === 'Emitida' && (
+                                                                <button
+                                                                    onClick={e => { e.stopPropagation(); setModalAnular(v); setMotivoAnular(''); setAccionError('') }}
+                                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-kaja-rose hover:bg-kaja-rose-soft transition"
+                                                                    title="Anular venta"
+                                                                >
+                                                                    <Ban className="w-3.5 h-3.5" /> Anular
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {expandida && (
+                                                        <div className="min-w-195 bg-kaja-light px-4 py-3">
+                                                            <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+                                                                <div className="grid grid-cols-[1fr_70px_90px_60px_90px] bg-gray-50">
+                                                                    {['Producto', 'Cant.', 'Precio ud.', 'IVA', 'Subtotal'].map(h => (
+                                                                        <div key={h} className="px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-gray-500">{h}</div>
+                                                                    ))}
+                                                                </div>
+                                                                {(v.lineas ?? []).map((l, i) => (
+                                                                    <div key={i} className="grid grid-cols-[1fr_70px_90px_60px_90px] text-xs border-t border-gray-50">
+                                                                        <div className="px-3 py-2 text-kaja-blueText truncate">{l.producto}</div>
+                                                                        <div className="px-3 py-2 font-mono">{l.cantidad}</div>
+                                                                        <div className="px-3 py-2 font-mono">{Number(l.precioVentaHistorico).toFixed(2)} €</div>
+                                                                        <div className="px-3 py-2 font-mono">{Number(l.ivaAplicado)}%</div>
+                                                                        <div className="px-3 py-2 font-mono">{Number(l.subtotal).toFixed(2)} €</div>
+                                                                    </div>
+                                                                ))}
+                                                                <div className="grid grid-cols-[1fr_70px_90px_60px_90px] text-xs border-t border-gray-100 bg-gray-50 font-semibold">
+                                                                    <div className="px-3 py-2 col-span-3 text-gray-500">Base imponible</div>
+                                                                    <div className="px-3 py-2 col-span-2 font-mono text-kaja-blueText">{Number(v.baseImponible ?? 0).toFixed(2)} €</div>
+                                                                </div>
+                                                            </div>
+
+                                                            {v.estado === 'Anulada' && (
+                                                                <div className="mt-3 px-3 py-2.5 bg-kaja-rose-soft border border-kaja-rose/20 rounded-lg text-xs text-kaja-rose">
+                                                                    <p><strong>Motivo de anulación:</strong> {v.motivoAnulacion}</p>
+                                                                    <p className="mt-0.5 text-kaja-rose/70">
+                                                                        Anulada por {v.anuladoPor} el {v.fechaAnulacion ? new Date(v.fechaAnulacion).toLocaleString('es-ES') : '—'}
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
-                                            </div>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             ) : tab === 'usuarios' ? (
