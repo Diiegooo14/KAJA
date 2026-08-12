@@ -80,6 +80,28 @@ class EmpresaModel
         }
     }
 
+    /**
+     * Listado cross-empresa para el panel SuperAdmin, con estadísticas rápidas.
+     * Excluye la empresa "sistema" que aloja únicamente la cuenta SuperAdmin.
+     */
+    public static function listarTodasConStats(): array
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->query(
+            'SELECT e.id, e.nif, e.razonSocial, e.nombreComercial, e.email, e.logo_empresa,
+                    (SELECT COUNT(*) FROM USUARIO u WHERE u.idEmpresa = e.id) AS numUsuarios,
+                    (SELECT COUNT(*) FROM PRODUCTO p WHERE p.idEmpresa = e.id) AS numProductos,
+                    (SELECT COUNT(*) FROM VENTA v JOIN USUARIO u2 ON v.idUsuario = u2.id
+                        WHERE u2.idEmpresa = e.id AND v.estado = "Emitida") AS numVentas,
+                    (SELECT COALESCE(SUM(v.totalFinal), 0) FROM VENTA v JOIN USUARIO u3 ON v.idUsuario = u3.id
+                        WHERE u3.idEmpresa = e.id AND v.estado = "Emitida") AS totalFacturado
+                FROM EMPRESA e
+                WHERE e.nif <> "SUPERADMIN"
+                ORDER BY e.nombreComercial ASC'
+        );
+        return $stmt->fetchAll();
+    }
+
     public static function crear(array $datos): int
     {
         $pdo = Database::connect();

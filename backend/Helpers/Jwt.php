@@ -73,4 +73,15 @@ class Jwt
         }
         return $carga;
     }
+
+    public static function requerirSuperAdmin(): array
+    {
+        $carga = self::requerirAutenticacion();
+        if ($carga['rol'] !== 'SuperAdmin') {
+            http_response_code(403);
+            echo json_encode(['error' => 'Acceso denegado. Se requiere rol SuperAdmin.']);
+            exit;
+        }
+        return $carga;
+    }
 }

@@ -64,7 +64,12 @@ CREATE TABLE VENTA (
     baseImponible DECIMAL(10,2) NOT NULL,
     totalIva DECIMAL(10,2) NOT NULL,
     totalFinal DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (idUsuario) REFERENCES USUARIO(id) ON DELETE RESTRICT
+    estado ENUM('Emitida', 'Anulada') NOT NULL DEFAULT 'Emitida',
+    motivoAnulacion VARCHAR(255) NULL,
+    idUsuarioAnula INT NULL,
+    fechaAnulacion DATETIME NULL,
+    FOREIGN KEY (idUsuario) REFERENCES USUARIO(id) ON DELETE RESTRICT,
+    FOREIGN KEY (idUsuarioAnula) REFERENCES USUARIO(id) ON DELETE SET NULL
 );
 
 CREATE TABLE DETALLE_VENTA (
@@ -138,10 +143,15 @@ CREATE TABLE NOMINA (
 
 -- DATOS DE PRUEBA
 
-INSERT INTO ROL (nombreRol) VALUES ('Administrador'), ('Empleado');
+INSERT INTO ROL (nombreRol) VALUES ('Administrador'), ('Empleado'), ('SuperAdmin');
 
 INSERT INTO EMPRESA (nif, razonSocial, nombreComercial, direccion, email)
 VALUES ('B12345678', 'Ferreterías Prieto S.L.', 'KAJA Demo', 'Calle Mayor 1', 'contacto@kajademo.es');
+
+-- Empresa "sistema": solo aloja la cuenta SuperAdmin (idEmpresa es NOT NULL en USUARIO).
+-- No es un negocio real y no aparece en ningún panel de empresa normal.
+INSERT INTO EMPRESA (nif, razonSocial, nombreComercial, direccion, email)
+VALUES ('SUPERADMIN', 'KAJA Sistema', 'Panel Central KAJA', NULL, NULL);
 
 INSERT INTO USUARIO (idRol, idEmpresa, nif, nombre, password) VALUES
 (1, 1, '70914786J', 'Diego Prieto (Admin)', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),

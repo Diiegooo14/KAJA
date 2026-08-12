@@ -3,6 +3,7 @@ import { useState, lazy, Suspense } from 'react'
 const Login = lazy(() => import('./views/Login'))
 const Register = lazy(() => import('./views/Register'))
 const Dashboard = lazy(() => import('./views/Dashboard'))
+const SuperAdminPanel = lazy(() => import('./views/SuperAdminPanel'))
 
 export default function App() {
     const [usuario, setUsuario] = useState(() => {
@@ -31,6 +32,13 @@ export default function App() {
     }
 
     if (usuario) {
+        if (usuario.rol === 'SuperAdmin') {
+            return (
+                <Suspense fallback={null}>
+                    <SuperAdminPanel usuario={usuario} onLogout={handleLogout} />
+                </Suspense>
+            )
+        }
         return (
             <Suspense fallback={null}>
                 <Dashboard
