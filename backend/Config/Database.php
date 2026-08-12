@@ -26,6 +26,14 @@ class Database
             $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
 
             self::$instance = new PDO($dsn, Config::$USERNAME, Config::$PASSWORD, $options);
+
+            // NOW()/CURRENT_TIMESTAMP se evalúan con la zona horaria de la sesión de
+            // TiDB (normalmente UTC), no con la de PHP. Se fija aquí como offset fijo
+            // (no como nombre de zona) porque TiDB Cloud no siempre tiene cargadas las
+            // tablas de zonas horarias con nombre. Se recalcula en cada conexión para
+            // seguir el cambio de horario de verano/invierno automáticamente.
+            $offset = (new DateTime('now', new DateTimeZone('Europe/Madrid')))->format('P');
+            self::$instance->exec("SET time_zone = '$offset'");
         }
 
         return self::$instance;

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+﻿import { useState, useEffect, Fragment } from 'react'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, BarElement,
@@ -9,6 +9,7 @@ import {
   TrendingUp, TrendingDown, Wallet,
   ChevronDown, ChevronUp, Calendar,
   ReceiptText, BarChart3, CalendarDays, BadgePercent,
+  Sun, RefreshCw,
 } from 'lucide-react'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -175,6 +176,212 @@ const DATASETS = (ventas, gastos, labelVentas = 'Ingresos reales') => ({
   ],
 })
 
+// ─── Tabla de ventas (compartida entre pestañas) ───────────────────────────────
+
+function TablaVentas({ ventas, expandida, setExpandida }) {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-160">
+          <thead>
+            <tr className="bg-kaja-sidebar">
+              <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-white/60">Fecha</th>
+              <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-white/60">Vendedor</th>
+              <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">Base</th>
+              <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">IVA</th>
+              <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">Total</th>
+              <th className="px-5 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Líneas</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ventas.map((venta) => (
+              <Fragment key={venta.id}>
+                <tr
+                  onClick={() => setExpandida(expandida === venta.id ? null : venta.id)}
+                  className="border-t border-gray-100 hover:bg-kaja-orange/5 cursor-pointer transition-colors"
+                >
+                  <td className="px-5 py-4">
+                    <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-light/60 text-xs font-mono text-kaja-blueText/70">
+                      {fmtFecha(venta.fecha)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={venta.imagenVendedor || DEFAULT_AVATAR}
+                        alt={venta.vendedor}
+                        width="28"
+                        height="28"
+                        loading="lazy"
+                        className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
+                        onError={e => { e.target.src = DEFAULT_AVATAR }}
+                      />
+                      <span className="text-kaja-blueText/80 font-medium">{venta.vendedor}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.baseImponible)}</td>
+                  <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.totalIva)}</td>
+                  <td className="px-5 py-4 text-right">
+                    <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
+                      {fmtEur(venta.totalFinal)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-center">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-bold text-kaja-blueText/70">
+                      {venta.lineas?.length ?? 0} art.
+                      {expandida === venta.id
+                        ? <ChevronUp className="w-3.5 h-3.5" />
+                        : <ChevronDown className="w-3.5 h-3.5" />
+                      }
+                    </span>
+                  </td>
+                </tr>
+
+                {expandida === venta.id && (
+                  <tr>
+                    <td colSpan={6} className="px-5 pb-4 pt-1 bg-kaja-light/20">
+                      <div className="rounded-xl overflow-hidden border border-kaja-light shadow-sm">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="bg-gray-50">
+                              <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Producto</th>
+                              <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Cant.</th>
+                              <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">P. Unit.</th>
+                              <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">IVA</th>
+                              <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Subtotal</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(venta.lineas ?? []).map((l, li) => (
+                              <tr key={li} className="border-t border-kaja-light">
+                                <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{l.producto}</td>
+                                <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{l.cantidad}</td>
+                                <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{fmtEur(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100))}</td>
+                                <td className="px-4 py-2.5 text-right">
+                                  <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono tabular-nums">{l.ivaAplicado}%</span>
+                                </td>
+                                <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText font-mono tabular-nums">{fmtEur(l.subtotal)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// ─── Tab Resumen diario ─────────────────────────────────────────────────────────
+
+function TabResumenDiario() {
+  const hoy = new Date()
+  const [datosVentas, setDatosVentas] = useState(null)
+  const [datosFinanciero, setDatosFinanciero] = useState(null)
+  const [cargando, setCargando] = useState(false)
+  const [error, setError] = useState(null)
+  const [expandida, setExpandida] = useState(null)
+
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setCargando(true)
+    setError(null)
+    setExpandida(null)
+    try {
+      const [rVentas, rFin] = await Promise.all([
+        fetch(`${API_URL}/ventas`, { headers: authHdr() }),
+        fetch(`${API_URL}/financiero?mes=${hoy.getMonth() + 1}&anio=${hoy.getFullYear()}`, { headers: authHdr() }),
+      ])
+      if (!rVentas.ok || !rFin.ok) throw new Error()
+      setDatosVentas(await rVentas.json())
+      setDatosFinanciero(await rFin.json())
+    } catch {
+      setError('No se pudo cargar el resumen del día')
+    } finally {
+      setCargando(false)
+    }
+  }
+
+  const ventas  = datosVentas?.ventas ?? []
+  const resumen = datosVentas?.resumen ?? {}
+  const idxHoy  = hoy.getDate() - 1
+
+  const baseHoy      = datosFinanciero?.ventasBase?.[idxHoy] ?? 0
+  const ivaHoy       = datosFinanciero?.ventasIva?.[idxHoy] ?? 0
+  const gastosHoy     = datosFinanciero?.gastos?.[idxHoy] ?? 0
+  const beneficioHoy = baseHoy - gastosHoy
+  const positivo     = beneficioHoy >= 0
+
+  return (
+    <div className="flex flex-col gap-5 animate-fade-in">
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm text-kaja-blueText/60 font-medium capitalize">
+          <Calendar className="w-4 h-4" />
+          {hoy.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+        </div>
+        <button
+          onClick={cargar}
+          disabled={cargando}
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600
+            hover:bg-gray-50 active:scale-95 transition disabled:opacity-50"
+        >
+          <RefreshCw className={`w-4 h-4 ${cargando ? 'animate-spin' : ''}`} />
+          Actualizar
+        </button>
+      </div>
+
+      {!cargando && !error && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <KpiCard label="Ventas de hoy" value={resumen.totalVentas ?? 0} icon={ReceiptText} variant="orange" />
+          <KpiCard
+            label="Ingresos hoy"
+            value={fmtEur(resumen.totalRecaudado ?? 0)}
+            icon={TrendingUp}
+            variant="navy"
+            sub={`Base ${fmtEur(baseHoy)} · IVA ${fmtEur(ivaHoy)}`}
+          />
+          <KpiCard label="Gastos hoy" value={fmtEur(gastosHoy)} icon={TrendingDown} variant="default" />
+          <KpiCard label="Beneficio neto hoy" value={fmtEur(beneficioHoy)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
+        </div>
+      )}
+
+      {cargando && (
+        <div className="flex items-center justify-center py-20 text-kaja-blueText/30">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-kaja-orange/30 border-t-kaja-orange rounded-full animate-spin" />
+            <span className="text-sm font-medium">Cargando el día...</span>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center justify-center py-16">
+          <p className="text-sm text-kaja-rose font-medium">{error}</p>
+        </div>
+      )}
+
+      {!cargando && !error && ventas.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 gap-3 text-kaja-blueText/30">
+          <ReceiptText className="w-12 h-12" />
+          <p className="text-sm font-medium">Aún no hay ventas registradas hoy</p>
+        </div>
+      )}
+
+      {!cargando && !error && ventas.length > 0 && (
+        <TablaVentas ventas={ventas} expandida={expandida} setExpandida={setExpandida} />
+      )}
+    </div>
+  )
+}
+
 // ─── Tab Ventas ────────────────────────────────────────────────────────────────
 
 function TabVentas() {
@@ -259,102 +466,7 @@ function TabVentas() {
       )}
 
       {!cargando && !error && ventas.length > 0 && (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-160">
-              <thead>
-                <tr className="bg-kaja-sidebar">
-                  <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-white/60">Fecha</th>
-                  <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-white/60">Vendedor</th>
-                  <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">Base</th>
-                  <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">IVA</th>
-                  <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-widest text-white/60">Total</th>
-                  <th className="px-5 py-4 text-center text-[11px] font-bold uppercase tracking-widest text-white/60">Líneas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ventas.map((venta) => (
-                  <>
-                    <tr
-                      key={venta.id}
-                      onClick={() => setExpandida(expandida === venta.id ? null : venta.id)}
-                      className="border-t border-gray-100 hover:bg-kaja-orange/5 cursor-pointer transition-colors"
-                    >
-                      <td className="px-5 py-4">
-                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-light/60 text-xs font-mono text-kaja-blueText/70">
-                          {fmtFecha(venta.fecha)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4">
-                        <div className="flex items-center gap-2.5">
-                          <img
-                            src={venta.imagenVendedor || DEFAULT_AVATAR}
-                            alt={venta.vendedor}
-                            width="28"
-                            height="28"
-                            loading="lazy"
-                            className="w-7 h-7 rounded-full object-cover shrink-0 ring-2 ring-white shadow-sm"
-                            onError={e => { e.target.src = DEFAULT_AVATAR }}
-                          />
-                          <span className="text-kaja-blueText/80 font-medium">{venta.vendedor}</span>
-                        </div>
-                      </td>
-                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.baseImponible)}</td>
-                      <td className="px-5 py-4 text-right text-kaja-blueText/40 text-xs font-mono tabular-nums">{fmtEur(venta.totalIva)}</td>
-                      <td className="px-5 py-4 text-right">
-                        <span className="inline-block px-2.5 py-1 rounded-lg bg-kaja-orange/10 text-kaja-orange font-bold font-mono tabular-nums">
-                          {fmtEur(venta.totalFinal)}
-                        </span>
-                      </td>
-                      <td className="px-5 py-4 text-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 text-xs font-bold text-kaja-blueText/70">
-                          {venta.lineas?.length ?? 0} art.
-                          {expandida === venta.id
-                            ? <ChevronUp className="w-3.5 h-3.5" />
-                            : <ChevronDown className="w-3.5 h-3.5" />
-                          }
-                        </span>
-                      </td>
-                    </tr>
-
-                    {expandida === venta.id && (
-                      <tr key={`det-${venta.id}`}>
-                        <td colSpan={6} className="px-5 pb-4 pt-1 bg-kaja-light/20">
-                          <div className="rounded-xl overflow-hidden border border-kaja-light shadow-sm">
-                            <table className="w-full text-xs">
-                              <thead>
-                                <tr className="bg-gray-50">
-                                  <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Producto</th>
-                                  <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Cant.</th>
-                                  <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">P. Unit.</th>
-                                  <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">IVA</th>
-                                  <th className="px-4 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-kaja-blueText/50">Subtotal</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {(venta.lineas ?? []).map((l, li) => (
-                                  <tr key={li} className="border-t border-kaja-light">
-                                    <td className="px-4 py-2.5 font-medium text-kaja-blueText/80">{l.producto}</td>
-                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{l.cantidad}</td>
-                                    <td className="px-4 py-2.5 text-right text-kaja-blueText/50 font-mono tabular-nums">{fmtEur(parseFloat(l.subtotal) / parseFloat(l.cantidad) / (1 + parseFloat(l.ivaAplicado) / 100))}</td>
-                                    <td className="px-4 py-2.5 text-right">
-                                      <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-kaja-blueText/60 font-mono tabular-nums">{l.ivaAplicado}%</span>
-                                    </td>
-                                    <td className="px-4 py-2.5 text-right font-bold text-kaja-blueText font-mono tabular-nums">{fmtEur(l.subtotal)}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <TablaVentas ventas={ventas} expandida={expandida} setExpandida={setExpandida} />
       )}
     </div>
   )
@@ -512,13 +624,14 @@ function TabResumenAnual() {
 // ─── Componente principal ──────────────────────────────────────────────────────
 
 const TABS = [
+  { id: 'diario', label: 'Resumen diario', icon: Sun },
   { id: 'ventas', label: 'Ventas', icon: ReceiptText },
   { id: 'mensual', label: 'Resumen mensual', icon: BarChart3 },
   { id: 'anual', label: 'Resumen anual', icon: CalendarDays },
 ]
 
 export default function GestionFinanciera() {
-  const [tab, setTab] = useState('ventas')
+  const [tab, setTab] = useState('diario')
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-gray-50/50">
@@ -555,6 +668,7 @@ export default function GestionFinanciera() {
 
       {/* Contenido */}
       <div className="flex-1 overflow-y-auto scrollbar-none px-4 sm:px-8 py-5 sm:py-6">
+        {tab === 'diario' && <TabResumenDiario />}
         {tab === 'ventas' && <TabVentas />}
         {tab === 'mensual' && <TabResumenMensual />}
         {tab === 'anual' && <TabResumenAnual />}
