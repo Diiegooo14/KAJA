@@ -9,7 +9,7 @@ import {
   TrendingUp, TrendingDown, Wallet,
   ChevronDown, ChevronUp, Calendar,
   ReceiptText, BarChart3, CalendarDays, BadgePercent,
-  Sun, RefreshCw,
+  Sun,
 } from 'lucide-react'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -282,74 +282,84 @@ function TablaVentas({ ventas, expandida, setExpandida }) {
 
 function TabResumenDiario() {
   const hoy = new Date()
-  const [datosVentas, setDatosVentas] = useState(null)
+  const [dia, setDia] = useState(hoy.getDate())
+  const [mes, setMes] = useState(hoy.getMonth() + 1)
+  const [anio, setAnio] = useState(hoy.getFullYear())
+  const [ventasMes, setVentasMes] = useState([])
   const [datosFinanciero, setDatosFinanciero] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [error, setError] = useState(null)
   const [expandida, setExpandida] = useState(null)
 
-  useEffect(() => { cargar() }, [])
+  const diasEnMes = new Date(anio, mes, 0).getDate()
+  const diaEfectivo = Math.min(dia, diasEnMes)
 
-  async function cargar() {
+  useEffect(() => {
     setCargando(true)
     setError(null)
     setExpandida(null)
-    try {
-      const [rVentas, rFin] = await Promise.all([
-        fetch(`${API_URL}/ventas`, { headers: authHdr() }),
-        fetch(`${API_URL}/financiero?mes=${hoy.getMonth() + 1}&anio=${hoy.getFullYear()}`, { headers: authHdr() }),
-      ])
-      if (!rVentas.ok || !rFin.ok) throw new Error()
-      setDatosVentas(await rVentas.json())
-      setDatosFinanciero(await rFin.json())
-    } catch {
-      setError('No se pudo cargar el resumen del día')
-    } finally {
-      setCargando(false)
-    }
-  }
+    Promise.all([
+      fetch(`${API_URL}/ventas?mes=${mes}&anio=${anio}`, { headers: authHdr() }),
+      fetch(`${API_URL}/financiero?mes=${mes}&anio=${anio}`, { headers: authHdr() }),
+    ])
+      .then(async ([rVentas, rFin]) => {
+        if (!rVentas.ok || !rFin.ok) throw new Error()
+        setVentasMes((await rVentas.json()).ventas ?? [])
+        setDatosFinanciero(await rFin.json())
+      })
+      .catch(() => setError('No se pudo cargar el resumen de ese mes'))
+      .finally(() => setCargando(false))
+  }, [mes, anio])
 
-  const ventas  = datosVentas?.ventas ?? []
-  const resumen = datosVentas?.resumen ?? {}
-  const idxHoy  = hoy.getDate() - 1
+  const ventasDia = ventasMes.filter(v => new Date(v.fecha).getDate() === diaEfectivo)
+  const idx        = diaEfectivo - 1
 
-  const baseHoy      = datosFinanciero?.ventasBase?.[idxHoy] ?? 0
-  const ivaHoy       = datosFinanciero?.ventasIva?.[idxHoy] ?? 0
-  const gastosHoy     = datosFinanciero?.gastos?.[idxHoy] ?? 0
-  const beneficioHoy = baseHoy - gastosHoy
-  const positivo     = beneficioHoy >= 0
+  const baseDia      = datosFinanciero?.ventasBase?.[idx] ?? 0
+  const ivaDia       = datosFinanciero?.ventasIva?.[idx]  ?? 0
+  const gastosDia    = datosFinanciero?.gastos?.[idx]     ?? 0
+  const ingresosDia  = datosFinanciero?.ventas?.[idx]     ?? 0
+  const beneficioDia = baseDia - gastosDia
+  const positivo     = beneficioDia >= 0
+
+  const fechaSeleccionada = new Date(anio, mes - 1, diaEfectivo)
+  const esHoy = fechaSeleccionada.toDateString() === hoy.toDateString()
 
   return (
     <div className="flex flex-col gap-5 animate-fade-in">
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-sm text-kaja-blueText/60 font-medium capitalize">
+      <Filtros>
+        <SelectField
+          label="Día"
+          value={diaEfectivo}
+          onChange={setDia}
+          options={Array.from({ length: diasEnMes }, (_, i) => ({ value: i + 1, label: String(i + 1) }))}
+        />
+        <SelectField
+          label="Mes"
+          value={mes}
+          onChange={setMes}
+          options={MESES.map((m, i) => ({ value: i + 1, label: m }))}
+        />
+        <NumberField label="Año" value={anio} onChange={setAnio} />
+        <div className="ml-auto self-end flex items-center gap-2 text-sm text-kaja-blueText/50 font-medium pb-0.5 capitalize">
           <Calendar className="w-4 h-4" />
-          {hoy.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          {fechaSeleccionada.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+          {esHoy && <span className="ml-1 px-2 py-0.5 rounded-full bg-kaja-orange/10 text-kaja-orange text-xs font-bold normal-case">Hoy</span>}
         </div>
-        <button
-          onClick={cargar}
-          disabled={cargando}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600
-            hover:bg-gray-50 active:scale-95 transition disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${cargando ? 'animate-spin' : ''}`} />
-          Actualizar
-        </button>
-      </div>
+      </Filtros>
 
       {!cargando && !error && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          <KpiCard label="Ventas de hoy" value={resumen.totalVentas ?? 0} icon={ReceiptText} variant="orange" />
+          <KpiCard label="Ventas" value={ventasDia.length} icon={ReceiptText} variant="orange" />
           <KpiCard
-            label="Ingresos hoy"
-            value={fmtEur(resumen.totalRecaudado ?? 0)}
+            label="Ingresos"
+            value={fmtEur(ingresosDia)}
             icon={TrendingUp}
             variant="navy"
-            sub={`Base ${fmtEur(baseHoy)} · IVA ${fmtEur(ivaHoy)}`}
+            sub={`Base ${fmtEur(baseDia)} · IVA ${fmtEur(ivaDia)}`}
           />
-          <KpiCard label="Gastos hoy" value={fmtEur(gastosHoy)} icon={TrendingDown} variant="default" />
-          <KpiCard label="Beneficio neto hoy" value={fmtEur(beneficioHoy)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
+          <KpiCard label="Gastos" value={fmtEur(gastosDia)} icon={TrendingDown} variant="default" />
+          <KpiCard label="Beneficio neto" value={fmtEur(beneficioDia)} icon={Wallet} variant={positivo ? 'green' : 'red'} />
         </div>
       )}
 
@@ -368,15 +378,15 @@ function TabResumenDiario() {
         </div>
       )}
 
-      {!cargando && !error && ventas.length === 0 && (
+      {!cargando && !error && ventasDia.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 gap-3 text-kaja-blueText/30">
           <ReceiptText className="w-12 h-12" />
-          <p className="text-sm font-medium">Aún no hay ventas registradas hoy</p>
+          <p className="text-sm font-medium">Sin ventas registradas ese día</p>
         </div>
       )}
 
-      {!cargando && !error && ventas.length > 0 && (
-        <TablaVentas ventas={ventas} expandida={expandida} setExpandida={setExpandida} />
+      {!cargando && !error && ventasDia.length > 0 && (
+        <TablaVentas ventas={ventasDia} expandida={expandida} setExpandida={setExpandida} />
       )}
     </div>
   )
